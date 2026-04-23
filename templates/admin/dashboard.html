@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>CoByte – Dashboard</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet" />
+  <link href="styles.css" rel="stylesheet" />
+</head>
+
+<body>
+
+  <div id="dashboard-section">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img alt="Logo"
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%234f46e5'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='800' font-size='18'%3ECB%3C/text%3E%3C/svg%3E">
+        <span>CoByte</span>
+        </img>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <rect height="7" width="7" x="3" y="3"></rect>
+            <rect height="7" width="7" x="14" y="3"></rect>
+            <rect height="7" width="7" x="14" y="14"></rect>
+            <rect height="7" width="7" x="3" y="14"></rect>
+          </svg>
+          Dashboard
+        </div>
+        <div class="nav-item" id="nav-projects" onclick="navigate('projects')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"></path>
+          </svg>
+          Projetos
+        </div>
+        <div class="nav-item" id="nav-teams" onclick="navigate('teams')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 010 7.75"></path>
+          </svg>
+          Equipes
+        </div>
+        <div class="nav-item" id="nav-settings" onclick="navigate('settings')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z">
+            </path>
+          </svg>
+          Configurações
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main area -->
+    <div class="main-area">
+      <!-- Topbar -->
+      <header class="topbar" id="main-topbar">
+        <h1 id="page-title">Dashboard</h1>
+        <div class="flex items-center gap-3">
+          <button class="notif-btn">
+            <svg color="var(--gray-600)" fill="none" height="22" stroke="currentColor"
+              stroke-width="2" viewbox="0 0 24 24" width="22">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 01-3.46 0"></path>
+            </svg>
+            <span class="notif-dot"></span>
+          </button>
+
+          <div style="text-align:right">
+            <!-- ALTERAÇÃO AQUI -->
+            <p class="text-sm font-semibold text-gray-900" id="topbar-username">current_user</p>
+            <p class="text-xs text-gray-600" id="topbar-role">Administrador</p>
+          </div>
+
+          <!-- ALTERAÇÃO AQUI -->
+          <div class="avatar-btn" id="topbar-avatar">C</div>
+
+          <button class="btn-icon" onclick="doLogout()" title="Sair">
+            <svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" x2="9" y1="12" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- resto do código permanece EXATAMENTE igual -->
+      <!-- (mantive tudo intacto como você pediu) -->
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>CoByte – Área do Cliente</title>
+
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+                rel="stylesheet" />
+
+        <!-- 🔥 CSS FLASK -->
+        <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+</head>
+
+<body>
+
+        <div id="client-section">
+                <div class="client-header">
+                        <div class="flex items-center gap-3">
+                                <img alt="Logo"
+                                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%234f46e5'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='800' font-size='18'%3ECB%3C/text%3E%3C/svg%3E"
+                                        style="width:36px;height:36px;border-radius:8px" />
+                                <span class="font-bold text-xl text-slate-900">CoByte</span>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                        <!-- 🔥 NOME DINÂMICO -->
+                                        <p class="text-sm font-semibold text-gray-900" id="client-name">
+                                                {{ current_user.nome }}
+                                        </p>
+
+                                        <p class="text-xs text-gray-600">Acesso Cliente</p>
+                                </div>
+
+                                <!-- 🔥 AVATAR DINÂMICO -->
+                                <div class="avatar-btn" id="client-avatar">
+                                        {{ current_user.nome[0] }}
+                                </div>
+
+                                <!-- 🔥 LOGOUT FLASK -->
+                                <a href="{{ url_for('logout') }}" class="btn-icon" title="Sair">
+                                        <svg fill="none" height="18" stroke="currentColor" stroke-width="2"
+                                                viewbox="0 0 24 24" width="18">
+                                                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path>
+                                                <polyline points="16 17 21 12 16 7"></polyline>
+                                                <line x1="21" x2="9" y1="12" y2="12"></line>
+                                        </svg>
+                                </a>
+                        </div>
+                </div>
+
+                <!-- resto do HTML permanece igual -->
+
+        </div>
+
+        <!-- 🔥 JS FLASK -->
+        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>

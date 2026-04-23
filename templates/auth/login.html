@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CoByte – Login</title>
+
+    <!-- CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+
+<div id="auth-section">
+    <div class="auth-page" id="page-login">
+
+        <!-- HERO -->
+        <div class="auth-hero">
+            <div class="auth-hero-logo">
+                <span>CoByte</span>
+            </div>
+            <div class="auth-hero-content">
+                <h1>Tudo o que sua equipe precisa em um só lugar!</h1>
+                <p>Automatize e organize seus projetos com facilidade.</p>
+            </div>
+        </div>
+
+        <!-- FORM -->
+        <div class="auth-form-side">
+            <div style="width:100%;max-width:440px">
+
+                <div class="auth-card">
+
+                    <h2>Boas-vindas!</h2>
+                    <p>Entre com sua conta para continuar</p>
+
+                    <!-- 🔥 FORM FLASK -->
+                    <form method="POST" action="{{ url_for('page_login') }}">
+
+                        <!-- tipo de usuário -->
+                        <input type="hidden" name="tipo" id="tipo-usuario" value="admin">
+
+                        <div>
+                            <label>Tipo de Acesso</label>
+                            <div class="user-type-grid">
+
+                                <button type="button" onclick="setTipo('admin')" class="user-type-btn">Admin</button>
+
+                                <button type="button" onclick="setTipo('employee')" class="user-type-btn">Funcionário</button>
+
+                                <button type="button" onclick="setTipo('client')" class="user-type-btn">Cliente</button>
+
+                            </div>
+                        </div>
+
+                        <!-- erro vindo do Flask -->
+                        {% if error %}
+                            <div style="color:red;margin-bottom:10px;">
+                                {{ error }}
+                            </div>
+                        {% endif %}
+
+                        <div>
+                            <label>E-mail</label>
+                            <input name="email" type="email" placeholder="seu@email.com" required>
+                        </div>
+
+                        <div>
+                            <label>Senha</label>
+                            <input name="senha" type="password" placeholder="••••••••" required>
+                        </div>
+
+                        <div>
+                            <input type="checkbox" name="lembrar">
+                            Salvar login
+                        </div>
+
+                        <button type="submit" class="btn btn-indigo">
+                            Entrar
+                        </button>
+
+                    </form>
+
+                    <p>
+                        Não tem conta?
+                        <a href="{{ url_for('page_register') }}">Inscreva-se</a>
+                    </p>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+<script>
+function setTipo(tipo){
+    document.getElementById('tipo-usuario').value = tipo;
+}
+</script>
+
+</body>
+</html>

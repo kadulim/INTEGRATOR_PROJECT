@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CoByte – Criar Conta</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+
+<div id="auth-section">
+    <div class="auth-page" id="page-register">
+
+        <!-- LADO ESQUERDO -->
+        <div class="auth-hero" style="background:linear-gradient(135deg,#4338ca,#1e293b,#0f172a)">
+            <div class="auth-hero-logo">
+                <span>CoByte</span>
+            </div>
+            <div class="auth-hero-content">
+                <h1>Comece sua jornada com a gente!</h1>
+                <p>Crie sua conta e descubra como é fácil gerenciar seus projetos de software.</p>
+            </div>
+        </div>
+
+        <!-- FORM -->
+        <div class="auth-form-side">
+            <div style="width:100%;max-width:440px;padding:32px 0">
+
+                <div class="auth-card">
+
+                    <h2>Criar Conta</h2>
+                    <p>Preencha os dados para começar</p>
+
+                    <!-- 🔥 FORM FLASK -->
+                    <form method="POST" action="{{ url_for('page_register') }}">
+
+                        <div>
+                            <label>Nome Completo</label>
+                            <input name="nome" type="text" placeholder="Seu nome completo" required>
+                        </div>
+
+                        <div>
+                            <label>E-mail</label>
+                            <input name="email" type="email" placeholder="seu@email.com" required>
+                        </div>
+
+                        <div>
+                            <label>Empresa</label>
+                            <input name="empresa" type="text" placeholder="Nome da sua empresa">
+                        </div>
+
+                        <div>
+                            <label>Senha</label>
+                            <input name="senha" type="password" placeholder="••••••••" required>
+                        </div>
+
+                        <div>
+                            <label>Confirmar Senha</label>
+                            <input name="confirmar_senha" type="password" placeholder="••••••••" required>
+                        </div>
+
+                        <div>
+                            <input type="checkbox" name="termos" required>
+                            Aceito os Termos
+                        </div>
+
+                        <button type="submit" class="btn btn-indigo">
+                            Criar Conta
+                        </button>
+
+                    </form>
+
+                    <p>
+                        Já tem conta?
+                        <a href="{{ url_for('page_login') }}">Fazer Login</a>
+                    </p>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
