@@ -20,16 +20,16 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'cobyte_chave_padrao')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# CONFIGURAÇÃO DO BANCO DE DADOS (POSTGRES NO RENDER / MYSQL LOCAL)
+# Lógica de conexão para o Render
 uri = os.getenv("DATABASE_URL")
 
 if uri:
-    # O Render fornece 'postgres://', mas o SQLAlchemy exige 'postgresql://'
+    # O SQLAlchemy exige 'postgresql://' (a sua já está assim, mas isso previne erros)
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = uri
 else:
-    # Fallback para o seu ambiente de desenvolvimento local
+    # Caso rode no seu Linux Mint local
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/database_cobyte'
 
 # Inicializa o banco de dados
