@@ -1,0 +1,130 @@
+{% extends 'admin/base.html' %}
+{% set active_page = 'configuracoes' %}
+
+{% block title %}Configurações — CoByte{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/configuracoes.css') }}">
+{% endblock %}
+
+{% block topbar_title %}Configurações{% endblock %}
+
+{% block content %}
+<div class="settings-layout">
+  <!-- Sidebar tabs -->
+  <div class="settings-tabs fade-up">
+    <div class="stab active" id="tab-perfil" onclick="switchTab('perfil')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Meu Perfil
+    </div>
+    <div class="stab" id="tab-notificacoes" onclick="switchTab('notificacoes')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Notificações
+    </div>
+    <div class="stab" id="tab-seguranca" onclick="switchTab('seguranca')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Segurança
+    </div>
+    <div class="stab" id="tab-aparencia" onclick="switchTab('aparencia')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Aparência
+    </div>
+    <div class="stab" id="tab-integracoes" onclick="switchTab('integracoes')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Integrações
+    </div>
+  </div>
+
+  <!-- Panel -->
+  <div class="settings-panel fade-up fade-up-1" id="settings-panel">
+    
+    <!-- Painel Perfil -->
+    <div id="panel-perfil" class="panel-section">
+      <div>
+        <div class="settings-panel-title">Meu Perfil</div>
+        <div class="settings-panel-desc">Gerencie suas informações pessoais</div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Foto de Perfil</div>
+        <div class="avatar-upload-area">
+          <div class="avatar lg avatar-blue">{{ current_user.nome[:2].upper() if current_user.is_authenticated else 'CB' }}</div>
+          <div>
+            <button class="avatar-upload-btn">Alterar foto</button>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">JPG, PNG ou GIF · Máx 2MB</div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Informações Pessoais</div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-group">
+              <label class="form-label">Nome</label>
+              <input class="form-input" type="text" id="cfg-name" value="{{ current_user.nome if current_user.is_authenticated else '' }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cargo</label>
+              <input class="form-input" type="text" value="Administrador" disabled style="opacity:0.6;">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input class="form-input" type="email" id="cfg-email" value="{{ current_user.email if current_user.is_authenticated else '' }}">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:20px;">
+          <button class="btn btn-primary" onclick="toast('Perfil atualizado com sucesso!')">Salvar Alterações</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Painel Notificações -->
+    <div id="panel-notificacoes" class="panel-section" style="display:none;">
+      <div>
+        <div class="settings-panel-title">Notificações</div>
+        <div class="settings-panel-desc">Escolha o que você deseja receber</div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">E-mail e alertas</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Novas atribuições</div><div class="settings-row-desc">Receba alertas quando for adicionado a um projeto</div></div>
+          <label class="toggle-switch"><input type="checkbox" checked onchange="toast('Preferência salva!')"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outros Painéis Ocultos para simplicidade -->
+    <div id="panel-seguranca" class="panel-section" style="display:none;">
+      <div><div class="settings-panel-title">Segurança</div></div>
+      <div class="settings-section">
+        <div class="settings-section-title">Alterar Senha</div>
+        <div class="form-group"><label class="form-label">Nova Senha</label><input class="form-input" type="password"></div>
+      </div>
+    </div>
+    
+    <div id="panel-aparencia" class="panel-section" style="display:none;">
+      <div><div class="settings-panel-title">Aparência</div></div>
+      <div class="settings-section">
+        <div class="settings-section-title">Tema</div>
+        <button class="btn btn-outline" onclick="toast('Tema Claro ativado')">☀️ Claro</button>
+      </div>
+    </div>
+    
+    <div id="panel-integracoes" class="panel-section" style="display:none;">
+      <div><div class="settings-panel-title">Integrações</div></div>
+      <div class="settings-section">
+        <div class="settings-section-title">Apps disponíveis</div>
+        <button class="btn btn-outline" onclick="toast('Conectado ao Slack!')">💬 Slack</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function switchTab(tabId) {
+    document.querySelectorAll('.panel-section').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.stab').forEach(el => el.classList.remove('active'));
+    document.getElementById('panel-' + tabId).style.display = 'block';
+    document.getElementById('tab-' + tabId).classList.add('active');
+  }
+</script>
+<script src="{{ url_for('static', filename='js/configuracoes.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard do Cliente — CoByte</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cliente-dashboard.css') }}">
+</head>
+<body class="client-body">
+
+<div class="client-layout">
+  <!-- Topbar Cliente -->
+  <header class="client-topbar">
+    <div class="client-topbar-left">
+      <div class="sidebar-logo-icon" style="width:34px;height:34px;font-size:18px;">C</div>
+      <span class="sidebar-logo-text" style="font-size:20px;">Co<span>Byte</span></span>
+      <div class="client-topbar-divider"></div>
+      <span style="font-weight:600;color:var(--text-secondary);">Portal do Cliente</span>
+    </div>
+    <div class="client-topbar-right">
+      <div class="client-user-info">
+        <div class="client-user-name">{{ current_user.nome }}</div>
+        <div class="client-user-label">Cliente</div>
+      </div>
+      <div class="avatar sm avatar-blue">{{ current_user.nome[:2].upper() }}</div>
+      <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Sair</a>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="client-main fade-up" id="client-main">
+    <div class="client-welcome">
+      <div class="cw-text">
+        <h2>Olá, {{ current_user.nome.split(' ')[0] }}! 👋</h2>
+        <p>Acompanhe o progresso dos seus projetos, marcos e deixe seu feedback para a equipe CoByte.</p>
+      </div>
+    </div>
+
+    <!-- Projetos -->
+    <div>
+      <h2 class="client-section-title">Meus Projetos</h2>
+      <div class="client-proj-grid">
+        <div class="client-proj-card">
+          <div class="cpc-header">
+            <div class="cpc-accent-bar" style="background:#e94560;"></div>
+            <div class="cpc-title">App Mobile CoByte</div>
+            <div class="cpc-badges"><span class="badge badge-blue">Em andamento</span></div>
+          </div>
+          <div class="cpc-body">
+            <div class="cpc-progress-label"><span>Progresso geral</span><strong>68%</strong></div>
+            <div class="progress-bar" style="height:8px;border-radius:6px;">
+              <div class="progress-fill blue" style="width:68%;border-radius:6px;background:#e94560;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/shared.js') }}"></script>
+<script src="{{ url_for('static', filename='js/cliente-dashboard.js') }}"></script>
+</body>
+</html>

@@ -29,6 +29,21 @@ class Funcionario(database.Model, UserMixin):
     __tablename__ = 'funcionario'
     id = database.Column(database.Integer, primary_key=True)
     usuario_id = database.Column(database.Integer, database.ForeignKey('usuario.id'))
-    
+    projeto_id = database.Column(database.Integer, database.ForeignKey('projeto.id'))
     cargo = database.Column(database.String(50))
     salario = database.Column(database.Float)
+
+#Tabel Projeto
+class Projeto(database.Model, UserMixin):
+    __tablename__ = 'projeto'
+    id = database.Column(database.Integer, primary_key=True)
+    nome = database.Column(database.String(200))
+    descricao = database.Column(database.String(200))
+    status = database.Column(database.String(20))
+    cliente = database.Column(database.String(200))
+    funcionario = database.Column(database.String(200))
+    prazo = database.Column(database.String(20))
+    budget = database.Column(database.Float)
+    prioridade = database.Column(database.String(20))
+    cliente_id = database.Column(database.Integer, database.ForeignKey('cliente.id'))
+    funcionario_id = database.Column(database.Integer, database.ForeignKey('funcionario.id'))

@@ -1,0 +1,193 @@
+/* ── Equipes Page ───────────────────────────────────────── */
+
+/* Toolbar & Search Bar */
+.proj-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  flex: 1;
+  min-width: 260px;
+  max-width: 400px;
+  transition: all 0.22s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.search-box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+  transform: translateY(-1px);
+}
+
+.search-box svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.search-box:focus-within svg {
+  color: var(--accent);
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: transparent;
+  width: 100%;
+  font-family: var(--font);
+}
+
+.search-box input::placeholder {
+  color: var(--text-muted);
+}
+
+.filter-select {
+  padding: 10px 16px;
+  border: 1.5px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 14px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+
+/* Team Stats */
+.team-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+/* Member Cards Grid */
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.member-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.member-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-4px); }
+
+.member-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(135deg, var(--brand), var(--brand-accent));
+  opacity: 0.06;
+}
+
+.member-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+  border: 3px solid var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+.member-name { font-size: 15px; font-weight: 700; }
+.member-role { font-size: 12.5px; color: var(--text-muted); margin-top: -8px; }
+.member-email { font-size: 12px; color: var(--text-muted); }
+
+.member-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.skill-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-secondary);
+}
+
+.member-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.member-projects-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.member-projects-count svg { width: 13px; height: 13px; }
+.member-projects-count strong { color: var(--text-primary); }
+
+/* Workload Bar */
+.workload-section { margin-top: 32px; }
+.workload-list { display: flex; flex-direction: column; gap: 14px; }
+.workload-item { display: flex; align-items: center; gap: 16px; }
+.workload-name { min-width: 140px; font-size: 13.5px; font-weight: 600; }
+.workload-bar-wrap { flex: 1; }
+.workload-bar {
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.workload-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: var(--accent);
+  transition: width 0.7s cubic-bezier(0.34,1.56,0.64,1);
+}
+.workload-fill.low    { background: var(--green); }
+.workload-fill.mid    { background: var(--blue); }
+.workload-fill.high   { background: var(--yellow); }
+.workload-fill.full   { background: var(--accent); }
+.workload-pct { min-width: 36px; font-size: 12px; font-weight: 700; color: var(--text-secondary); text-align: right; }

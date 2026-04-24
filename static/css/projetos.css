@@ -1,0 +1,188 @@
+/* ── Projetos Page ──────────────────────────────────────── */
+
+/* Toolbar */
+.proj-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1.5px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  flex: 1;
+  min-width: 220px;
+  max-width: 320px;
+  transition: border-color 0.18s;
+}
+.search-box:focus-within { border-color: var(--accent); }
+.search-box svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+.search-box input {
+  border: none;
+  outline: none;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  background: transparent;
+  width: 100%;
+  font-family: var(--font);
+}
+.search-box input::placeholder { color: var(--text-muted); }
+
+.filter-select {
+  padding: 9px 14px;
+  border: 1.5px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 13.5px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.18s;
+}
+.filter-select:focus { border-color: var(--accent); }
+
+/* View Toggle */
+.view-toggle {
+  display: flex;
+  border: 1.5px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface);
+}
+.view-btn {
+  padding: 8px 12px;
+  display: flex; align-items: center;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.view-btn svg { width: 16px; height: 16px; }
+.view-btn.active { background: var(--accent); color: #fff; }
+.view-btn:not(.active):hover { background: var(--surface-2); color: var(--text-primary); }
+
+/* ── Kanban Board ── */
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.kanban-col {
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+
+.kanban-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.kanban-col-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.kanban-col-title::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+.kanban-col[data-status="Em andamento"] .kanban-col-title::before { background: var(--blue); }
+.kanban-col[data-status="Concluído"]    .kanban-col-title::before { background: var(--green); }
+.kanban-col[data-status="Planejamento"] .kanban-col-title::before { background: var(--purple); }
+.kanban-col[data-status="Pausado"]      .kanban-col-title::before { background: var(--yellow); }
+
+.kanban-count {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.06);
+  color: var(--text-secondary);
+}
+
+.kanban-cards { display: flex; flex-direction: column; gap: 10px; }
+
+.kanban-card {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.18s;
+  box-shadow: var(--shadow-sm);
+}
+.kanban-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+.kc-name { font-size: 13.5px; font-weight: 600; margin-bottom: 4px; line-height: 1.35; }
+.kc-client { font-size: 11.5px; color: var(--text-muted); margin-bottom: 10px; }
+.kc-footer { display: flex; align-items: center; justify-content: space-between; }
+
+/* ── Table View ── */
+.proj-table-wrap { overflow-x: auto; }
+
+/* Project Cards Grid */
+.proj-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.proj-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.proj-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-3px); }
+
+.pc-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.pc-name { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.pc-client { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+.pc-progress-area { display: flex; flex-direction: column; gap: 6px; }
+.pc-pct-row { display: flex; justify-content: space-between; font-size: 12px; }
+.pc-pct-row span:first-child { color: var(--text-muted); }
+.pc-pct-row strong { font-weight: 700; }
+
+.pc-footer { display: flex; align-items: center; justify-content: space-between; }
+.pc-deadline { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-muted); }
+.pc-deadline svg { width: 13px; height: 13px; }
+.pc-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+.proj-card:hover .pc-actions { opacity: 1; }
+
+/* ── Empty state ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 24px;
+  color: var(--text-muted);
+  text-align: center;
+  gap: 12px;
+}
+.empty-state svg { width: 48px; height: 48px; opacity: 0.35; }
+.empty-state p { font-size: 14px; }

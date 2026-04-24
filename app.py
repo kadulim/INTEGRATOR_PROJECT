@@ -1,9 +1,14 @@
 from flask import Flask, render_template, abort, request, redirect, url_for
 from flask_login import LoginManager, login_required, current_user, logout_user
 import functools
+import os
+from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash
+
+load_dotenv()
 
 from database import database
-from models import Usuario
+from models import Usuario, Admin
 
 import function.login as logar
 import function.register as registrar
@@ -76,13 +81,28 @@ def cliente():
 def funcionario():
     return render_template('cliente/client.html')
 
-# Rota Admin
-@app.route('/admin')
-@login_required_nivel(3)
-def admin():
-    return render_template('admin/dashboard.html')
+# Blueprint Admin
+from routes.admin import admin_bp
+app.register_blueprint(admin_bp)
 
 if __name__ == '__main__':
     with app.app_context():
         database.create_all()
+        
+        # Criação do admin via .env
+        admin_email = os.getenv('ADMIN_EMAIL')
+        if admin_email and not Usuario.query.filter_by(email=admin_email).first():
+            nome = os.getenv('ADMIN_NOME', 'Admin')
+            senha = os.getenv('ADMIN_SENHA', 'admin')
+            senha_hash = generate_password_hash(senha)
+            
+            usuario = Usuario(nome=nome, email=admin_email, senha=senha_hash, tipo='admin', nivel=1)
+            database.session.add(usuario)
+            database.session.flush()
+            
+            admin = Admin(usuario_id=usuario.id, nivel='1')
+            database.session.add(admin)
+            database.session.commit()
+            print("Usuário Admin padrão criado com sucesso!")
+            
     app.run(debug=True)

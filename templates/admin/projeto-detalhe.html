@@ -1,0 +1,144 @@
+{% extends 'admin/base.html' %}
+{% set active_page = 'projetos' %}
+
+{% block title %}Detalhe do Projeto — CoByte{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/projeto-detalhe.css') }}">
+<style>
+.proj-header { background:var(--surface-2); border-bottom:1.5px solid var(--border); padding:24px 32px; }
+.proj-header-inner { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+.proj-header-name { font-size:22px; font-weight:800; color:var(--text-primary); letter-spacing:-0.5px; }
+.proj-header-meta { display:flex; gap:12px; margin-top:8px; align-items:center; }
+.proj-tab-nav { display:flex; gap:8px; padding:0 32px; background:var(--surface-2); border-bottom:1.5px solid var(--border); overflow-x:auto; }
+.proj-tab { padding:14px 16px; font-size:13.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; background:none; border:none; border-bottom:3px solid transparent; transition:0.2s; white-space:nowrap; display:flex; align-items:center; gap:8px; }
+.proj-tab svg { width:16px; height:16px; }
+.proj-tab:hover { color:var(--text-primary); }
+.proj-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-content { padding:32px; }
+.tab-pane { display:none; }
+.tab-pane.active { display:block; animation: fadeUp 0.3s ease; }
+
+.overview-grid { display:grid; grid-template-columns:2fr 1fr; gap:24px; }
+@media(max-width:992px) { .overview-grid { grid-template-columns:1fr; } }
+.kpi-card { background:var(--surface-2); border-radius:var(--radius-md); padding:20px; display:flex; gap:16px; align-items:center; }
+.kpi-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+.overview-kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; }
+</style>
+{% endblock %}
+
+{% block topbar_title %}Visão Geral do Projeto{% endblock %}
+
+{% block content %}
+<div class="proj-header">
+  <div class="proj-header-inner">
+    <a href="{{ url_for('admin.projetos') }}" class="btn btn-ghost btn-sm">Voltar</a>
+    <div class="proj-header-info">
+      <div class="proj-header-name">App Mobile CoByte</div>
+      <div class="proj-header-meta">
+        <span class="badge badge-blue">Em andamento</span>
+        <span class="badge badge-red">Alta</span>
+        <span style="font-size:12px;color:var(--text-muted);">Prazo: 15/08/2025</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="proj-tab-nav">
+  <button class="proj-tab active" onclick="switchTab('visao-geral', this)">Visão Geral</button>
+  <button class="proj-tab" onclick="switchTab('requisitos', this)">Requisitos</button>
+  <button class="proj-tab" onclick="switchTab('equipe', this)">Equipe</button>
+</div>
+
+<div class="tab-content">
+  <!-- Aba Visão Geral -->
+  <div id="tab-visao-geral" class="tab-pane active">
+    <div class="overview-grid">
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="overview-kpis">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:var(--blue-soft);color:var(--blue);">📅</div>
+            <div>
+              <div class="kpi-label">Dias Restantes</div>
+              <div class="kpi-value">45</div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:var(--green-soft);color:var(--green);">📊</div>
+            <div>
+              <div class="kpi-label">Progresso</div>
+              <div class="kpi-value">68%</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <h3>Sobre o Projeto</h3>
+            <p>Desenvolvimento do app mobile nativo para iOS e Android da plataforma CoByte.</p>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="card">
+          <div class="card-body">
+            <h3>Equipe (Resumo)</h3>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+              <div class="avatar sm avatar-blue">AC</div>
+              <div><strong>Ana Carvalho</strong> <br><small>Tech Lead</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aba Requisitos -->
+  <div id="tab-requisitos" class="tab-pane">
+    <div class="card">
+      <div class="card-body">
+        <h3>Requisitos do Projeto</h3>
+        <p>A listagem de requisitos estática foi carregada.</p>
+        <table class="data-table">
+          <thead><tr><th>ID</th><th>Título</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>RF-001</td><td>Autenticação de Usuários</td><td><span class="badge badge-green">Concluído</span></td></tr>
+            <tr><td>RF-002</td><td>Gestão de Tarefas</td><td><span class="badge badge-blue">Em andamento</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aba Equipe -->
+  <div id="tab-equipe" class="tab-pane">
+    <div class="card">
+      <div class="card-body">
+        <h3>Equipe Atribuída</h3>
+        <div class="proj-team-grid">
+          <div class="proj-member-card">
+            <div class="avatar avatar-blue">AC</div>
+            <div class="pmc-info">
+              <div class="pmc-name">Ana Carvalho</div>
+              <div class="pmc-role">Tech Lead</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.proj-tab').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+<script src="{{ url_for('static', filename='js/projeto-detalhe.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'admin/base.html' %}
+{% set active_page = 'equipes' %}
+
+{% block title %}Equipes — CoByte{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/equipes.css') }}">
+{% endblock %}
+
+{% block topbar_title %}Equipes{% endblock %}
+{% block topbar_actions %}
+  <button class="btn btn-primary btn-sm" onclick="openModal('modal-novo-membro')">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Novo Membro
+  </button>
+{% endblock %}
+
+{% block content %}
+    <!-- Stats -->
+    <div class="team-stats fade-up">
+      <div class="stat-card">
+        <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div>
+          <div class="stat-label">Total da Equipe</div>
+          <div class="stat-value">6</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="stat-label">Disponíveis</div>
+          <div class="stat-value">3</div>
+          <div class="stat-delta">3 em projeto</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div>
+          <div class="stat-label">Habilidades</div>
+          <div class="stat-value">12</div>
+          <div class="stat-delta">na equipe</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="proj-toolbar fade-up fade-up-1">
+      <div class="search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar membros…">
+      </div>
+      <select class="filter-select">
+        <option value="Todos">Todos</option>
+        <option value="Disponível">Disponíveis</option>
+        <option value="Em projeto">Em projeto</option>
+      </select>
+    </div>
+
+    <!-- Members Grid -->
+    <div id="members-root" class="fade-up fade-up-2">
+      <div class="members-grid">
+        <!-- Mock Member 1 -->
+        <div class="member-card fade-up">
+          <div class="member-avatar avatar-blue">AC</div>
+          <div>
+            <div class="member-name">Ana Carvalho</div>
+            <div class="member-role">Dev Full Stack</div>
+          </div>
+          <span class="badge badge-green">Disponível</span>
+          <div class="member-email">ana@cobyte.dev</div>
+          <div class="member-skills">
+            <span class="skill-tag">React</span><span class="skill-tag">Node.js</span><span class="skill-tag">PostgreSQL</span>
+          </div>
+          <div class="member-footer">
+            <div class="member-projects-count">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <strong>4</strong> projetos
+            </div>
+            <button class="icon-btn" style="color:var(--accent);" title="Remover">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+</script>
+<script src="{{ url_for('static', filename='js/equipes.js') }}"></script>
+{% endblock %}

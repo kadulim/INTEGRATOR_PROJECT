@@ -1,106 +1,191 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+{% extends 'admin/base.html' %}
+{% set active_page = 'dashboard' %}
 
-<head>
-  <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>CoByte – Dashboard</title>
-  <link href="https://fonts.googleapis.com" rel="preconnect" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
-    rel="stylesheet" />
-  <link href="styles.css" rel="stylesheet" />
-</head>
+{% block title %}Dashboard — CoByte{% endblock %}
 
-<body>
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
 
-  <div id="dashboard-section">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <img alt="Logo"
-          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%234f46e5'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='800' font-size='18'%3ECB%3C/text%3E%3C/svg%3E">
-        <span>CoByte</span>
-        </img>
+{% block topbar_title %}Dashboard{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('admin.projetos') }}" class="btn btn-primary btn-sm">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Novo Projeto
+  </a>
+{% endblock %}
+
+{% block content %}
+    <!-- Boas-vindas -->
+    <div class="welcome-banner fade-up">
+      <div class="wb-text">
+        <h2>Olá, {{ current_user.nome.split(' ')[0] if current_user.is_authenticated else 'Usuário' }}! 👋</h2>
+        <!-- Valores estáticos temporários até implementação real do DB -->
+        <p>Você tem 3 projetos em andamento e 4 membros disponíveis.</p>
       </div>
-      <nav class="sidebar-nav">
-        <div class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
-            <rect height="7" width="7" x="3" y="3"></rect>
-            <rect height="7" width="7" x="14" y="3"></rect>
-            <rect height="7" width="7" x="14" y="14"></rect>
-            <rect height="7" width="7" x="3" y="14"></rect>
-          </svg>
-          Dashboard
-        </div>
-        <div class="nav-item" id="nav-projects" onclick="navigate('projects')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
-            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"></path>
-          </svg>
-          Projetos
-        </div>
-        <div class="nav-item" id="nav-teams" onclick="navigate('teams')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 010 7.75"></path>
-          </svg>
-          Equipes
-        </div>
-        <div class="nav-item" id="nav-settings" onclick="navigate('settings')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path
-              d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z">
-            </path>
-          </svg>
-          Configurações
-        </div>
-      </nav>
-    </aside>
-
-    <!-- Main area -->
-    <div class="main-area">
-      <!-- Topbar -->
-      <header class="topbar" id="main-topbar">
-        <h1 id="page-title">Dashboard</h1>
-        <div class="flex items-center gap-3">
-          <button class="notif-btn">
-            <svg color="var(--gray-600)" fill="none" height="22" stroke="currentColor"
-              stroke-width="2" viewbox="0 0 24 24" width="22">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 01-3.46 0"></path>
-            </svg>
-            <span class="notif-dot"></span>
-          </button>
-
-          <div style="text-align:right">
-            <!-- ALTERAÇÃO AQUI -->
-            <p class="text-sm font-semibold text-gray-900" id="topbar-username">current_user</p>
-            <p class="text-xs text-gray-600" id="topbar-role">Administrador</p>
-          </div>
-
-          <!-- ALTERAÇÃO AQUI -->
-          <div class="avatar-btn" id="topbar-avatar">C</div>
-
-          <button class="btn-icon" onclick="doLogout()" title="Sair">
-            <svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18">
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" x2="9" y1="12" y2="12"></line>
-            </svg>
-          </button>
-        </div>
-      </header>
-
-      <!-- resto do código permanece EXATAMENTE igual -->
-      <!-- (mantive tudo intacto como você pediu) -->
-
+      <a href="{{ url_for('admin.projetos') }}" class="btn btn-primary wb-btn">
+        Ver Projetos 
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
     </div>
-  </div>
 
-  <script src="script.js"></script>
-</body>
+    <!-- Stat Cards -->
+    <div class="stat-grid fade-up fade-up-1">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Projetos Ativos</div>
+          <div class="stat-value">3</div>
+          <div class="stat-delta">+2 este mês</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Concluídos</div>
+          <div class="stat-value">1</div>
+          <div class="stat-delta">98% no prazo</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Equipe</div>
+          <div class="stat-value">6</div>
+          <div class="stat-delta">4 disponíveis</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon accent">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Budget Total</div>
+          <div class="stat-value">R$ 288k</div>
+          <div class="stat-delta">R$ 288k sob gestão</div>
+        </div>
+      </div>
+    </div>
 
-</html>
+    <!-- Grid Principal -->
+    <div class="dash-grid">
+      <!-- Coluna Esquerda -->
+      <div style="display:flex;flex-direction:column;gap:24px;">
+
+        <!-- Projetos Em Andamento -->
+        <div class="card fade-up fade-up-2">
+          <div class="card-body">
+            <div class="flex items-center justify-between mb-6">
+              <h3 style="font-size:15px;font-weight:700;">Projetos Ativos</h3>
+              <a href="{{ url_for('admin.projetos') }}" class="btn btn-ghost btn-sm">Ver todos</a>
+            </div>
+            <div class="project-mini-list">
+                <div class="project-mini fade-up" style="animation-delay:0s" onclick="location.href='{{ url_for('admin.projetos') }}'">
+                  <div class="project-mini-color" style="background:#e94560"></div>
+                  <div class="project-mini-info">
+                    <div class="project-mini-name">App Mobile CoByte</div>
+                    <div class="project-mini-meta">
+                      <div class="progress-bar" style="flex:1;height:5px;">
+                        <div class="progress-fill blue" style="width:68%"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="project-mini-pct">68%</div>
+                </div>
+
+                <div class="project-mini fade-up" style="animation-delay:0.1s" onclick="location.href='{{ url_for('admin.projetos') }}'">
+                  <div class="project-mini-color" style="background:#3b82f6"></div>
+                  <div class="project-mini-info">
+                    <div class="project-mini-name">Redesign Portal Web</div>
+                    <div class="project-mini-meta">
+                      <div class="progress-bar" style="flex:1;height:5px;">
+                        <div class="progress-fill purple" style="width:32%"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="project-mini-pct">32%</div>
+                </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini Chart - Projetos por status -->
+        <div class="card fade-up fade-up-3">
+          <div class="card-body">
+            <div class="flex items-center justify-between mb-6">
+              <h3 style="font-size:15px;font-weight:700;">Volume por Mês</h3>
+              <span class="badge badge-green">2025</span>
+            </div>
+            <div class="chart-bars" id="chart-bars">
+                <!-- Gerado no dashboard.js apenas a animação -->
+            </div>
+            <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+                <div style="width:10px;height:10px;border-radius:2px;background:var(--accent);"></div> Projetos entregues
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna Direita -->
+      <div style="display:flex;flex-direction:column;gap:24px;">
+
+        <!-- Distribuição Status (Donut) -->
+        <div class="card fade-up fade-up-2">
+          <div class="card-body" style="padding-bottom:0;">
+            <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;">Status dos Projetos</h3>
+          </div>
+          <div class="donut-wrap" id="donut-wrap">
+            <!-- Renderizado visualmente via dashboard.js -->
+          </div>
+        </div>
+
+        <!-- Feed de Atividade -->
+        <div class="card fade-up fade-up-3" style="flex:1;">
+          <div class="card-body">
+            <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">Atividade Recente</h3>
+            <div class="activity-list">
+                <div class="activity-item">
+                  <div class="activity-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="activity-body">
+                    <div class="activity-text"><strong>App Mobile CoByte</strong> atingiu 68% de progresso</div>
+                    <div class="activity-time">há 5 min</div>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Membros Disponíveis -->
+        <div class="card fade-up fade-up-4">
+          <div class="card-body">
+            <div class="flex items-center justify-between mb-4">
+              <h3 style="font-size:15px;font-weight:700;">Equipe</h3>
+              <a href="{{ url_for('admin.equipes') }}" class="btn btn-ghost btn-sm">Ver Todos</a>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div class="avatar sm avatar-blue">AC</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ana Carvalho</div>
+                    <div style="font-size:11.5px;color:var(--text-muted);">Dev Full Stack</div>
+                  </div>
+                  <span class="badge badge-green">Disponível</span>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
