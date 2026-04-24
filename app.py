@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 
-# Carrega variáveis do arquivo .env (local)
+# Carrega variáveis do arquivo .env (apenas localmente)
 load_dotenv()
 
 from database import database
@@ -16,28 +16,34 @@ import function.register as registrar
 
 app = Flask(__name__)
 
-# CONFIGURAÇÕES
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'cobyte_default_key')
+# CONFIGURAÇÕES DE SEGURANÇA
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'cobyte_chave_padrao')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Lógica para alternar entre Postgres (Render) e MySQL (Local)
+# CONFIGURAÇÃO DO BANCO DE DADOS (POSTGRES NO RENDER / MYSQL LOCAL)
 uri = os.getenv("DATABASE_URL")
-if uri and uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = uri or 'mysql+pymysql://root:@localhost/database_cobyte'
+if uri:
+    # O Render fornece 'postgres://', mas o SQLAlchemy exige 'postgresql://'
+    if uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = uri
+else:
+    # Fallback para o seu ambiente de desenvolvimento local
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/database_cobyte'
 
-# Inicializa o banco
+# Inicializa o banco de dados
 database.init_app(app)
 
-# CONFIGURAÇÃO LOGIN
+# CONFIGURAÇÃO DO LOGIN MANAGER
 lm = LoginManager(app)
 lm.login_view = '/'
 
-# Criação das tabelas e Admin padrão (Roda no Render e Local)
+# CRIAÇÃO AUTOMÁTICA DE TABELAS (Executa no deploy do Render)
 with app.app_context():
     database.create_all()
     
+    # Lógica de criação do Administrador padrão via Variáveis de Ambiente
     admin_email = os.getenv('ADMIN_EMAIL')
     if admin_email and not Usuario.query.filter_by(email=admin_email).first():
         nome = os.getenv('ADMIN_NOME', 'Admin')
@@ -51,9 +57,9 @@ with app.app_context():
         admin = Admin(usuario_id=usuario.id, nivel='1')
         database.session.add(admin)
         database.session.commit()
-        print("Usuário Admin padrão verificado/criado com sucesso!")
+        print("Banco de dados sincronizado e Admin verificado.")
 
-# DECORATOR POR NÍVEL
+# DECORATOR PARA NÍVEL DE ACESSO
 def login_required_nivel(nivel_minimo):
     def decorator(f):
         @functools.wraps(f)
@@ -66,12 +72,13 @@ def login_required_nivel(nivel_minimo):
         return decorated_function
     return decorator
 
-# USER LOADER
+# CARREGADOR DE USUÁRIO PARA FLASK-LOGIN
 @lm.user_loader
 def user_loader(id):
     return database.session.get(Usuario, int(id))
 
-# ROTAS
+# --- ROTAS ---
+
 @app.route('/', methods=['GET', 'POST'])
 def page_login():
     return logar.logar()
@@ -96,7 +103,7 @@ def cliente():
 def funcionario():
     return render_template('cliente/client.html')
 
-# Blueprint Admin
+# Registro do Blueprint de Admin
 from routes.admin import admin_bp
 app.register_blueprint(admin_bp)
 
