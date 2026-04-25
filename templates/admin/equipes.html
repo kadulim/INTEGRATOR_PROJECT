@@ -22,23 +22,15 @@
         <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <div>
           <div class="stat-label">Total da Equipe</div>
-          <div class="stat-value">6</div>
+          <div class="stat-value">{{ total }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div>
-          <div class="stat-label">Disponíveis</div>
-          <div class="stat-value">3</div>
-          <div class="stat-delta">3 em projeto</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-        <div>
-          <div class="stat-label">Habilidades</div>
-          <div class="stat-value">12</div>
-          <div class="stat-delta">na equipe</div>
+          <div class="stat-label">Funcionários Ativos</div>
+          <div class="stat-value">{{ total }}</div>
+          <div class="stat-delta">cadastrados</div>
         </div>
       </div>
     </div>
@@ -59,28 +51,31 @@
     <!-- Members Grid -->
     <div id="members-root" class="fade-up fade-up-2">
       <div class="members-grid">
-        <!-- Mock Member 1 -->
-        <div class="member-card fade-up">
-          <div class="member-avatar avatar-blue">AC</div>
-          <div>
-            <div class="member-name">Ana Carvalho</div>
-            <div class="member-role">Dev Full Stack</div>
-          </div>
-          <span class="badge badge-green">Disponível</span>
-          <div class="member-email">ana@cobyte.dev</div>
-          <div class="member-skills">
-            <span class="skill-tag">React</span><span class="skill-tag">Node.js</span><span class="skill-tag">PostgreSQL</span>
-          </div>
-          <div class="member-footer">
-            <div class="member-projects-count">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-              <strong>4</strong> projetos
+        {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-accent','avatar-red'] %}
+        {% if funcionarios %}
+          {% for func, usuario in funcionarios %}
+          <div class="member-card fade-up">
+            <div class="member-avatar {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ usuario.nome[:2].upper() }}</div>
+            <div>
+              <div class="member-name">{{ usuario.nome }}</div>
+              <div class="member-role">{{ func.cargo }}</div>
             </div>
-            <button class="icon-btn" style="color:var(--accent);" title="Remover">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-            </button>
+            <span class="badge badge-green">Ativo</span>
+            <div class="member-email">{{ usuario.email }}</div>
+            <div class="member-skills">
+              <span class="skill-tag">{{ func.cargo }}</span>
+            </div>
+            <div class="member-footer">
+              <div class="member-projects-count">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                Salário: <strong>R$ {{ "%.2f" | format(func.salario) }}</strong>
+              </div>
+            </div>
           </div>
-        </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-muted);font-size:14px;">Nenhum funcionário cadastrado.</p>
+        {% endif %}
       </div>
     </div>
 

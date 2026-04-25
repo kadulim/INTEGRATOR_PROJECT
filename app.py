@@ -9,10 +9,11 @@ from werkzeug.security import generate_password_hash
 load_dotenv()
 
 from database import database
-from models import Usuario, Admin
+from models import Usuario, Admin, Cliente, Funcionario, Projeto
 
 import function.login as logar
 import function.register as registrar
+import function.adicionar_na_tabela as adicionar_na_tabela
 
 app = Flask(__name__)
 
@@ -39,25 +40,8 @@ database.init_app(app)
 lm = LoginManager(app)
 lm.login_view = '/'
 
-# CRIAÇÃO AUTOMÁTICA DE TABELAS (Executa no deploy do Render)
-with app.app_context():
-    database.create_all()
-    
-    # Lógica de criação do Administrador padrão via Variáveis de Ambiente
-    admin_email = os.getenv('ADMIN_EMAIL')
-    if admin_email and not Usuario.query.filter_by(email=admin_email).first():
-        nome = os.getenv('ADMIN_NOME', 'Admin')
-        senha = os.getenv('ADMIN_SENHA', 'admin123')
-        senha_hash = generate_password_hash(senha)
-        
-        usuario = Usuario(nome=nome, email=admin_email, senha=senha_hash, tipo='admin', nivel=1)
-        database.session.add(usuario)
-        database.session.flush()
-        
-        admin = Admin(usuario_id=usuario.id, nivel='1')
-        database.session.add(admin)
-        database.session.commit()
-        print("Banco de dados sincronizado e Admin verificado.")
+# CRIAÇÃO AUTOMÁTICA DE TABELAS + SEED DE DADOS INICIAIS
+adicionar_na_tabela.adicionar(app)
 
 # DECORATOR PARA NÍVEL DE ACESSO
 def login_required_nivel(nivel_minimo):

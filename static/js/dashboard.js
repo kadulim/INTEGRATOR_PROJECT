@@ -1,45 +1,48 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Animar gráficos
   setTimeout(() => {
     renderChartBars();
     renderDonut();
   }, 100);
 });
 
+// ── Volume por Mês ────────────────────────────────────────────────────
 function renderChartBars() {
   const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  const values = [2, 1, 3, 2, 4, 3, 5, 2, 4, 6, 3, 2];
-  const max    = Math.max(...values);
+
+  // Usa dados reais injetados pelo servidor, ou fallback zerado
+  const values = (window.DASHBOARD_VOLUMES && window.DASHBOARD_VOLUMES.length === 12)
+    ? window.DASHBOARD_VOLUMES
+    : new Array(12).fill(0);
+
+  const max = Math.max(...values, 1); // garante que max >= 1 para evitar divisão por zero
   const container = document.getElementById('chart-bars');
   if (!container) return;
 
   container.innerHTML = months.map((m, i) => `
     <div class="chart-bar-wrap">
       <div class="chart-bar ${i === new Date().getMonth() ? 'active' : ''}"
-           style="height:${(values[i]/max)*100}%"
-           title="${values[i]} projeto(s)"></div>
+           style="height:${(values[i] / max) * 100}%"
+           title="${values[i]} projeto(s) com prazo em ${m}"></div>
       <span class="chart-label">${m}</span>
     </div>
   `).join('');
 }
 
+// ── Status dos Projetos (Donut) ───────────────────────────────────────
 function renderDonut() {
-  // Dados fictícios visuais (apenas animação)
-  const data = [
-    { label: 'Em andamento', val: 3,   color: '#3b82f6' },
-    { label: 'Concluído',    val: 1, color: '#22c55e' },
-    { label: 'Planejamento', val: 1, color: '#8b5cf6' },
-    { label: 'Pausado',      val: 1,  color: '#f59e0b' },
-  ].filter(d => d.val > 0);
-  
-  const total = data.reduce((acc, d) => acc + d.val, 0);
+  // Usa dados reais injetados pelo servidor
+  const data = (window.DASHBOARD_STATUS && window.DASHBOARD_STATUS.length > 0)
+    ? window.DASHBOARD_STATUS.filter(d => d.val > 0)
+    : [{ label: 'Sem dados', val: 1, color: '#6b7280' }];
 
+  const total = data.reduce((acc, d) => acc + d.val, 0);
   const container = document.getElementById('donut-wrap');
   if (!container) return;
 
   const r = 45, cx = 55, cy = 55, strokeW = 18;
   const circ = 2 * Math.PI * r;
   let offset = 0;
+
   const segments = data.map(d => {
     const dash = (d.val / total) * circ;
     const seg = `<circle cx="${cx}" cy="${cy}" r="${r}"

@@ -38,81 +38,90 @@
       </div>
     </div>
 
-    <!-- Conteúdo da View -->
+    <!-- Cards View -->
     <div id="view-cards" class="view-section active fade-up fade-up-1">
       <div class="proj-cards-grid">
-          <!-- Mock Project 1 -->
-          <div class="proj-card" onclick="openProject(1)">
+        {% set badge_prioridade = {'Alta': 'badge-red', 'Média': 'badge-yellow', 'Baixa': 'badge-green'} %}
+        {% set badge_status     = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow', 'Planejamento': 'badge-purple'} %}
+        {% if projetos %}
+          {% for p in projetos %}
+          <div class="proj-card" onclick="openProject({{ p.id }})">
             <div class="pc-header">
               <div>
-                <div class="pc-name">App Mobile CoByte</div>
-                <div class="pc-client">TechNova SA</div>
+                <div class="pc-name">{{ p.nome }}</div>
+                <div class="pc-client">{{ p.cliente }}</div>
               </div>
-              <span class="badge badge-red">Alta</span>
+              <span class="badge {{ badge_prioridade.get(p.prioridade, 'badge-blue') }}">{{ p.prioridade }}</span>
             </div>
-            <span class="badge badge-blue">Em andamento</span>
+            <span class="badge {{ badge_status.get(p.status, 'badge-blue') }}">{{ p.status }}</span>
             <div class="pc-progress-area">
-              <div class="pc-pct-row"><span>Progresso</span><strong>68%</strong></div>
-              <div class="progress-bar"><div class="progress-fill blue" style="width:68%"></div></div>
+              <div class="pc-pct-row"><span>Orçamento</span><strong>R$ {{ "%.0f" | format(p.budget) }}</strong></div>
+              <div class="progress-bar"><div class="progress-fill blue" style="width:60%"></div></div>
             </div>
             <div class="pc-footer">
-              <div class="pc-deadline"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 15/08/2025</div>
+              <div class="pc-deadline">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {{ p.prazo }}
+              </div>
               <div class="pc-actions" onclick="event.stopPropagation()">
-                <button class="icon-btn" onclick="openProject(1)">VER</button>
+                <button class="icon-btn" onclick="openProject({{ p.id }})">VER</button>
               </div>
             </div>
           </div>
-          <!-- Mock Project 2 -->
-          <div class="proj-card" onclick="openProject(2)">
-            <div class="pc-header">
-              <div>
-                <div class="pc-name">Redesign Portal Web</div>
-                <div class="pc-client">Grupo Meridian</div>
-              </div>
-              <span class="badge badge-yellow">Média</span>
-            </div>
-            <span class="badge badge-blue">Em andamento</span>
-            <div class="pc-progress-area">
-              <div class="pc-pct-row"><span>Progresso</span><strong>32%</strong></div>
-              <div class="progress-bar"><div class="progress-fill purple" style="width:32%"></div></div>
-            </div>
-            <div class="pc-footer">
-              <div class="pc-deadline">30/09/2025</div>
-              <div class="pc-actions" onclick="event.stopPropagation()"><button class="icon-btn">VER</button></div>
-            </div>
-          </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-muted);font-size:14px;">Nenhum projeto cadastrado.</p>
+        {% endif %}
       </div>
     </div>
 
+    <!-- Kanban View -->
     <div id="view-kanban" class="view-section fade-up fade-up-1" style="display:none;">
       <div class="kanban-board">
+        {% set status_list = ['Em andamento', 'Planejamento', 'Concluído', 'Pausado'] %}
+        {% for status in status_list %}
         <div class="kanban-col">
-          <div class="kanban-col-header"><div class="kanban-col-title">Em andamento</div></div>
+          <div class="kanban-col-header"><div class="kanban-col-title">{{ status }}</div></div>
           <div class="kanban-cards">
-            <!-- Mock Kanban Card -->
+            {% for p in projetos if p.status == status %}
             <div class="kanban-card">
-              <div class="kc-name">App Mobile CoByte</div>
-              <div class="kc-client">TechNova SA</div>
-              <div class="progress-bar mb-3"><div class="progress-fill blue" style="width:68%"></div></div>
+              <div class="kc-name">{{ p.nome }}</div>
+              <div class="kc-client">{{ p.cliente }}</div>
+              <div class="progress-bar mb-3"><div class="progress-fill blue" style="width:50%"></div></div>
             </div>
+            {% else %}
+            <p style="color:var(--text-muted);font-size:12px;padding:8px 0;">Nenhum projeto.</p>
+            {% endfor %}
           </div>
         </div>
+        {% endfor %}
       </div>
     </div>
 
+    <!-- Table View -->
     <div id="view-table" class="view-section fade-up fade-up-1" style="display:none;">
       <div class="card proj-table-wrap">
         <table class="data-table">
           <thead>
-            <tr><th>Projeto</th><th>Cliente</th><th>Status</th><th>Progresso</th></tr>
+            <tr><th>Projeto</th><th>Cliente</th><th>Status</th><th>Prioridade</th><th>Prazo</th><th>Budget</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td><div style="font-weight:600;">App Mobile CoByte</div></td>
-              <td>TechNova SA</td>
-              <td><span class="badge badge-blue">Em andamento</span></td>
-              <td>68%</td>
-            </tr>
+            {% set badge_prioridade = {'Alta': 'badge-red', 'Média': 'badge-yellow', 'Baixa': 'badge-green'} %}
+            {% set badge_status     = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow', 'Planejamento': 'badge-purple'} %}
+            {% if projetos %}
+              {% for p in projetos %}
+              <tr>
+                <td><div style="font-weight:600;">{{ p.nome }}</div></td>
+                <td>{{ p.cliente }}</td>
+                <td><span class="badge {{ badge_status.get(p.status, 'badge-blue') }}">{{ p.status }}</span></td>
+                <td><span class="badge {{ badge_prioridade.get(p.prioridade, 'badge-blue') }}">{{ p.prioridade }}</span></td>
+                <td>{{ p.prazo }}</td>
+                <td>R$ {{ "%.2f" | format(p.budget) }}</td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Nenhum projeto cadastrado.</td></tr>
+            {% endif %}
           </tbody>
         </table>
       </div>

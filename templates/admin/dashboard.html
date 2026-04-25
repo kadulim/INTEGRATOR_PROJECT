@@ -20,8 +20,7 @@
     <div class="welcome-banner fade-up">
       <div class="wb-text">
         <h2>Olá, {{ current_user.nome.split(' ')[0] if current_user.is_authenticated else 'Usuário' }}! 👋</h2>
-        <!-- Valores estáticos temporários até implementação real do DB -->
-        <p>Você tem 3 projetos em andamento e 4 membros disponíveis.</p>
+        <p>Você tem <strong>{{ projetos_ativos | length }}</strong> projeto(s) em andamento e <strong>{{ total_equipe }}</strong> membro(s) na equipe.</p>
       </div>
       <a href="{{ url_for('admin.projetos') }}" class="btn btn-primary wb-btn">
         Ver Projetos 
@@ -37,8 +36,8 @@
         </div>
         <div>
           <div class="stat-label">Projetos Ativos</div>
-          <div class="stat-value">3</div>
-          <div class="stat-delta">+2 este mês</div>
+          <div class="stat-value">{{ total_projetos }}</div>
+          <div class="stat-delta">{{ projetos_ativos | length }} em andamento</div>
         </div>
       </div>
       <div class="stat-card">
@@ -46,9 +45,9 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div>
-          <div class="stat-label">Concluídos</div>
-          <div class="stat-value">1</div>
-          <div class="stat-delta">98% no prazo</div>
+          <div class="stat-label">Clientes</div>
+          <div class="stat-value">{{ total_clientes }}</div>
+          <div class="stat-delta">cadastrados</div>
         </div>
       </div>
       <div class="stat-card">
@@ -57,8 +56,8 @@
         </div>
         <div>
           <div class="stat-label">Equipe</div>
-          <div class="stat-value">6</div>
-          <div class="stat-delta">4 disponíveis</div>
+          <div class="stat-value">{{ total_equipe }}</div>
+          <div class="stat-delta">funcionários</div>
         </div>
       </div>
       <div class="stat-card">
@@ -67,8 +66,8 @@
         </div>
         <div>
           <div class="stat-label">Budget Total</div>
-          <div class="stat-value">R$ 288k</div>
-          <div class="stat-delta">R$ 288k sob gestão</div>
+          <div class="stat-value">R$ {{ "%.0f" | format(budget_total / 1000) }}k</div>
+          <div class="stat-delta">R$ {{ "%.2f" | format(budget_total) }} sob gestão</div>
         </div>
       </div>
     </div>
@@ -86,31 +85,25 @@
               <a href="{{ url_for('admin.projetos') }}" class="btn btn-ghost btn-sm">Ver todos</a>
             </div>
             <div class="project-mini-list">
-                <div class="project-mini fade-up" style="animation-delay:0s" onclick="location.href='{{ url_for('admin.projetos') }}'">
-                  <div class="project-mini-color" style="background:#e94560"></div>
+              {% set colors = ['#e94560','#3b82f6','#a78bfa','#10b981','#f59e0b'] %}
+              {% if projetos_ativos %}
+                {% for projeto in projetos_ativos %}
+                <div class="project-mini fade-up" style="animation-delay:{{ loop.index0 * 0.1 }}s" onclick="location.href='{{ url_for('admin.projetos') }}'">
+                  <div class="project-mini-color" style="background:{{ colors[loop.index0 % colors|length] }}"></div>
                   <div class="project-mini-info">
-                    <div class="project-mini-name">App Mobile CoByte</div>
+                    <div class="project-mini-name">{{ projeto.nome }}</div>
                     <div class="project-mini-meta">
                       <div class="progress-bar" style="flex:1;height:5px;">
-                        <div class="progress-fill blue" style="width:68%"></div>
+                        <div class="progress-fill blue" style="width:50%"></div>
                       </div>
                     </div>
                   </div>
-                  <div class="project-mini-pct">68%</div>
+                  <div class="project-mini-pct">{{ projeto.status }}</div>
                 </div>
-
-                <div class="project-mini fade-up" style="animation-delay:0.1s" onclick="location.href='{{ url_for('admin.projetos') }}'">
-                  <div class="project-mini-color" style="background:#3b82f6"></div>
-                  <div class="project-mini-info">
-                    <div class="project-mini-name">Redesign Portal Web</div>
-                    <div class="project-mini-meta">
-                      <div class="progress-bar" style="flex:1;height:5px;">
-                        <div class="progress-fill purple" style="width:32%"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="project-mini-pct">32%</div>
-                </div>
+                {% endfor %}
+              {% else %}
+                <p style="color:var(--text-muted);font-size:13px;">Nenhum projeto em andamento.</p>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -150,20 +143,26 @@
         <!-- Feed de Atividade -->
         <div class="card fade-up fade-up-3" style="flex:1;">
           <div class="card-body">
-            <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">Atividade Recente</h3>
+            <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">Projetos Cadastrados</h3>
             <div class="activity-list">
+              {% if projetos_ativos %}
+                {% for projeto in projetos_ativos %}
                 <div class="activity-item">
-                  <div class="activity-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="activity-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
                   <div class="activity-body">
-                    <div class="activity-text"><strong>App Mobile CoByte</strong> atingiu 68% de progresso</div>
-                    <div class="activity-time">há 5 min</div>
+                    <div class="activity-text"><strong>{{ projeto.nome }}</strong> — {{ projeto.cliente }}</div>
+                    <div class="activity-time">{{ projeto.status }} · Prazo: {{ projeto.prazo }}</div>
                   </div>
                 </div>
+                {% endfor %}
+              {% else %}
+                <p style="color:var(--text-muted);font-size:13px;">Nenhum projeto cadastrado.</p>
+              {% endif %}
             </div>
           </div>
         </div>
 
-        <!-- Membros Disponíveis -->
+        <!-- Membros da Equipe -->
         <div class="card fade-up fade-up-4">
           <div class="card-body">
             <div class="flex items-center justify-between mb-4">
@@ -171,14 +170,20 @@
               <a href="{{ url_for('admin.equipes') }}" class="btn btn-ghost btn-sm">Ver Todos</a>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;">
+              {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-accent'] %}
+              {# funcionarios_dash é passado opcionalmente; se não vier, lista fica vazia #}
+              {% for func, usuario in funcionarios_dash %}
                 <div style="display:flex;align-items:center;gap:10px;">
-                  <div class="avatar sm avatar-blue">AC</div>
+                  <div class="avatar sm {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ usuario.nome[:2].upper() }}</div>
                   <div style="flex:1;min-width:0;">
-                    <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ana Carvalho</div>
-                    <div style="font-size:11.5px;color:var(--text-muted);">Dev Full Stack</div>
+                    <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ usuario.nome }}</div>
+                    <div style="font-size:11.5px;color:var(--text-muted);">{{ func.cargo }}</div>
                   </div>
-                  <span class="badge badge-green">Disponível</span>
+                  <span class="badge badge-green">Ativo</span>
                 </div>
+              {% else %}
+                <p style="color:var(--text-muted);font-size:13px;">Sem membros cadastrados.</p>
+              {% endfor %}
             </div>
           </div>
         </div>
@@ -187,5 +192,10 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+  /* Dados injetados pelo servidor — usados por dashboard.js */
+  window.DASHBOARD_STATUS = {{ status_data_json | safe }};
+  window.DASHBOARD_VOLUMES = {{ volumes_json | safe }};
+</script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}
