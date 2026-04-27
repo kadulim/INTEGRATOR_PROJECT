@@ -69,11 +69,6 @@ def dashboard():
         status_data_json  = json.dumps(status_data),
         volumes_json      = json.dumps(volumes),
     )
-
-@admin_bp.route('/cliente-dashboard')
-def cliente_dashboard():
-    return render_template('admin/cliente-dashboard.html')
-
 @admin_bp.route('/equipes')
 def equipes():
     funcionarios = (

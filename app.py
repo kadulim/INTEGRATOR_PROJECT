@@ -77,10 +77,10 @@ def logout():
     logout_user()
     return redirect(url_for('page_login'))
 
-@app.route('/cliente')
-@login_required
-def cliente():
-    return render_template('cliente/client.html')
+
+@app.route('/cliente-dashboard')
+def cliente_dashboard():
+    return render_template('cliente/cliente-dashboard.html')
 
 @app.route('/funcionario')
 @login_required

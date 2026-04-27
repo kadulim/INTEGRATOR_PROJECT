@@ -36,6 +36,6 @@ def logar():
 
         else:
             logging.warning(f"entrou no cliente ({email})")
-            return redirect('/cliente')
+            return redirect('/cliente-dashboard')
 
     return render_template('auth/login.html')
