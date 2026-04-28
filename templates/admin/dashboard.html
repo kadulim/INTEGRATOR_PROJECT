@@ -16,7 +16,7 @@
     <div class="welcome-banner fade-up">
       <div class="wb-text">
         <h2>Olá, {{ current_user.nome.split(' ')[0] if current_user.is_authenticated else 'Usuário' }}! 👋</h2>
-        <p>Você tem <strong>{{ projetos_ativos | length }}</strong> projeto(s) em andamento e <strong>{{ total_equipe }}</strong> membro(s) na equipe.</p>
+        <p>Você tem <strong>{{ projetos_ativos | length }}</strong> projeto(s) em andamento e <strong>{{ total_equipe }}</strong> funcionário(s) na equipe.</p>
       </div>
       <a href="{{ url_for('admin.projetos') }}" class="btn btn-primary wb-btn">
         Ver Projetos 
@@ -51,7 +51,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div>
-          <div class="stat-label">Membros</div>
+          <div class="stat-label">Funcionários</div>
           <div class="stat-value">{{ total_equipe }}</div>
           <div class="stat-delta">funcionários</div>
         </div>
@@ -157,12 +157,12 @@
           </div>
         </div>
 
-        <!-- Membros da Equipe -->
-        <div class="card fade-up fade-up-4">
+        <!-- Funcionários da Equipe -->
+        <div class="card fade-up fade-up-3">
           <div class="card-body">
-            <div class="flex items-center justify-between mb-4">
-              <h3 style="font-size:15px;font-weight:700;">Membros</h3>
-              <a href="{{ url_for('admin.membros') }}" class="btn btn-ghost btn-sm">Ver Todos</a>
+            <div class="flex justify-between items-center mb-5">
+              <h3 style="font-size:15px;font-weight:700;">Funcionários</h3>
+              <a href="{{ url_for('admin.funcionarios') }}" class="btn btn-ghost btn-sm">Ver Todos</a>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;">
               {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-accent'] %}
@@ -177,7 +177,7 @@
                   <span class="badge badge-green">Ativo</span>
                 </div>
               {% else %}
-                <p style="color:var(--text-muted);font-size:13px;">Sem membros cadastrados.</p>
+                <p style="color:var(--text-muted);font-size:13px;">Sem funcionários cadastrados.</p>
               {% endfor %}
             </div>
           </div>

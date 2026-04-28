@@ -87,8 +87,8 @@ def dashboard():
         status_data_json  = json.dumps(status_data),
         volumes_json      = json.dumps(volumes),
     )
-@admin_bp.route('/membros')
-def membros():
+@admin_bp.route('/funcionarios')
+def funcionarios():
     funcionarios = (
         Funcionario.query
         .join(Usuario, Funcionario.usuario_id == Usuario.id)
@@ -98,7 +98,7 @@ def membros():
     total = Funcionario.query.count()
     equipes = Equipes.query.all()
     return render_template(
-        'admin/membros.html',
+        'admin/funcionarios.html',
         funcionarios = funcionarios,
         total        = total,
         equipes      = equipes
@@ -124,8 +124,8 @@ def projeto_detalhe():
 def configuracoes():
     return render_template('admin/configuracoes.html')
 
-@admin_bp.route('/add-membro', methods=['POST'])
-def add_membro():
+@admin_bp.route('/add-funcionario', methods=['POST'])
+def add_funcionario():
     nome = request.form.get('nome')
     email = request.form.get('email')
     senha = request.form.get('senha')
@@ -138,7 +138,7 @@ def add_membro():
             email=email,
             senha=generate_password_hash(senha),
             tipo='funcionario',
-            nivel=0
+            nivel=2
         )
         database.session.add(usuario)
         database.session.flush()
@@ -162,26 +162,23 @@ def add_membro():
         database.session.add(funcionario)
         database.session.commit()
     
-    return redirect(url_for('admin.membros'))
+    return redirect(url_for('admin.funcionarios'))
 
 @admin_bp.route('/add-projeto', methods=['POST'])
 def add_projeto():
     nome = request.form.get('nome')
     descricao = request.form.get('descricao')
-    status = request.form.get('status')
     prazo = request.form.get('prazo')
     budget = request.form.get('budget', 0)
-    prioridade = request.form.get('prioridade')
     cliente_id = request.form.get('cliente_id')
     equipe_id = request.form.get('equipe_id')
 
     projeto = Projeto(
         nome=nome,
         descricao=descricao,
-        status=status,
+        status="Em Andamento",
         prazo=prazo,
         budget=float(budget) if budget else 0.0,
-        prioridade=prioridade,
         cliente_id=cliente_id if cliente_id else None,
         equipe_id=equipe_id if equipe_id else None
     )
@@ -190,7 +187,47 @@ def add_projeto():
     
     return redirect(url_for('admin.projetos'))
 
-@admin_bp.route('/membro/<int:id>')
-def membro_perfil(id):
+@admin_bp.route('/funcionario/<int:id>')
+def funcionario_perfil(id):
     func = Funcionario.query.get_or_404(id)
-    return render_template('admin/membro-perfil.html', membro=func)
+    return render_template('admin/funcionario-perfil.html', funcionario=func)
+
+@admin_bp.route('/funcionario/excluir/<int:id>', methods = ['GET' , 'POST'])
+def excluir_funcionario(id):
+    membro = Funcionario.query.get_or_404(id)
+    user = Usuario.query.get(membro.usuario_id)
+    try:
+        database.session.delete(membro)
+        database.session.delete(user)
+        database.session.commit()
+    except:
+        flash("Ocorreu um erro ao excluir o funcionário.", "erro")
+        return redirect(url_for('admin.funcionarios'))
+    
+    return redirect(url_for('admin.funcionarios'))
+
+@admin_bp.route('/funcionario/editar/<int:id>', methods=['POST'])
+def editar_funcionario(id):
+    funcionario = Funcionario.query.get_or_404(id)
+    usuario = Usuario.query.get(funcionario.usuario_id)
+    
+    usuario.nome = request.form.get('nome')
+    usuario.email = request.form.get('email')
+    funcionario.cargo = request.form.get('cargo')
+    skills_str = request.form.get('skills', '')
+    funcionario.skills = skills_str
+
+    # Atualizar Skills (M2M)
+    funcionario.lista_skills = [] # Limpa as skills atuais
+    if skills_str:
+        for sk_nome in [s.strip() for s in skills_str.split(',')]:
+            skill = Skill.query.filter_by(nome=sk_nome).first()
+            if not skill:
+                skill = Skill(nome=sk_nome)
+                database.session.add(skill)
+                database.session.flush()
+            if skill not in funcionario.lista_skills:
+                funcionario.lista_skills.append(skill)
+
+    database.session.commit()
+    return redirect(url_for('admin.funcionario_perfil', id=id))

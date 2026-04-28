@@ -82,7 +82,6 @@ def logout():
 @login_required
 def cliente_dashboard():
     # Busca o registro de Cliente associado ao Usuario logado
-
     cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
     projetos = cliente.projetos if cliente else []
     return render_template('cliente/cliente-dashboard.html', projetos=projetos)
@@ -91,6 +90,14 @@ def cliente_dashboard():
 @login_required
 def funcionario():
     return render_template('cliente/client.html')
+
+# PREVENIR CACHE (Impede voltar para página logada após logout)
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 # Registro do Blueprint de Admin
 from routes.admin import admin_bp

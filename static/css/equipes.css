@@ -56,24 +56,6 @@
   color: var(--text-muted);
 }
 
-.filter-select {
-  padding: 10px 16px;
-  border: 1.5px solid var(--border-md);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  font-size: 14px;
-  font-family: var(--font);
-  color: var(--text-primary);
-  outline: none;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: var(--shadow-sm);
-}
-
-.filter-select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px var(--accent-soft);
-}
 
 
 /* Team Stats */
@@ -191,3 +173,60 @@
 .workload-fill.high   { background: var(--yellow); }
 .workload-fill.full   { background: var(--accent); }
 .workload-pct { min-width: 36px; font-size: 12px; font-weight: 700; color: var(--text-secondary); text-align: right; }
+
+/* Member Actions */
+.member-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: var(--transition);
+  z-index: 10;
+}
+
+.member-card:hover .member-actions {
+  opacity: 1;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.action-btn:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border-color: var(--border-md);
+}
+
+.action-btn.edit:hover {
+  color: var(--blue);
+  background: var(--blue-soft);
+  border-color: var(--blue);
+}
+
+.action-btn.delete:hover {
+  color: var(--red);
+  background: var(--red-soft);
+  border-color: var(--red);
+}
+
+.modal-sm {
+  max-width: 400px;
+}
+
+.modal-body {
+  padding: 10px 0 20px 0;
+}
+

@@ -46,8 +46,8 @@ function renderPageCards() {
     },
     {
       href:  'equipes.html',
-      title: 'Equipes',
-      desc:  'Gerenciamento de membros da equipe, habilidades e carga de trabalho.',
+      title: 'Funcionários',
+      desc:  'Gerenciamento de funcionários da equipe, habilidades e carga de trabalho.',
       icon:  iconUsers(),
       color: 'var(--purple-soft)',
       iconColor: 'var(--purple)',

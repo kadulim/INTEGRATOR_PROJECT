@@ -35,19 +35,6 @@
 }
 .search-box input::placeholder { color: var(--text-muted); }
 
-.filter-select {
-  padding: 9px 14px;
-  border: 1.5px solid var(--border-md);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  font-size: 13.5px;
-  font-family: var(--font);
-  color: var(--text-primary);
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.18s;
-}
-.filter-select:focus { border-color: var(--accent); }
 
 /* View Toggle */
 .view-toggle {
