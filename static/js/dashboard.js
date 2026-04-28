@@ -18,14 +18,29 @@ function renderChartBars() {
   const container = document.getElementById('chart-bars');
   if (!container) return;
 
-  container.innerHTML = months.map((m, i) => `
-    <div class="chart-bar-wrap">
-      <div class="chart-bar ${i === new Date().getMonth() ? 'active' : ''}"
-           style="height:${(values[i] / max) * 100}%"
-           title="${values[i]} projeto(s) com prazo em ${m}"></div>
-      <span class="chart-label">${m}</span>
-    </div>
-  `).join('');
+  container.innerHTML = months.map((m, i) => {
+    const val = values[i];
+    const pct = (val / max) * 100;
+    // Se o valor for > 0 mas a pct for muito pequena, damos um mínimo para visibilidade
+    const displayPct = val > 0 ? Math.max(pct, 5) : 0;
+
+    return `
+      <div class="chart-bar-wrap">
+        <div class="chart-bar ${i === new Date().getMonth() ? 'active' : ''}"
+             style="height: 0%" 
+             data-height="${displayPct}%"
+             title="${val} projeto(s) em ${m}"></div>
+        <span class="chart-label">${m}</span>
+      </div>
+    `;
+  }).join('');
+
+  // Animação de subida das barras
+  setTimeout(() => {
+    container.querySelectorAll('.chart-bar').forEach(bar => {
+      bar.style.height = bar.getAttribute('data-height');
+    });
+  }, 50);
 }
 
 // ── Status dos Projetos (Donut) ───────────────────────────────────────
@@ -50,7 +65,7 @@ function renderDonut() {
       stroke-dasharray="${dash} ${circ}"
       stroke-dashoffset="${-offset}"
       transform="rotate(-90 ${cx} ${cy})"
-      style="transition:stroke-dasharray 0.8s ease"/>`;
+      style="transition:stroke-dasharray 0.3s ease"/>`;
     offset += dash;
     return seg;
   });

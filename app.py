@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash
 load_dotenv()
 
 from database import database
-from models import Usuario, Admin, Cliente, Funcionario, Projeto
+from models import Usuario,Cliente
 
 import function.login as logar
 import function.register as registrar
@@ -79,8 +79,13 @@ def logout():
 
 
 @app.route('/cliente-dashboard')
+@login_required
 def cliente_dashboard():
-    return render_template('cliente/cliente-dashboard.html')
+    # Busca o registro de Cliente associado ao Usuario logado
+
+    cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
+    projetos = cliente.projetos if cliente else []
+    return render_template('cliente/cliente-dashboard.html', projetos=projetos)
 
 @app.route('/funcionario')
 @login_required

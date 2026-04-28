@@ -51,9 +51,14 @@
                 <div class="pc-name">{{ p.nome }}</div>
                 <div class="pc-client">{{ p.cliente }}</div>
               </div>
+              <div class="pc-actions" onclick="event.stopPropagation()">
+                <button class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11px;" onclick="openProject({{ p.id }})">VER</button>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <span class="badge {{ badge_status.get(p.status, 'badge-blue') }}">{{ p.status }}</span>
               <span class="badge {{ badge_prioridade.get(p.prioridade, 'badge-blue') }}">{{ p.prioridade }}</span>
             </div>
-            <span class="badge {{ badge_status.get(p.status, 'badge-blue') }}">{{ p.status }}</span>
             <div class="pc-progress-area">
               <div class="pc-pct-row"><span>Orçamento</span><strong>R$ {{ "%.0f" | format(p.budget) }}</strong></div>
               <div class="progress-bar"><div class="progress-fill blue" style="width:60%"></div></div>
@@ -62,9 +67,6 @@
               <div class="pc-deadline">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 {{ p.prazo }}
-              </div>
-              <div class="pc-actions" onclick="event.stopPropagation()">
-                <button class="icon-btn" onclick="openProject({{ p.id }})">VER</button>
               </div>
             </div>
           </div>
@@ -124,6 +126,75 @@
             {% endif %}
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- Modal Novo Projeto -->
+    <div class="modal-backdrop" id="modal-novo-projeto">
+      <div class="modal" style="width:550px;">
+        <div class="modal-header">
+          <h2 class="modal-title">Cadastrar Novo Projeto</h2>
+          <div class="modal-close" onclick="closeModal('modal-novo-projeto')">&times;</div>
+        </div>
+        <form action="{{ url_for('admin.add_projeto') }}" method="POST">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-group" style="grid-column: span 2;">
+              <label class="form-label">Nome do Projeto</label>
+              <input type="text" name="nome" class="form-input" placeholder="Ex: Redesign E-commerce" required>
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+              <label class="form-label">Descrição</label>
+              <textarea name="descricao" class="form-input" rows="3" placeholder="Breve resumo do projeto..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select name="status" class="form-input">
+                <option value="Planejamento">Planejamento</option>
+                <option value="Em andamento" selected>Em andamento</option>
+                <option value="Pausado">Pausado</option>
+                <option value="Concluído">Concluído</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prioridade</label>
+              <select name="prioridade" class="form-input">
+                <option value="Baixa">Baixa</option>
+                <option value="Média" selected>Média</option>
+                <option value="Alta">Alta</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prazo</label>
+              <input type="date" name="prazo" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Budget (R$)</label>
+              <input type="number" step="0.01" name="budget" class="form-input" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cliente</label>
+              <select name="cliente_id" class="form-input">
+                <option value="">Selecione um cliente</option>
+                {% for c in clientes %}
+                <option value="{{ c.id }}">{{ c.usuario_rel.nome }} ({{ c.empresa }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Equipe Responsável</label>
+              <select name="equipe_id" class="form-input">
+                <option value="">Selecione uma equipe</option>
+                {% for eq in equipes %}
+                <option value="{{ eq.id }}">{{ eq.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeModal('modal-novo-projeto')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Criar Projeto</button>
+          </div>
+        </form>
       </div>
     </div>
 {% endblock %}

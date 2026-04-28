@@ -4,6 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}CoByte{% endblock %}</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+
+  <!-- Theme Check -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cobyte-theme');
+      if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-mode');
+        document.body.classList.add('light-mode');
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
   {% block extra_css %}{% endblock %}
 </head>
@@ -29,9 +42,9 @@
         <span>Projetos</span>
       </a>
       
-      <a href="{{ url_for('admin.equipes') }}" class="nav-item {% if active_page == 'equipes' %}active{% endif %}">
+      <a href="{{ url_for('admin.membros') }}" class="nav-item {% if active_page == 'membros' %}active{% endif %}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Equipes</span>
+        <span>Membros</span>
       </a>
       
       <a href="{{ url_for('admin.configuracoes') }}" class="nav-item {% if active_page == 'configuracoes' %}active{% endif %}">

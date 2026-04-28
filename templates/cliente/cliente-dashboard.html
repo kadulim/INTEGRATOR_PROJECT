@@ -41,19 +41,24 @@
     <div>
       <h2 class="client-section-title">Meus Projetos</h2>
       <div class="client-proj-grid">
+        {% for projeto in projetos %}
         <div class="client-proj-card">
           <div class="cpc-header">
             <div class="cpc-accent-bar" style="background:#e94560;"></div>
-            <div class="cpc-title">App Mobile CoByte</div>
-            <div class="cpc-badges"><span class="badge badge-blue">Em andamento</span></div>
+            <div class="cpc-title">{{ projeto.nome }}</div>
+            <div class="cpc-badges"><span class="badge badge-blue">{{ projeto.status }}</span></div>
           </div>
           <div class="cpc-body">
-            <div class="cpc-progress-label"><span>Progresso geral</span><strong>68%</strong></div>
+            <div class="cpc-progress-label"><span>Prioridade</span><strong>{{ projeto.prioridade }}</strong></div>
+            <div class="cpc-progress-label"><span>Prazo</span><strong>{{ projeto.prazo }}</strong></div>
             <div class="progress-bar" style="height:8px;border-radius:6px;">
-              <div class="progress-fill blue" style="width:68%;border-radius:6px;background:#e94560;"></div>
+              <div class="progress-fill blue" style="width:100%;border-radius:6px;background:#e94560;"></div>
             </div>
           </div>
         </div>
+        {% else %}
+          <p style="color:var(--text-muted);">Nenhum projeto vinculado à sua conta no momento.</p>
+        {% endfor %}
       </div>
     </div>
   </main>

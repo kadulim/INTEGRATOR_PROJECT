@@ -1,6 +1,6 @@
 import os
 from database import database
-from models import Usuario, Admin, Cliente, Funcionario, Projeto
+from models import Usuario, Admin, Cliente, Funcionario, Projeto, Equipes, Skill
 from werkzeug.security import generate_password_hash
 
 
@@ -81,8 +81,31 @@ def adicionar(app):
                 f = Funcionario(
                     usuario_id = u.id,
                     cargo      = os.getenv(f'{prefix}CARGO'),
-                    salario    = float(os.getenv(f'{prefix}SALARIO', 0))
+                    skills     = os.getenv(f'{prefix}SKILLS')
                 )
+                
+                # Tratar Equipes
+                equipes_str = os.getenv(f'{prefix}EQUIPES', '')
+                if equipes_str:
+                    for eq_nome in [e.strip() for e in equipes_str.split(',')]:
+                        equipe = Equipes.query.filter_by(nome=eq_nome).first()
+                        if not equipe:
+                            equipe = Equipes(nome=eq_nome)
+                            database.session.add(equipe)
+                            database.session.flush()
+                        f.lista_equipes.append(equipe)
+
+                # Tratar Skills (M2M)
+                skills_str = os.getenv(f'{prefix}SKILLS', '')
+                if skills_str:
+                    for sk_nome in [s.strip() for s in skills_str.split(',')]:
+                        skill = Skill.query.filter_by(nome=sk_nome).first()
+                        if not skill:
+                            skill = Skill(nome=sk_nome)
+                            database.session.add(skill)
+                            database.session.flush()
+                        f.lista_skills.append(skill)
+
                 database.session.add(f)
                 database.session.commit()
                 print(f"✅ Funcionário {i} criado: {os.getenv(f'{prefix}NOME')}")
@@ -101,14 +124,14 @@ def adicionar(app):
 
             if not Projeto.query.filter_by(nome=nome).first():
                 cliente_email = os.getenv(f'{prefix}CLIENTE_EMAIL')
-                func_email    = os.getenv(f'{prefix}FUNC_EMAIL')
+                equipe_nome   = os.getenv(f'{prefix}EQUIPE_NOME')
 
-                _cliente     = (Cliente.query.join(Usuario)
-                                .filter(Usuario.email == cliente_email).first()
-                                if cliente_email else None)
-                _funcionario = (Funcionario.query.join(Usuario)
-                                .filter(Usuario.email == func_email).first()
-                                if func_email else None)
+                _cliente = (Cliente.query.join(Usuario)
+                            .filter(Usuario.email == cliente_email).first()
+                            if cliente_email else None)
+                
+                _equipe = (Equipes.query.filter_by(nome=equipe_nome).first() 
+                           if equipe_nome else None)
 
                 p = Projeto(
                     nome           = nome,
@@ -117,10 +140,8 @@ def adicionar(app):
                     prazo          = os.getenv(f'{prefix}PRAZO'),
                     budget         = float(os.getenv(f'{prefix}BUDGET', 0)),
                     prioridade     = os.getenv(f'{prefix}PRIORIDADE'),
-                    cliente        = Usuario.query.get(_cliente.usuario_id).nome if _cliente else '',
-                    funcionario    = Usuario.query.get(_funcionario.usuario_id).nome if _funcionario else '',
-                    cliente_id     = _cliente.id    if _cliente    else None,
-                    funcionario_id = _funcionario.id if _funcionario else None
+                    cliente_id     = _cliente.id if _cliente else None,
+                    equipe_id      = _equipe.id  if _equipe  else None
                 )
                 database.session.add(p)
                 database.session.commit()

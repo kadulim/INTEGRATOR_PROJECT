@@ -1,0 +1,145 @@
+{% extends 'admin/base.html' %}
+{% set active_page = 'membros' %}
+
+{% block title %}Membros — CoByte{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/equipes.css') }}">
+{% endblock %}
+
+{% block topbar_title %}Membros{% endblock %}
+{% block topbar_actions %}
+  <button class="btn btn-primary btn-sm" onclick="openModal('modal-novo-membro')">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Novo Membro
+  </button>
+{% endblock %}
+
+{% block content %}
+    <!-- Stats -->
+    <div class="team-stats fade-up">
+      <div class="stat-card">
+        <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div>
+          <div class="stat-label">Total de Membros</div>
+          <div class="stat-value">{{ total }}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="stat-label">Membros Ativos</div>
+          <div class="stat-value">{{ total }}</div>
+          <div class="stat-delta">cadastrados</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+        <div>
+          <div class="stat-label">Total de Equipes</div>
+          <div class="stat-value">{{ equipes|length }}</div>
+          <div class="stat-delta">grupos ativos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="proj-toolbar fade-up fade-up-1">
+      <div class="search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar membros…" oninput="onSearch(this.value)">
+      </div>
+      <select class="filter-select" onchange="onFilter(this.value)">
+        <option value="Todos">Todos</option>
+        <option value="Disponível">Disponíveis</option>
+        <option value="Em projeto">Em projeto</option>
+      </select>
+    </div>
+
+    <!-- Members Grid -->
+    <div id="members-root" class="fade-up fade-up-2">
+      <div class="members-grid">
+        {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-accent','avatar-red'] %}
+        {% if funcionarios %}
+          {% for func, usuario in funcionarios %}
+          <div class="member-card fade-up" onclick="location.href='{{ url_for('admin.membro_perfil', id=func.id) }}'" style="cursor:pointer;">
+            <div class="member-avatar {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ usuario.nome[:2].upper() }}</div>
+            <div>
+              <div class="member-name">{{ usuario.nome }}</div>
+              <div class="member-role">{{ func.cargo }}</div>
+            </div>
+            <span class="badge badge-green">Ativo</span>
+            <div class="member-email">{{ usuario.email }}</div>
+            <div class="member-skills">
+              {% for skill in func.lista_skills %}
+                <span class="skill-tag">{{ skill.nome }}</span>
+              {% else %}
+                <span class="skill-tag">{{ func.cargo }}</span>
+              {% endfor %}
+            </div>
+            <div class="member-footer">
+              <div class="member-projects-count" title="Equipes vinculadas">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                Equipes: <strong>
+                  {% for eq in func.lista_equipes %}
+                    {{ eq.nome }}{% if not loop.last %}, {% endif %}
+                  {% else %}
+                    Nenhuma
+                  {% endfor %}
+                </strong>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-muted);font-size:14px;">Nenhum funcionário cadastrado.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Modal Novo Membro -->
+    <div class="modal-backdrop" id="modal-novo-membro">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Novo Membro da Equipe</h2>
+          <div class="modal-close" onclick="closeModal('modal-novo-membro')">&times;</div>
+        </div>
+        <form action="{{ url_for('admin.add_membro') }}" method="POST">
+          <div class="flex-col gap-4">
+            <div class="form-group">
+              <label class="form-label">Nome Completo</label>
+              <input type="text" name="nome" class="form-input" placeholder="Ex: Ana Silva" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">E-mail</label>
+              <input type="email" name="email" class="form-input" placeholder="ana@cobyte.dev" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Senha Inicial</label>
+              <input type="password" name="senha" class="form-input" placeholder="••••••••" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cargo</label>
+              <input type="text" name="cargo" class="form-input" placeholder="Ex: Desenvolvedora Frontend" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Skills (separadas por vírgula)</label>
+              <input type="text" name="skills" class="form-input" placeholder="React, CSS, Node.js">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeModal('modal-novo-membro')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Membro</button>
+          </div>
+        </form>
+      </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+</script>
+<script src="{{ url_for('static', filename='js/equipes.js') }}"></script>
+{% endblock %}

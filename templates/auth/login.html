@@ -23,11 +23,11 @@
       </div>
       <div class="brand-stats">
         <div class="b-stat">
-          <strong>6+</strong>
+          <strong>{{ total_projetos }}+</strong>
           <span>Projetos ativos</span>
         </div>
         <div class="b-stat">
-          <strong>12</strong>
+          <strong>{{ total_clientes }}</strong>
           <span>Clientes satisfeitos</span>
         </div>
         <div class="b-stat">
@@ -38,7 +38,7 @@
       <!-- Floating cards decorativos -->
       <div class="deco-card deco-1">
         <div class="deco-dot green"></div>
-        <span>App Mobile CoByte — 68%</span>
+        <span>{{ projeto_destaque.nome if projeto_destaque else 'Sistema CoByte' }} — Ativo</span>
       </div>
       <div class="deco-card deco-2">
         <div class="deco-dot blue"></div>

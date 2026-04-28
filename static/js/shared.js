@@ -92,3 +92,25 @@ function iconUser()      { return svg('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 
 function iconEye()       { return svg('<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'); }
 function iconLock()      { return svg('<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'); }
 function iconSave()      { return svg('<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>'); }
+// ── Theme Management ───────────────────────────────────────
+function setAppTheme(theme) {
+  if (theme === 'light') {
+    document.body.classList.add('light-mode');
+    localStorage.setItem('cobyte-theme', 'light');
+  } else {
+    document.body.classList.remove('light-mode');
+    localStorage.setItem('cobyte-theme', 'dark');
+  }
+}
+
+function loadAppTheme() {
+  const saved = localStorage.getItem('cobyte-theme');
+  if (saved === 'light') {
+    document.body.classList.add('light-mode');
+  }
+}
+
+// Inicializa no carregamento
+document.addEventListener('DOMContentLoaded', () => {
+  loadAppTheme();
+});

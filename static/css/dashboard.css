@@ -48,7 +48,8 @@
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface);
-  transition: all 0.18s;
+  backdrop-filter: var(--blur);
+  transition: var(--transition);
   cursor: pointer;
 }
 .project-mini:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); transform: translateX(3px); }
@@ -76,9 +77,9 @@
 .chart-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
 .chart-bar {
   width: 100%;
-  border-radius: 5px 5px 0 0;
+  border-radius: 20px 20px 0 0;
   background: var(--accent-soft);
-  transition: height 0.6s cubic-bezier(0.34,1.56,0.64,1), background 0.18s;
+  transition: height 0.6s cubic-bezier(0.34,1.56,0.64,1), background var(--transition);
   min-height: 4px;
   cursor: pointer;
 }
@@ -103,7 +104,8 @@
 
 /* ── Welcome banner ── */
 .welcome-banner {
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-accent) 100%);
+  background: var(--brand-accent);
+  backdrop-filter: var(--blur);
   border-radius: var(--radius-lg);
   padding: 28px 32px;
   display: flex;
@@ -118,9 +120,30 @@
   position: absolute;
   right: -30px; top: -30px;
   width: 180px; height: 180px;
-  background: radial-gradient(circle, rgba(233,69,96,0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
   pointer-events: none;
 }
 .wb-text h2 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: -0.3px; }
-.wb-text p  { font-size: 13.5px; color: rgba(255,255,255,0.55); }
+.wb-text p  { font-size: 13.5px; color: rgba(255,255,255,0.7); }
 .wb-btn { z-index: 1; }
+
+/* ── Light Mode Overrides ── */
+.light-mode .welcome-banner {
+  background: var(--brand-mid);
+  border: 1px solid var(--border-md);
+}
+.light-mode .wb-text h2 { color: var(--brand-accent); }
+.light-mode .wb-text p { color: var(--text-secondary); }
+
+.light-mode .project-mini {
+  background: #ffffff;
+  border-color: var(--border-md);
+}
+.light-mode .project-mini-name { color: #000; }
+.light-mode .project-mini-pct { color: var(--brand-accent); }
+
+.light-mode .activity-text { color: #000; }
+.light-mode .activity-time { color: var(--text-muted); }
+
+.light-mode .chart-label { color: var(--text-muted); }
+.light-mode .donut-val { color: #000; }

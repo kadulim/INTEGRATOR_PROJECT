@@ -20,7 +20,7 @@
   flex: 1;
   min-width: 220px;
   max-width: 320px;
-  transition: border-color 0.18s;
+  transition: var(--transition);
 }
 .search-box:focus-within { border-color: var(--accent); }
 .search-box svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
@@ -126,7 +126,7 @@
   padding: 14px;
   border: 1px solid var(--border);
   cursor: pointer;
-  transition: all 0.18s;
+  transition: var(--transition);
   box-shadow: var(--shadow-sm);
 }
 .kanban-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-2px); }
@@ -151,7 +151,7 @@
   border: 1px solid var(--border);
   padding: 20px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--transition);
   display: flex;
   flex-direction: column;
   gap: 14px;

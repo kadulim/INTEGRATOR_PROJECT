@@ -484,3 +484,46 @@
   border: 1px solid var(--border);
   padding: 18px;
 }
+
+.proj-header { background:var(--surface-2); border-bottom:1.5px solid var(--border); padding:24px 32px; }
+.proj-header-inner { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+.proj-header-name { font-size:22px; font-weight:800; color:var(--text-primary); letter-spacing:-0.5px; }
+.proj-header-meta { display:flex; gap:12px; margin-top:8px; align-items:center; }
+.proj-tab-nav { display:flex; gap:8px; padding:0 32px; background:var(--surface-2); border-bottom:1.5px solid var(--border); overflow-x:auto; }
+.proj-tab { padding:14px 16px; font-size:13.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; background:none; border:none; border-bottom:3px solid transparent; transition:0.2s; white-space:nowrap; display:flex; align-items:center; gap:8px; }
+.proj-tab svg { width:16px; height:16px; }
+.proj-tab:hover { color:var(--text-primary); }
+.proj-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-content { padding:32px; }
+.tab-pane { display:none; }
+.tab-pane.active { display:block; animation: fadeUp 0.3s ease; }
+
+.overview-grid { display:grid; grid-template-columns:2fr 1fr; gap:24px; }
+@media(max-width:992px) { .overview-grid { grid-template-columns:1fr; } }
+.kpi-card { 
+  background:var(--surface-2); 
+  border-radius:var(--radius); 
+  padding:20px; 
+  display:flex; 
+  gap:16px; 
+  align-items:center;
+  transition: var(--transition);
+  border: 1px solid transparent;
+}
+.kpi-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  border-color: var(--brand-accent);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  background: var(--surface);
+}
+.kpi-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+.overview-kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; }
+/* Light Mode Overrides */
+.light-mode .proj-header { background: #ffffff !important; border-bottom: 1px solid var(--border-md) !important; }
+.light-mode .proj-header-name { color: #000 !important; }
+.light-mode .proj-tab-nav { background: #ffffff !important; border-bottom: 1px solid var(--border-md) !important; }
+.light-mode .proj-tab { color: var(--text-muted) !important; }
+.light-mode .proj-tab:hover { background: #f8fafc !important; color: #000 !important; }
+.light-mode .proj-tab.active { color: var(--brand-accent) !important; border-bottom-color: var(--brand-accent) !important; }
+.light-mode .kpi-card { background: #ffffff !important; border: 1px solid var(--border-md) !important; }
+.light-mode .card h3, .light-mode h3 { color: #000 !important; }

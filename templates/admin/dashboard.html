@@ -9,10 +9,6 @@
 
 {% block topbar_title %}Dashboard{% endblock %}
 {% block topbar_actions %}
-  <a href="{{ url_for('admin.projetos') }}" class="btn btn-primary btn-sm">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Novo Projeto
-  </a>
 {% endblock %}
 
 {% block content %}
@@ -55,7 +51,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div>
-          <div class="stat-label">Equipe</div>
+          <div class="stat-label">Membros</div>
           <div class="stat-value">{{ total_equipe }}</div>
           <div class="stat-delta">funcionários</div>
         </div>
@@ -116,11 +112,10 @@
               <span class="badge badge-green">2025</span>
             </div>
             <div class="chart-bars" id="chart-bars">
-                <!-- Gerado no dashboard.js apenas a animação -->
             </div>
             <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
               <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-                <div style="width:10px;height:10px;border-radius:2px;background:var(--accent);"></div> Projetos entregues
+                <div style="width:10px;height:10px;border-radius:2px;background:var(--accent);"></div> Total de projetos
               </div>
             </div>
           </div>
@@ -166,8 +161,8 @@
         <div class="card fade-up fade-up-4">
           <div class="card-body">
             <div class="flex items-center justify-between mb-4">
-              <h3 style="font-size:15px;font-weight:700;">Equipe</h3>
-              <a href="{{ url_for('admin.equipes') }}" class="btn btn-ghost btn-sm">Ver Todos</a>
+              <h3 style="font-size:15px;font-weight:700;">Membros</h3>
+              <a href="{{ url_for('admin.membros') }}" class="btn btn-ghost btn-sm">Ver Todos</a>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;">
               {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-accent'] %}

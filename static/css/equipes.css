@@ -20,7 +20,7 @@
   flex: 1;
   min-width: 260px;
   max-width: 400px;
-  transition: all 0.22s ease;
+  transition: var(--transition);
   box-shadow: var(--shadow-sm);
 }
 
@@ -101,7 +101,7 @@
   align-items: center;
   text-align: center;
   gap: 14px;
-  transition: all 0.2s;
+  transition: var(--transition);
   position: relative;
   overflow: hidden;
 }
@@ -177,14 +177,14 @@
 .workload-bar {
   height: 8px;
   background: var(--surface-2);
-  border-radius: 10px;
+  border-radius: 20px;
   overflow: hidden;
 }
 .workload-fill {
   height: 100%;
-  border-radius: 10px;
+  border-radius: 20px;
   background: var(--accent);
-  transition: width 0.7s cubic-bezier(0.34,1.56,0.64,1);
+  transition: width 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
 .workload-fill.low    { background: var(--green); }
 .workload-fill.mid    { background: var(--blue); }
