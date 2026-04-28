@@ -70,6 +70,7 @@ class Projeto(database.Model):
     status = database.Column(database.String(20))
     prazo = database.Column(database.String(20))
     budget = database.Column(database.Float)
+
     
     # Chaves Estrangeiras Corretas
     cliente_id = database.Column(database.Integer, database.ForeignKey('cliente.id'))

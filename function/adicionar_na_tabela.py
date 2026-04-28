@@ -10,6 +10,19 @@ def adicionar(app):
     with app.app_context():
         database.create_all()
 
+        # --- Verificação de colunas para o Postgres (Render) ---
+        # Isso garante que novas colunas sejam adicionadas se a tabela já existir
+        try:
+            from sqlalchemy import text
+            # Tenta adicionar colunas que podem estar faltando se a tabela foi criada anteriormente
+            database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS equipe_id INTEGER REFERENCES equipes(id)"))
+            database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS prioridade VARCHAR(20)"))
+            database.session.commit()
+        except Exception as e:
+            database.session.rollback()
+            print(f"ℹ️  Nota: Tentativa de atualizar colunas do projeto (pode ser ignorado se não for Postgres): {e}")
+
+
         # ─── Seed: Admin ────────────────────────────────────────────────
         admin_email = os.getenv('ADMIN_EMAIL')
         if admin_email and not Usuario.query.filter_by(email=admin_email).first():
@@ -42,7 +55,7 @@ def adicionar(app):
                     email = email,
                     senha = generate_password_hash(os.getenv(f'{prefix}SENHA')),
                     tipo  = 'cliente',
-                    nivel = 0
+                    nivel = 3
                 )
                 database.session.add(u)
                 database.session.flush()
@@ -73,7 +86,7 @@ def adicionar(app):
                     email = email,
                     senha = generate_password_hash(os.getenv(f'{prefix}SENHA')),
                     tipo  = 'funcionario',
-                    nivel = 0
+                    nivel = 2
                 )
                 database.session.add(u)
                 database.session.flush()

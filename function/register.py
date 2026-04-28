@@ -24,15 +24,18 @@ def register():
                 email=email,
                 senha=senha_hash,
                 tipo="cliente",
-                empresa=empresa
+                nivel=3
             )
+
 
             database.session.add(usuario)
             database.session.flush()  
 
             cliente = Cliente(
-                usuario_id=usuario.id
+                usuario_id=usuario.id,
+                empresa=empresa
             )
+
 
             database.session.add(cliente)
 

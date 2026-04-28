@@ -1,98 +1,87 @@
-# 🚀 Configuração do Banco de Dados - CoByte
+# 🚀 INTEGRATOR PROJECT - CoByte
 
-Este guia explica como configurar e inicializar o banco de dados do projeto em um novo ambiente (outro computador).
-
-## 📋 Pré-requisitos
-
-Antes de começar, certifique-se de ter instalado:
-
-1.  **Python 3.x**
-2.  **MySQL Server** (ou outro banco de dados compatível com SQLAlchemy)
-3.  **Git** (para clonar o repositório)
+Este repositório contém o sistema de gerenciamento interno da CoByte, desenvolvido com **Flask**, **SQLAlchemy** e um design focado em experiência premium.
 
 ---
 
-## 🛠️ Passo a Passo
+## 📋 Pré-requisitos
 
-### 1. Clonar o Repositório
-Abra o terminal no novo computador e clone o projeto:
+- **Python 3.x**
+- **MySQL** (Local) ou **PostgreSQL** (Produção/Render)
+- **Git**
+
+---
+
+## 🛠️ Instalação e Configuração
+
+### 1. Clonar e Acessar
 ```bash
 git clone <url-do-repositorio>
 cd INTEGRATOR_PROJECT
 ```
 
-### 2. Criar um Ambiente Virtual (Opcional, mas Recomendado)
+### 2. Ambiente Virtual
 ```bash
-python -m venv venv
-# No Windows:
-venv\Scripts\activate
-# No Linux/Mac:
-source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# .venv\Scripts\activate   # Windows
 ```
 
-### 3. Instalar Dependências
-Instale as bibliotecas necessárias listadas no `requirements.txt`:
+### 3. Dependências
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configurar o MySQL
-Abra o seu cliente MySQL (MySQL Workbench, terminal, etc.) e crie o banco de dados:
-```sql
-CREATE DATABASE database_cobyte;
-```
+### 4. Variáveis de Ambiente (`.env`)
+Crie um arquivo `.env` na raiz do projeto (ele já está configurado no `.gitignore`). Exemplo:
 
-### 5. Configurar o Arquivo `.env`
-O projeto utiliza um arquivo `.env` para gerenciar as configurações. 
-1. Crie um arquivo chamado `.env` na raiz do projeto.
-2. Adicione as configurações de conexão e os dados iniciais (Seed). 
-
-**Exemplo de conteúdo para o `.env`:**
 ```env
-# Configurações do Banco de Dados
-# Formato: mysql+pymysql://usuario:senha@localhost/nome_do_banco
-DATABASE_URL=mysql+pymysql://root:sua_senha@localhost/database_cobyte
-SECRET_KEY=sua_chave_secreta_aqui
+# Banco de Dados
+# MySQL: mysql+pymysql://root:senha@localhost/database_cobyte
+# Postgres (Render): postgresql://usuario:senha@host/banco
+DATABASE_URL=mysql+pymysql://root:@localhost/database_cobyte
+SECRET_KEY=sua_chave_secreta
 
-# Dados do Administrador Inicial
+# Admin Inicial
 ADMIN_NOME=Admin
-ADMIN_EMAIL=admin@cobyte.com
+ADMIN_EMAIL=admin@gmail.com
 ADMIN_SENHA=admin123
-
-# Exemplo de Cliente para Seed
-CLIENTE_1_NOME=Empresa X
-CLIENTE_1_EMAIL=contato@empresax.com
-CLIENTE_1_SENHA=cliente123
-CLIENTE_1_EMPRESA=Empresa X Tech
-
-# Exemplo de Funcionário para Seed
-FUNC_1_NOME=João Silva
-FUNC_1_EMAIL=joao@cobyte.com
-FUNC_1_SENHA=func123
-FUNC_1_CARGO=Desenvolvedor Fullstack
-FUNC_1_SKILLS=Python, Flask, MySQL
-FUNC_1_EQUIPES=Desenvolvimento, Inovação
 ```
 
-> [!IMPORTANT]
-> Certifique-se de que o usuário e a senha no `DATABASE_URL` correspondem às suas credenciais do MySQL local.
+---
 
-### 6. Inicializar o Banco de Dados
-O projeto está configurado para **criar as tabelas automaticamente** e inserir os dados iniciais (Seed) na primeira vez que o servidor for executado.
+## 🔐 Níveis de Acesso
 
-Basta rodar o comando:
+O sistema utiliza uma hierarquia de níveis para controle de permissões:
+
+| Nível | Tipo | Descrição |
+| :--- | :--- | :--- |
+| **1** | **Admin** | Acesso total ao dashboard administrativo e gerenciamento. |
+| **2** | **Funcionário** | Acesso às ferramentas de trabalho e equipe. |
+| **3** | **Cliente** | Acesso ao painel de acompanhamento de projetos. |
+
+---
+
+## 🚀 Execução
+
+Para iniciar o servidor e criar o banco de dados automaticamente (Seed):
+
 ```bash
 python app.py
 ```
 
-Ao iniciar, você verá mensagens no terminal confirmando a criação do Admin, Clientes e Funcionários.
+O sistema detectará se está rodando localmente (MySQL) ou em produção (PostgreSQL no Render) e aplicará as migrações e o seed de dados definidos no seu `.env`.
 
 ---
 
-## 🔍 Verificação
-Após rodar o `app.py`, você pode acessar seu banco de dados MySQL e verificar se as tabelas (`usuario`, `funcionario`, `projeto`, etc.) foram criadas corretamente e se os dados do `.env` foram inseridos.
+## 🌐 Deploy (Render)
+
+Este projeto está pronto para deploy no **Render**. 
+- O banco de dados recomendado é o **PostgreSQL**.
+- O arquivo `requirements.txt` já inclui o `gunicorn` e o `psycopg2-binary`.
+- O script de seed (`adicionar_na_tabela.py`) possui lógica para atualizar colunas automaticamente no Postgres.
 
 ---
 
-## 🚀 Próximos Passos
-Agora o sistema está pronto para uso! Acesse `http://127.0.0.1:5000` no seu navegador.
+## 📄 Licença
+Desenvolvido para o Projeto Integrador CoByte.
