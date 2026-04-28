@@ -10,17 +10,29 @@ def adicionar(app):
     with app.app_context():
         database.create_all()
 
-        # --- Verificação de colunas para o Postgres (Render) ---
-        # Isso garante que novas colunas sejam adicionadas se a tabela já existir
+        # --- Verificação de colunas (Postgres e MySQL) ---
         try:
             from sqlalchemy import text
-            # Tenta adicionar colunas que podem estar faltando se a tabela foi criada anteriormente
-            database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS equipe_id INTEGER REFERENCES equipes(id)"))
-            database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS prioridade VARCHAR(20)"))
-            database.session.commit()
+            # Tentativa para Postgres (Render)
+            try:
+                database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS equipe_id INTEGER REFERENCES equipes(id)"))
+                database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS prioridade VARCHAR(20)"))
+                database.session.commit()
+            except:
+                database.session.rollback()
+                # Tentativa para MySQL (Local) - sem o IF NOT EXISTS
+                try:
+                    database.session.execute(text("ALTER TABLE projeto ADD COLUMN equipe_id INTEGER REFERENCES equipes(id)"))
+                except:
+                    database.session.rollback()
+                try:
+                    database.session.execute(text("ALTER TABLE projeto ADD COLUMN prioridade VARCHAR(20)"))
+                except:
+                    database.session.rollback()
+                database.session.commit()
         except Exception as e:
-            database.session.rollback()
-            print(f"ℹ️  Nota: Tentativa de atualizar colunas do projeto (pode ser ignorado se não for Postgres): {e}")
+            print(f"ℹ️  Nota: Colunas já existem ou erro ao atualizar: {e}")
+
 
 
         # ─── Seed: Admin ────────────────────────────────────────────────
