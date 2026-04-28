@@ -17,21 +17,27 @@ def adicionar(app):
             try:
                 database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS equipe_id INTEGER REFERENCES equipes(id)"))
                 database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS prioridade VARCHAR(20)"))
+                database.session.execute(text("ALTER TABLE funcionario ADD COLUMN IF NOT EXISTS skills VARCHAR(255)"))
+                database.session.execute(text("ALTER TABLE usuario ADD COLUMN IF NOT EXISTS nivel INTEGER"))
                 database.session.commit()
             except:
                 database.session.rollback()
                 # Tentativa para MySQL (Local) - sem o IF NOT EXISTS
-                try:
-                    database.session.execute(text("ALTER TABLE projeto ADD COLUMN equipe_id INTEGER REFERENCES equipes(id)"))
-                except:
-                    database.session.rollback()
-                try:
-                    database.session.execute(text("ALTER TABLE projeto ADD COLUMN prioridade VARCHAR(20)"))
-                except:
-                    database.session.rollback()
+                # Projeto
+                try: database.session.execute(text("ALTER TABLE projeto ADD COLUMN equipe_id INTEGER REFERENCES equipes(id)"))
+                except: database.session.rollback()
+                try: database.session.execute(text("ALTER TABLE projeto ADD COLUMN prioridade VARCHAR(20)"))
+                except: database.session.rollback()
+                # Funcionario
+                try: database.session.execute(text("ALTER TABLE funcionario ADD COLUMN skills VARCHAR(255)"))
+                except: database.session.rollback()
+                # Usuario
+                try: database.session.execute(text("ALTER TABLE usuario ADD COLUMN nivel INTEGER"))
+                except: database.session.rollback()
                 database.session.commit()
         except Exception as e:
             print(f"ℹ️  Nota: Colunas já existem ou erro ao atualizar: {e}")
+
 
 
 
