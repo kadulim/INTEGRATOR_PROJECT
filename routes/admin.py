@@ -59,10 +59,12 @@ def dashboard():
     # ── Volume por Mês (barras) ──────────────────────────────────
     # Extrai o mês do campo prazo ('YYYY-MM-DD'). 
     # Usamos substring para garantir compatibilidade se o campo for string.
+    mes_expr = database.func.substring(Projeto.prazo, 6, 2)
     monthly_rows = database.session.query(
-        database.func.substring(Projeto.prazo, 6, 2).label('mes'),
+        mes_expr.label('mes'),
         database.func.count(Projeto.id).label('total')
-    ).filter(Projeto.prazo.like('____-__-__')).group_by('mes').all()
+    ).filter(Projeto.prazo.like('____-__-__')).group_by(mes_expr).all()
+
 
     monthly_map = {}
     for r in monthly_rows:
