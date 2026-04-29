@@ -41,13 +41,6 @@ Crie um arquivo `.env` na raiz do projeto (ele já está configurado no `.gitign
 # Postgres (Render): postgresql://usuario:senha@host/banco
 DATABASE_URL=mysql+pymysql://root:@localhost/database_cobyte
 SECRET_KEY=sua_chave_secreta
-
-# Admin Inicial
-ADMIN_NOME=Admin
-ADMIN_EMAIL=admin@gmail.com
-ADMIN_SENHA=admin123
-```
-
 ---
 
 ## 🔐 Níveis de Acesso
