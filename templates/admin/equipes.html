@@ -1,0 +1,209 @@
+{% extends 'admin/base.html' %}
+{% set active_page = 'equipes' %}
+
+{% block title %}Equipes — CoByte{% endblock %}
+
+{% block topbar_title %}Equipes{% endblock %}
+{% block topbar_actions %}
+<button class="btn btn-primary btn-sm" onclick="openModal('modal-nova-equipe')">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+  Nova Equipe
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Toolbar -->
+<div class="proj-toolbar fade-up">
+  <div class="search-box">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+    <input type="text" placeholder="Buscar equipes…" id="search-input" oninput="onSearch(this.value)">
+  </div>
+</div>
+
+<!-- Teams Grid -->
+<div class="members-grid fade-up fade-up-1">
+  {% if equipes %}
+    {% for equipe in equipes %}
+    <div class="member-card team-card">
+      <div class="member-actions">
+        <button class="action-btn edit" title="Editar" 
+          data-id="{{ equipe.id }}"
+          data-nome="{{ equipe.nome }}"
+          data-membros="{% for m in equipe.membros_da_equipe %}{{ m.id }}{% if not loop.last %},{% endif %}{% endfor %}"
+          onclick="event.stopPropagation(); handleEditEquipeClick(this)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="action-btn delete" title="Excluir" 
+          data-id="{{ equipe.id }}"
+          data-nome="{{ equipe.nome }}"
+          onclick="event.stopPropagation(); handleDeleteEquipeClick(this)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </button>
+      </div>
+      <div class="member-avatar" style="background: var(--brand); font-size: 28px;">
+        {{ equipe.nome[0] | upper }}
+      </div>
+      <div class="member-name">{{ equipe.nome }}</div>
+      <div class="member-role" style="margin-top: 4px;">{{ equipe.membros_da_equipe|length }} Membros • {{ equipe.projetos|length }} Projetos</div>
+      
+      <div class="member-skills" style="margin-top: 12px;">
+        {% for membro in equipe.membros_da_equipe[:3] %}
+        <span class="skill-tag" style="background: var(--surface); border: 1px solid var(--border-md);" title="{{ membro.usuario_rel.nome }}">{{ membro.usuario_rel.nome.split()[0] }}</span>
+        {% endfor %}
+        {% if equipe.membros_da_equipe|length > 3 %}
+        <span class="skill-tag" style="background: var(--surface); border: 1px solid var(--border-md);">+{{ equipe.membros_da_equipe|length - 3 }}</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p style="color:var(--text-muted);font-size:14px;grid-column:1/-1;text-align:center;">Nenhuma equipe cadastrada.</p>
+  {% endif %}
+</div>
+
+<!-- Modal Nova Equipe -->
+<div class="modal-backdrop" id="modal-nova-equipe">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2 class="modal-title">Nova Equipe</h2>
+      <div class="modal-close" onclick="closeModal('modal-nova-equipe')">&times;</div>
+    </div>
+    <form action="{{ url_for('admin.add_equipe') }}" method="POST">
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Nome da Equipe</label>
+          <input type="text" name="nome" class="form-input" placeholder="Ex: Frontend Ninjas" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Funcionários</label>
+          {%for membro in funcionarios %} 
+            <label>
+              <input type="checkbox" name="check_funcionarios" value="{{ membro.id }}">{{ membro.usuario_rel.nome }}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer" style="margin-top: 20px;">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-nova-equipe')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Criar Equipe</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Editar Equipe -->
+<div class="modal-backdrop" id="modal-editar-equipe">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2 class="modal-title">Editar Equipe</h2>
+      <div class="modal-close" onclick="closeModal('modal-editar-equipe')">&times;</div>
+    </div>
+    <form id="form-editar-equipe" method="POST">
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Nome da Equipe</label>
+          <input type="text" name="nome" id="edit-equipe-nome" class="form-input" required>
+        </div>
+        <div class="form-group" style="margin-top: 15px;">
+          <label class="form-label">Funcionários</label>
+          {%for membro in funcionarios %} 
+            <label style="display: block; margin-bottom: 5px;">
+              <input type="checkbox" name="check_funcionarios" class="edit-equipe-check" value="{{ membro.id }}"> {{ membro.usuario_rel.nome }}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer" style="margin-top: 20px;">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-editar-equipe')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Atualizar Equipe</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Deletar Equipe -->
+<div class="modal-backdrop" id="modal-deletar-equipe">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2 class="modal-title">Confirmar Exclusão</h2>
+      <div class="modal-close" onclick="closeModal('modal-deletar-equipe')">&times;</div>
+    </div>
+    <div class="modal-body">
+      <p style="color: var(--text-secondary); line-height: 1.6;">
+        Tem certeza que deseja excluir a equipe <strong id="delete-equipe-nome" style="color: var(--text-primary);"></strong>? 
+        Esta ação não pode ser desfeita.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeModal('modal-deletar-equipe')">Cancelar</button>
+      <form id="form-deletar-equipe" method="POST" style="margin:0;">
+        <button type="submit" class="btn btn-danger">Excluir Permanentemente</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/equipes.css') }}">
+<style>
+  .team-card {
+    min-height: 240px;
+    justify-content: space-between;
+  }
+  .w-100 {
+    width: 100%;
+  }
+  .team-card .member-avatar {
+    width: 72px;
+    height: 72px;
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  
+  function onSearch(val) {
+    val = val.toLowerCase();
+    document.querySelectorAll('.team-card').forEach(card => {
+      let text = card.textContent.toLowerCase();
+      card.style.display = text.includes(val) ? 'flex' : 'none';
+    });
+  }
+
+  function handleEditEquipeClick(btn) {
+    const id = btn.getAttribute('data-id');
+    const nome = btn.getAttribute('data-nome');
+    const membros_str = btn.getAttribute('data-membros');
+    const membros_ids = membros_str ? membros_str.split(',') : [];
+
+    document.getElementById('form-editar-equipe').action = `/admin/equipes/editar/${id}`;
+    document.getElementById('edit-equipe-nome').value = nome;
+    
+    document.querySelectorAll('.edit-equipe-check').forEach(cb => {
+      cb.checked = membros_ids.includes(cb.value);
+    });
+
+    openModal('modal-editar-equipe');
+  }
+
+  function handleDeleteEquipeClick(btn) {
+    const id = btn.getAttribute('data-id');
+    const nome = btn.getAttribute('data-nome');
+
+    document.getElementById('delete-equipe-nome').innerText = nome;
+    document.getElementById('form-deletar-equipe').action = `/admin/equipes/excluir/${id}`;
+    openModal('modal-deletar-equipe');
+  }
+</script>
+{% endblock %}

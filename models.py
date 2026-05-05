@@ -49,7 +49,6 @@ class Funcionario(database.Model):
     id = database.Column(database.Integer, primary_key=True)
     usuario_id = database.Column(database.Integer, database.ForeignKey('usuario.id'))
     cargo = database.Column(database.String(50))
-    skills = database.Column(database.String(255))
     usuario_rel = database.relationship('Usuario', backref='funcionario_perfil', uselist=False)
     
     # Relacionamentos Muitos-para-Muitos

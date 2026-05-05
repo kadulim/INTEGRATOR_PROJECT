@@ -12,7 +12,6 @@ from database import database
 from models import Usuario,Cliente
 
 import function.login as logar
-import function.register as registrar
 import function.adicionar_na_tabela as adicionar_na_tabela
 
 app = Flask(__name__)
@@ -66,11 +65,6 @@ def user_loader(id):
 @app.route('/', methods=['GET', 'POST'])
 def page_login():
     return logar.logar()
-
-@app.route('/register', methods=['GET', 'POST'])
-def page_register():
-    return registrar.register()
-
 @app.route('/logout')
 @login_required
 def logout():

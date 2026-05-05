@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Funcionário — CoByte</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+  <style>
+    .func-body { display: flex; min-height: 100vh; background: var(--bg); }
+    .func-sidebar {
+      width: var(--sidebar-w); height: 100vh; position: fixed; top: 0; left: 0;
+      background: var(--brand); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .func-sidebar .sidebar-logo { padding: 28px 24px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .func-sidebar .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+    .func-sidebar .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 14px; border-radius: var(--radius-sm); color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 500; transition: var(--transition); cursor: pointer; text-decoration: none; }
+    .func-sidebar .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .func-sidebar .nav-item.active { background: var(--accent-soft); color: #fff; }
+    .func-sidebar .nav-item svg { width: 18px; height: 18px; }
+    .func-main { margin-left: var(--sidebar-w); flex: 1; padding: 32px; }
+    .func-topbar {
+      height: var(--topbar-h); display: flex; align-items: center; padding: 0 32px;
+      background: rgba(10,10,12,0.8); backdrop-filter: var(--blur);
+      border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50;
+    }
+    .func-topbar h1 { font-size: 19px; font-weight: 700; color: var(--text-primary); flex: 1; }
+    .func-topbar-right { display: flex; align-items: center; gap: 10px; }
+    .func-greeting { margin-bottom: 28px; }
+    .func-greeting h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .func-greeting p { color: var(--text-muted); font-size: 14px; }
+    .func-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .func-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; transition: var(--transition);
+    }
+    .func-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .func-card-label { font-size: 12.5px; font-weight: 500; color: var(--text-muted); margin-bottom: 4px; }
+    .func-card-value { font-size: 28px; font-weight: 700; color: var(--text-primary); }
+    .func-section-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+    .func-project-list { display: flex; flex-direction: column; gap: 12px; }
+    .func-project-item {
+      display: flex; align-items: center; gap: 16px; padding: 16px 20px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .func-project-item:hover { border-color: var(--border-md); background: var(--surface-2); }
+    .func-project-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .func-project-info { flex: 1; min-width: 0; }
+    .func-project-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .func-project-meta { font-size: 12px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<div class="func-body">
+  <aside class="func-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">C</div>
+      <span class="sidebar-logo-text">Co<span>Byte</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/funcionario" class="nav-item active">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Meu Painel</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span>Meus Projetos</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <span>Minha Equipe</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div style="margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh;">
+    <header class="func-topbar">
+      <h1>Painel do Funcionário</h1>
+      <div class="func-topbar-right">
+        <div style="text-align: right;">
+          <div style="font-size: 13px; font-weight: 600;">{{ current_user.nome }}</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Funcionário</div>
+        </div>
+        <div class="avatar sm avatar-green">{{ current_user.nome[:2].upper() }}</div>
+        <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Sair</a>
+      </div>
+    </header>
+
+    <main class="func-main fade-up">
+      <div class="func-greeting">
+        <h2>Olá, {{ current_user.nome.split(' ')[0] }}! 👋</h2>
+        <p>Veja seus projetos atribuídos e acompanhe o progresso das suas tarefas.</p>
+      </div>
+
+      <div class="func-stats">
+        <div class="func-card">
+          <div class="func-card-label">Projetos Ativos</div>
+          <div class="func-card-value">0</div>
+        </div>
+        <div class="func-card">
+          <div class="func-card-label">Tarefas Pendentes</div>
+          <div class="func-card-value">0</div>
+        </div>
+        <div class="func-card">
+          <div class="func-card-label">Tarefas Concluídas</div>
+          <div class="func-card-value">0</div>
+        </div>
+      </div>
+
+      <h3 class="func-section-title">Meus Projetos</h3>
+      <div class="func-project-list">
+        <div class="func-project-item">
+          <div class="func-project-icon" style="background: var(--blue-soft); color: var(--blue);">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="func-project-info">
+            <div class="func-project-name">Nenhum projeto atribuído</div>
+            <div class="func-project-meta">Aguarde a atribuição pelo administrador.</div>
+          </div>
+          <span class="badge badge-gray">Aguardando</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/shared.js') }}"></script>
+</body>
+</html>

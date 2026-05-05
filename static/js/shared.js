@@ -7,7 +7,6 @@ function statusBadge(status) {
   const map = {
     'Em andamento': 'badge-blue',
     'Concluído':    'badge-green',
-    'Planejamento': 'badge-purple',
     'Pausado':      'badge-yellow',
   };
   return `<span class="badge ${map[status] || 'badge-gray'}">${status}</span>`;

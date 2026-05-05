@@ -111,8 +111,7 @@ def adicionar(app):
 
                 f = Funcionario(
                     usuario_id = u.id,
-                    cargo      = os.getenv(f'{prefix}CARGO'),
-                    skills     = os.getenv(f'{prefix}SKILLS')
+                    cargo      = os.getenv(f'{prefix}CARGO')
                 )
                 
                 # Tratar Equipes

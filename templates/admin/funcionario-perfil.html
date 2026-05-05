@@ -1,276 +1,67 @@
 {% extends 'admin/base.html' %}
 {% set active_page = 'funcionarios' %}
 
-{% block title %}Perfil: {{ funcionario.usuario_rel.nome }} — CoByte{% endblock %}
-
-{% block extra_css %}
-<style>
-  .profile-header {
-    background: var(--brand); /* Navy dark from tokens */
-    border-radius: var(--radius-lg);
-    padding: 48px;
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    margin-bottom: 32px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid var(--border);
-  }
-  .profile-header::after {
-    content: '';
-    position: absolute;
-    right: -40px; top: -40px;
-    width: 240px; height: 240px;
-    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-  }
-  .profile-avatar {
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.1);
-    border: 3px solid rgba(255,255,255,0.2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 42px; font-weight: 700; color: #fff;
-    z-index: 1;
-  }
-  .profile-info h1 { font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-  .profile-info p { font-size: 16px; color: rgba(255,255,255,0.7); }
-
-  .profile-grid {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 24px;
-  }
-  
-  .info-group { margin-bottom: 24px; }
-  .info-label { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 8px; }
-  .info-value { font-size: 15px; color: var(--text-primary); font-weight: 500; }
-
-  .skill-pill {
-    display: inline-block;
-    padding: 6px 14px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 30px;
-    font-size: 13px;
-    margin: 0 6px 8px 0;
-    transition: var(--transition);
-    color: var(--text-secondary);
-  }
-  .skill-pill:hover { border-color: var(--brand-accent); background: var(--accent-soft); color: var(--brand-accent); }
-
-  .team-mini-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 12px;
-    transition: var(--transition);
-  }
-  .team-mini-card:hover { transform: translateX(4px); border-color: var(--brand-accent); }
-  
-  .light-mode .profile-header { background: #0f172a; border: none; }
-  .light-mode .skill-pill { background: #fff; border-color: #d1d5db; }
-  .light-mode .info-value { color: #000; }
-  .light-mode h3 { color: #000; }
-</style>
-{% endblock %}
+{% block title %}{{ funcionario.usuario_rel.nome }} — CoByte{% endblock %}
 
 {% block topbar_title %}Perfil do Funcionário{% endblock %}
 
-{% block content %}
-  <div class="profile-header fade-up">
-    <div class="profile-avatar">
-      {{ funcionario.usuario_rel.nome[:2].upper() }}
-    </div>
-    <div class="profile-info">
-      <h1>{{ funcionario.usuario_rel.nome }}</h1>
-      <p>{{ funcionario.cargo }}</p>
-      <div style="display:flex; gap:12px; margin-top:16px;">
-        <span class="badge badge-green">Ativo</span>
-        <span class="badge badge-blue">{{ funcionario.usuario_rel.email }}</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="profile-grid">
-    <div style="display:flex; flex-direction:column; gap:24px;">
-      <!-- Biografia / Sobre -->
-      <div class="card fade-up fade-up-1">
-        <div class="card-body">
-          <h3 class="mb-4">Sobre o Profissional</h3>
-          <div class="info-group">
-            <div class="info-label">Cargo Atual</div>
-            <div class="info-value">{{ funcionario.cargo }}</div>
-          </div>
-          <div class="info-group">
-            <div class="info-label">E-mail Corporativo</div>
-            <div class="info-value">{{ funcionario.usuario_rel.email }}</div>
-          </div>
-          <div class="info-group">
-            <div class="info-label">Competências e Skills</div>
-            <div style="margin-top:8px;">
-              {% for skill in funcionario.lista_skills %}
-                <span class="skill-pill">{{ skill.nome }}</span>
-              {% else %}
-                <span class="text-muted">Nenhuma skill cadastrada.</span>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Projetos Vinculados -->
-      <div class="card fade-up fade-up-2">
-        <div class="card-body">
-          <h3 class="mb-4">Projetos Atuais</h3>
-          {% set found_projects = [] %}
-          {% for eq in funcionario.lista_equipes %}
-            {% for proj in eq.projetos %}
-              {% if proj not in found_projects %}
-                {% set _ = found_projects.append(proj) %}
-                <div class="team-mini-card">
-                  <div class="flex justify-between items-center">
-                    <div>
-                      <div style="font-weight:700; font-size:15px; margin-bottom:4px;">{{ proj.nome }}</div>
-                      <div style="font-size:12px; color:var(--text-muted);">Status: {{ proj.status }}</div>
-                    </div>
-                    <a href="{{ url_for('admin.projetos') }}" class="btn btn-outline btn-sm">Ver Detalhes</a>
-                  </div>
-                </div>
-              {% endif %}
-            {% endfor %}
-          {% endfor %}
-          {% if not found_projects %}
-            <p class="text-muted">Este funcionário não está vinculado a nenhum projeto ativo no momento.</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex; flex-direction:column; gap:24px;">
-      <!-- Equipes -->
-      <div class="card fade-up fade-up-3">
-        <div class="card-body">
-          <h3 class="mb-4">Equipes</h3>
-          {% for eq in funcionario.lista_equipes %}
-            <div class="team-mini-card" style="padding:12px 16px;">
-              <div style="font-weight:600; font-size:14px; color:var(--brand-accent);">{{ eq.nome }}</div>
-            </div>
-          {% else %}
-            <p class="text-muted">Não vinculado a equipes.</p>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- Ações Rápidas -->
-      <div class="card fade-up fade-up-4">
-        <div class="card-body">
-          <h3 class="mb-4">Ações de Gestão</h3>
-          <div class="flex-col gap-6">
-            <button class="btn btn-outline w-full" style="justify-content:center;"
-              data-id="{{ funcionario.id }}"
-              data-nome="{{ funcionario.usuario_rel.nome }}"
-              data-email="{{ funcionario.usuario_rel.email }}"
-              data-cargo="{{ funcionario.cargo }}"
-              data-skills="{{ funcionario.skills }}"
-              onclick="handleEditClick(this)">
-              Editar Perfil
-            </button>
-            <button class="btn btn-outline w-full" style="justify-content:center; color:var(--accent);"
-              data-id="{{ funcionario.id }}"
-              data-nome="{{ funcionario.usuario_rel.nome }}"
-              onclick="handleDeleteClick(this)">
-              Excluir Permanentemente
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-    <!-- Modal Editar Funcionário -->
-      <div class="modal-backdrop" id="modal-editar-funcionario">
-      <div class="modal">
-        <div class="modal-header">
-          <h2 class="modal-title">Editar Funcionário</h2>
-          <div class="modal-close" onclick="closeModal('modal-editar-funcionario')">&times;</div>
-        </div>
-        <form id="form-editar-funcionario" method="POST">
-          <div class="flex-col gap-4">
-            <div class="form-group">
-              <label class="form-label">Nome Completo</label>
-              <input type="text" name="nome" id="edit-nome" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">E-mail</label>
-              <input type="email" name="email" id="edit-email" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cargo</label>
-              <input type="text" name="cargo" id="edit-cargo" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Skills (separadas por vírgula)</label>
-              <input type="text" name="skills" id="edit-skills" class="form-input">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="closeModal('modal-editar-funcionario')">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Atualizar Funcionário</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal Deletar Funcionário -->
-    <div class="modal-backdrop" id="modal-deletar-funcionario">
-      <div class="modal modal-sm">
-        <div class="modal-header">
-          <h2 class="modal-title">Confirmar Exclusão</h2>
-          <div class="modal-close" onclick="closeModal('modal-deletar-funcionario')">&times;</div>
-        </div>
-        <div class="modal-body">
-          <p style="color: var(--text-secondary); line-height: 1.6;">
-            Tem certeza que deseja excluir o funcionário <strong id="delete-funcionario-nome" style="color: var(--text-primary);"></strong>? 
-            Esta ação não pode ser desfeita e removerá o acesso deste usuário ao sistema.
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline" onclick="closeModal('modal-deletar-funcionario')">Cancelar</button>
-          <a id="btn-confirmar-delete" class="btn btn-danger">Excluir Permanentemente</a>
-        </div>
-      </div>
-    </div>
+{% block topbar_actions %}
+<a href="{{ url_for('admin.funcionarios') }}" class="btn btn-outline btn-sm">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right:4px;"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+  Voltar
+</a>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-  function openModal(id) { document.getElementById(id).classList.add('open'); }
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+{% block content %}
+{% set usuario = funcionario.usuario_rel %}
+{% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-yellow'] %}
 
-  function handleEditClick(btn) {
-    const id = btn.getAttribute('data-id');
-    const nome = btn.getAttribute('data-nome');
-    const email = btn.getAttribute('data-email');
-    const cargo = btn.getAttribute('data-cargo');
-    const skills = btn.getAttribute('data-skills');
+<div class="fade-up">
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-body" style="display:flex; align-items:center; gap:24px;">
+      <div class="avatar lg avatar-blue" style="width:64px; height:64px; font-size:24px;">{{ usuario.nome[:2].upper() }}</div>
+      <div style="flex:1;">
+        <h2 style="font-size:22px; font-weight:700; margin-bottom:4px;">{{ usuario.nome }}</h2>
+        <div style="color:var(--text-muted); font-size:14px;">{{ funcionario.cargo }}</div>
+        <div style="color:var(--text-muted); font-size:13px; margin-top:4px;">{{ usuario.email }}</div>
+      </div>
+      <span class="badge badge-green">Ativo</span>
+    </div>
+  </div>
 
-    document.getElementById('form-editar-funcionario').action = `/admin/funcionario/editar/${id}`;
-    document.getElementById('edit-nome').value = nome;
-    document.getElementById('edit-email').value = email;
-    document.getElementById('edit-cargo').value = cargo;
-    document.getElementById('edit-skills').value = skills;
-    openModal('modal-editar-funcionario');
-  }
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+    <div class="card">
+      <div class="card-body">
+        <h3 style="font-size:15px; font-weight:700; margin-bottom:16px;">Skills</h3>
+        {% if funcionario.lista_skills %}
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          {% for skill in funcionario.lista_skills %}
+          <span class="badge badge-blue">{{ skill.nome }}</span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted); font-size:13px;">Nenhuma skill cadastrada.</p>
+        {% endif %}
+      </div>
+    </div>
 
-  function handleDeleteClick(btn) {
-    const id = btn.getAttribute('data-id');
-    const nome = btn.getAttribute('data-nome');
-
-    document.getElementById('delete-funcionario-nome').innerText = nome;
-    document.getElementById('btn-confirmar-delete').href = `/admin/funcionario/excluir/${id}`;
-    openModal('modal-deletar-funcionario');
-  }
-</script>
+    <div class="card">
+      <div class="card-body">
+        <h3 style="font-size:15px; font-weight:700; margin-bottom:16px;">Equipes</h3>
+        {% if funcionario.lista_equipes %}
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          {% for eq in funcionario.lista_equipes %}
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="avatar sm avatar-purple" style="width:24px;height:24px;font-size:10px;">{{ eq.nome[:2].upper() }}</div>
+            <span style="font-size:14px; font-weight:500;">{{ eq.nome }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted); font-size:13px;">Não pertence a nenhuma equipe.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

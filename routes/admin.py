@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, abort, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from database import database
-from models import Usuario, Cliente, Funcionario, Projeto, Equipes, Skill
+from models import Usuario, Cliente, Funcionario, Projeto, Equipes, Skill, membros_equipe
 from werkzeug.security import generate_password_hash
 import functools
 
@@ -36,7 +36,6 @@ def dashboard():
     status_cores = {
         'Em andamento': '#3b82f6',
         'Concluído':    '#22c55e',
-        'Planejamento': '#8b5cf6',
         'Pausado':      '#f59e0b',
     }
     status_rows = database.session.query(
@@ -89,6 +88,188 @@ def dashboard():
         status_data_json  = json.dumps(status_data),
         volumes_json      = json.dumps(volumes),
     )
+
+@admin_bp.route('/projetos')
+def projetos():
+    todos_projetos = Projeto.query.all()
+    todos_clientes = Cliente.query.join(Usuario).all()
+    todas_equipes = Equipes.query.all()
+    return render_template(
+        'admin/projetos.html',
+        projetos = todos_projetos,
+        clientes = todos_clientes,
+        equipes = todas_equipes
+    )
+@admin_bp.route('/add-projeto', methods=['POST'])
+def add_projeto():
+    nome = request.form.get('nome')
+    descricao = request.form.get('descricao')
+    prazo = request.form.get('prazo')
+    budget = request.form.get('budget', 0)
+    cliente_id = request.form.get('cliente_id')
+    equipe_id = request.form.get('equipe_id')
+
+    projeto = Projeto(
+        nome=nome,
+        descricao=descricao,
+        status="Em andamento",
+        prazo=prazo,
+        budget=float(budget) if budget else 0.0,
+        cliente_id=cliente_id if cliente_id else None,
+        equipe_id=equipe_id if equipe_id else None
+    )
+    database.session.add(projeto)
+    database.session.commit()
+    
+    return redirect(url_for('admin.projetos'))
+
+@admin_bp.route('/projeto-detalhe')
+def projeto_detalhe():
+    projeto_id = request.args.get('id', type=int)
+    if not projeto_id:
+        return redirect(url_for('admin.projetos'))
+    
+    projeto = Projeto.query.get_or_404(projeto_id)
+    cliente = projeto.cliente_rel
+    equipe = projeto.equipe_rel
+    membros = []
+    if equipe:
+        membros = (
+            Funcionario.query
+            .join(membros_equipe, Funcionario.id == membros_equipe.c.funcionario_id)
+            .filter(membros_equipe.c.equipe_id == equipe.id)
+            .join(Usuario, Funcionario.usuario_id == Usuario.id)
+            .add_entity(Usuario)
+            .all()
+        )
+    
+    return render_template(
+        'admin/projeto-detalhe.html',
+        projeto=projeto,
+        cliente=cliente,
+        equipe=equipe,
+        membros=membros,
+    )
+
+@admin_bp.route('/clientes')
+def clientes():
+    todos_clientes = Cliente.query.join(Usuario).all()
+    return render_template(
+        'admin/clientes.html',
+        clientes = todos_clientes
+    )
+
+@admin_bp.route('/add-cliente', methods=['POST'])
+def add_cliente():
+    nome = request.form.get('nome')
+    email = request.form.get('email')
+    senha = request.form.get('senha')
+    empresa = request.form.get('empresa')
+    
+    if not Usuario.query.filter_by(email=email).first():
+        usuario = Usuario(
+            nome=nome,
+            email=email,
+            senha=generate_password_hash(senha),
+            tipo='cliente',
+            nivel=3
+        )
+        database.session.add(usuario)
+        database.session.flush()
+
+        cliente = Cliente(
+            usuario_id=usuario.id,
+            empresa=empresa
+        )
+        database.session.add(cliente)
+        database.session.commit()
+    
+    return redirect(url_for('admin.clientes'))
+
+@admin_bp.route('/cliente/excluir/<int:id>', methods=['POST'])
+def excluir_cliente(id):
+    cliente = Cliente.query.get_or_404(id)
+    try:
+        database.session.delete(cliente)
+        database.session.commit()
+        flash("Cliente excluído com sucesso.", "sucesso")
+    except:
+        database.session.rollback()
+        flash("Ocorreu um erro ao excluir o cliente.", "erro")
+    return redirect(url_for('admin.clientes'))
+
+@admin_bp.route('/cliente/editar/<int:id>', methods=['POST'])
+def editar_cliente(id):
+    cliente = Cliente.query.get_or_404(id)
+    usuario = Usuario.query.get_or_404(cliente.usuario_id)
+    
+    usuario.nome = request.form.get('nome')
+    usuario.email = request.form.get('email')
+    cliente.empresa = request.form.get('empresa')
+    
+    senha = request.form.get('senha')
+    if senha:
+        usuario.senha = generate_password_hash(senha)
+
+    database.session.commit()
+    
+    return redirect(url_for('admin.clientes'))
+
+@admin_bp.route('/equipes')
+def equipes():
+    todas_equipes = Equipes.query.all()
+    todos_funcionarios = Funcionario.query.join(Usuario).all()
+    return render_template(
+        'admin/equipes.html',
+        equipes = todas_equipes,
+        funcionarios = todos_funcionarios
+    )
+
+@admin_bp.route('/add-equipe', methods=['POST'])
+def add_equipe():
+    nome = request.form.get('nome')
+    funcionarios_ids = request.form.getlist('check_funcionarios')
+    
+    equipe = Equipes(nome=nome)
+    
+    if funcionarios_ids:
+        membros = Funcionario.query.filter(Funcionario.id.in_(funcionarios_ids)).all()
+        equipe.membros_da_equipe.extend(membros)
+
+    database.session.add(equipe)
+    database.session.commit()
+    return redirect(url_for('admin.equipes'))
+
+@admin_bp.route('/equipes/excluir/<int:id>', methods=['POST'])
+def excluir_equipe(id):
+    equipe = Equipes.query.get_or_404(id)
+    try:
+        database.session.delete(equipe)
+        database.session.commit()
+        flash("Equipe excluída com sucesso.", "sucesso")
+    except:
+        database.session.rollback()
+        flash("Ocorreu um erro ao excluir a equipe.", "erro")
+    return redirect(url_for('admin.equipes'))
+
+@admin_bp.route('/equipes/editar/<int:id>', methods=['POST'])
+def editar_equipe(id):
+    equipe = Equipes.query.get_or_404(id)
+    nome = request.form.get('nome')
+    funcionarios_ids = request.form.getlist('check_funcionarios')
+    
+    equipe.nome = nome
+    
+    if funcionarios_ids:
+        membros = Funcionario.query.filter(Funcionario.id.in_(funcionarios_ids)).all()
+        equipe.membros_da_equipe = membros
+    else:
+        equipe.membros_da_equipe = []
+
+    database.session.commit()
+    return redirect(url_for('admin.equipes'))
+
+
 @admin_bp.route('/funcionarios')
 def funcionarios():
     funcionarios = (
@@ -106,25 +287,48 @@ def funcionarios():
         equipes      = equipes
     )
 
-@admin_bp.route('/projetos')
-def projetos():
-    todos_projetos = Projeto.query.all()
-    todos_clientes = Cliente.query.join(Usuario).all()
-    todas_equipes = Equipes.query.all()
-    return render_template(
-        'admin/projetos.html',
-        projetos = todos_projetos,
-        clientes = todos_clientes,
-        equipes = todas_equipes
-    )
+@admin_bp.route('/funcionario/<int:id>')
+def funcionario_perfil(id):
+    funcionario = Funcionario.query.get_or_404(id)
+    return render_template('admin/funcionario-perfil.html', funcionario=funcionario)
 
-@admin_bp.route('/projeto-detalhe')
-def projeto_detalhe():
-    return render_template('admin/projeto-detalhe.html')
+@admin_bp.route('/funcionario/excluir/<int:id>', methods=['POST'])
+def excluir_funcionario(id):
+    membro = Funcionario.query.get_or_404(id)
+    user = Usuario.query.get(membro.usuario_id)
+    try:
+        database.session.delete(membro)
+        database.session.delete(user)
+        database.session.commit()
+        flash("Funcionário excluído com sucesso.", "sucesso")
+    except:
+        database.session.rollback()
+        flash("Ocorreu um erro ao excluir o funcionário.", "erro")
+    return redirect(url_for('admin.funcionarios'))
 
-@admin_bp.route('/configuracoes')
-def configuracoes():
-    return render_template('admin/configuracoes.html')
+@admin_bp.route('/funcionario/editar/<int:id>', methods=['POST'])
+def editar_funcionario(id):
+    funcionario = Funcionario.query.get_or_404(id)
+    usuario = Usuario.query.get(funcionario.usuario_id)
+    
+    usuario.nome = request.form.get('nome')
+    usuario.email = request.form.get('email')
+    funcionario.cargo = request.form.get('cargo')
+    skills_str = request.form.get('skills', '')
+
+    funcionario.lista_skills = []
+    if skills_str:
+        for sk_nome in [s.strip() for s in skills_str.split(',')]:
+            skill = Skill.query.filter_by(nome=sk_nome).first()
+            if not skill:
+                skill = Skill(nome=sk_nome)
+                database.session.add(skill)
+                database.session.flush()
+            if skill not in funcionario.lista_skills:
+                funcionario.lista_skills.append(skill)
+
+    database.session.commit()
+    return redirect(url_for('admin.funcionario_perfil', id=id))
 
 @admin_bp.route('/add-funcionario', methods=['POST'])
 def add_funcionario():
@@ -147,11 +351,9 @@ def add_funcionario():
 
         funcionario = Funcionario(
             usuario_id=usuario.id,
-            cargo=cargo,
-            skills=skills_str
+            cargo=cargo
         )
         
-        # Tratar Skills (M2M)
         if skills_str:
             for sk_nome in [s.strip() for s in skills_str.split(',')]:
                 skill = Skill.query.filter_by(nome=sk_nome).first()
@@ -166,70 +368,7 @@ def add_funcionario():
     
     return redirect(url_for('admin.funcionarios'))
 
-@admin_bp.route('/add-projeto', methods=['POST'])
-def add_projeto():
-    nome = request.form.get('nome')
-    descricao = request.form.get('descricao')
-    prazo = request.form.get('prazo')
-    budget = request.form.get('budget', 0)
-    cliente_id = request.form.get('cliente_id')
-    equipe_id = request.form.get('equipe_id')
-
-    projeto = Projeto(
-        nome=nome,
-        descricao=descricao,
-        status="Em Andamento",
-        prazo=prazo,
-        budget=float(budget) if budget else 0.0,
-        cliente_id=cliente_id if cliente_id else None,
-        equipe_id=equipe_id if equipe_id else None
-    )
-    database.session.add(projeto)
-    database.session.commit()
+@admin_bp.route('/configuracoes')
+def configuracoes():
+    return render_template('admin/configuracoes.html')
     
-    return redirect(url_for('admin.projetos'))
-
-@admin_bp.route('/funcionario/<int:id>')
-def funcionario_perfil(id):
-    func = Funcionario.query.get_or_404(id)
-    return render_template('admin/funcionario-perfil.html', funcionario=func)
-
-@admin_bp.route('/funcionario/excluir/<int:id>', methods = ['GET' , 'POST'])
-def excluir_funcionario(id):
-    membro = Funcionario.query.get_or_404(id)
-    user = Usuario.query.get(membro.usuario_id)
-    try:
-        database.session.delete(membro)
-        database.session.delete(user)
-        database.session.commit()
-    except:
-        flash("Ocorreu um erro ao excluir o funcionário.", "erro")
-        return redirect(url_for('admin.funcionarios'))
-    
-    return redirect(url_for('admin.funcionarios'))
-
-@admin_bp.route('/funcionario/editar/<int:id>', methods=['POST'])
-def editar_funcionario(id):
-    funcionario = Funcionario.query.get_or_404(id)
-    usuario = Usuario.query.get(funcionario.usuario_id)
-    
-    usuario.nome = request.form.get('nome')
-    usuario.email = request.form.get('email')
-    funcionario.cargo = request.form.get('cargo')
-    skills_str = request.form.get('skills', '')
-    funcionario.skills = skills_str
-
-    # Atualizar Skills (M2M)
-    funcionario.lista_skills = [] # Limpa as skills atuais
-    if skills_str:
-        for sk_nome in [s.strip() for s in skills_str.split(',')]:
-            skill = Skill.query.filter_by(nome=sk_nome).first()
-            if not skill:
-                skill = Skill(nome=sk_nome)
-                database.session.add(skill)
-                database.session.flush()
-            if skill not in funcionario.lista_skills:
-                funcionario.lista_skills.append(skill)
-
-    database.session.commit()
-    return redirect(url_for('admin.funcionario_perfil', id=id))

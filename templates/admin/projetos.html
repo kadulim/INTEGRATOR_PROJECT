@@ -5,181 +5,238 @@
 
 {% block topbar_title %}Projetos{% endblock %}
 {% block topbar_actions %}
-  <button class="btn btn-primary btn-sm" onclick="openModal('modal-novo-projeto')">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Novo Projeto
-  </button>
+<button class="btn btn-primary btn-sm" onclick="openModal('modal-novo-projeto')">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+  Novo Projeto
+</button>
 {% endblock %}
 
 {% block content %}
-    <!-- Toolbar -->
-    <div class="proj-toolbar fade-up">
-      <div class="search-box">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Buscar projetos…" id="search-input" oninput="onSearch(this.value)">
-      </div>
-      <select class="filter-select" onchange="onFilter(this.value)">
-        <option value="Todos">Todos os status</option>
-        <option value="Em andamento">Em andamento</option>
-        <option value="Concluído">Concluído</option>
-        <option value="Planejamento">Planejamento</option>
-        <option value="Pausado">Pausado</option>
-      </select>
-      <div class="view-toggle" style="margin-left:auto;">
-        <button class="view-btn active" onclick="setView('cards')" title="Cards" id="btn-view-cards">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        </button>
-        <button class="view-btn" onclick="setView('kanban')" title="Kanban" id="btn-view-kanban">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        </button>
-        <button class="view-btn" onclick="setView('table')" title="Tabela" id="btn-view-table">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
-        </button>
-      </div>
-    </div>
+<!-- Toolbar -->
+<div class="proj-toolbar fade-up">
+  <div class="search-box">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+    <input type="text" placeholder="Buscar projetos…" id="search-input" oninput="onSearch(this.value)">
+  </div>
+  <select class="filter-select" onchange="onFilter(this.value)">
+    <option value="Todos">Todos os status</option>
+    <option value="Em andamento">Em andamento</option>
+    <option value="Concluído">Concluído</option>
+    <option value="Pausado">Pausado</option>
+  </select>
+  <div class="view-toggle" style="margin-left:auto;">
+    <button class="view-btn active" onclick="setView('cards')" title="Cards" id="btn-view-cards">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
+      </svg>
+    </button>
+    <button class="view-btn" onclick="setView('kanban')" title="Kanban" id="btn-view-kanban">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="8" y1="6" x2="21" y2="6" />
+        <line x1="8" y1="12" x2="21" y2="12" />
+        <line x1="8" y1="18" x2="21" y2="18" />
+        <line x1="3" y1="6" x2="3.01" y2="6" />
+        <line x1="3" y1="12" x2="3.01" y2="12" />
+        <line x1="3" y1="18" x2="3.01" y2="18" />
+      </svg>
+    </button>
+    <button class="view-btn" onclick="setView('table')" title="Tabela" id="btn-view-table">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path
+          d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18" />
+      </svg>
+    </button>
+  </div>
+</div>
 
-    <!-- Cards View -->
-    <div id="view-cards" class="view-section active fade-up fade-up-1">
-      <div class="proj-cards-grid">
-        {% set badge_prioridade = {'Alta': 'badge-red', 'Média': 'badge-yellow', 'Baixa': 'badge-green'} %}
-        {% set badge_status     = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow', 'Planejamento': 'badge-purple'} %}
-        {% if projetos %}
-          {% for p in projetos %}
-          <div class="proj-card" onclick="openProject({{ p.id }})">
-            <div class="pc-header">
-              <div>
-                <div class="pc-name">{{ p.nome }}</div>
-                <div class="pc-client">{{ p.cliente }}</div>
-              </div>
-              <div class="pc-actions" onclick="event.stopPropagation()">
-                <button class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11px;" onclick="openProject({{ p.id }})">VER</button>
-              </div>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <span class="badge {{ badge_status.get(p.status, 'badge-blue') }}">{{ p.status }}</span>
-              <span class="badge {{ badge_prioridade.get(p.prioridade, 'badge-blue') }}">{{ p.prioridade }}</span>
-            </div>
-            <div class="pc-progress-area">
-              <div class="pc-pct-row"><span>Orçamento</span><strong>R$ {{ "%.0f" | format(p.budget) }}</strong></div>
-              <div class="progress-bar"><div class="progress-fill blue" style="width:60%"></div></div>
-            </div>
-            <div class="pc-footer">
-              <div class="pc-deadline">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                {{ p.prazo }}
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <p style="color:var(--text-muted);font-size:14px;">Nenhum projeto cadastrado.</p>
+<!-- Cards View -->
+<div id="view-cards" class="view-section active fade-up fade-up-1">
+  <div class="proj-cards-grid">
+    {% set badge_prioridade = {'Alta': 'badge-red', 'Média': 'badge-yellow', 'Baixa': 'badge-green'} %}
+    {% set badge_status = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow'} %}
+    {% if projetos %}
+    {% for p in projetos %}
+    <div class="proj-card" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=p.id) }}'">
+      <div class="pc-header">
+        <div>
+          <div class="pc-name">{{ p.nome }}</div>
+          <!-- Nome do Cliente via relacionamento -->
+          <div class="pc-client">{{ p.cliente_rel.usuario_rel.nome if p.cliente_rel else 'Sem Cliente' }}</div>
+        </div>
+        <div class="pc-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11px;"
+            onclick="location.href='{{ url_for('admin.projeto_detalhe', id=p.id) }}'">VER</button>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom: 12px;">
+        <span class="badge {{ badge_status.get(p.status, 'badge-blue') }}">{{ p.status }}</span>
+        <!-- Badge da Equipe nos Cards -->
+        {% if p.equipe_rel %}
+        <span class="badge badge-purple" style="opacity: 0.8;">{{ p.equipe_rel.nome }}</span>
         {% endif %}
       </div>
+      <div class="pc-progress-area">
+        <div class="pc-pct-row"><span>Orçamento</span><strong>R$ {{ "%.0f" | format(p.budget) }}</strong></div>
+        <div class="progress-bar">
+          <div class="progress-fill blue" style="width:60%"></div>
+        </div>
+      </div>
+      <div class="pc-footer">
+        <div class="pc-deadline">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            width="14" height="14">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          {{ p.prazo }}
+        </div>
+      </div>
     </div>
+    {% endfor %}
+    {% else %}
+    <p style="color:var(--text-muted);font-size:14px;">Nenhum projeto cadastrado.</p>
+    {% endif %}
+  </div>
+</div>
 
-    <!-- Kanban View -->
-    <div id="view-kanban" class="view-section fade-up fade-up-1" style="display:none;">
-      <div class="kanban-board">
-        {% set status_list = ['Em andamento', 'Planejamento', 'Concluído', 'Pausado'] %}
-        {% for status in status_list %}
-        <div class="kanban-col">
-          <div class="kanban-col-header"><div class="kanban-col-title">{{ status }}</div></div>
-          <div class="kanban-cards">
-            {% for p in projetos if p.status == status %}
-            <div class="kanban-card">
-              <div class="kc-name">{{ p.nome }}</div>
-              <div class="kc-client">{{ p.cliente }}</div>
-              <div class="progress-bar mb-3"><div class="progress-fill blue" style="width:50%"></div></div>
-            </div>
-            {% else %}
-            <p style="color:var(--text-muted);font-size:12px;padding:8px 0;">Nenhum projeto.</p>
-            {% endfor %}
+<!-- Kanban View -->
+<div id="view-kanban" class="view-section fade-up fade-up-1" style="display:none;">
+  <div class="kanban-board">
+    {% set status_list = ['Em andamento', 'Concluído', 'Pausado'] %}
+    {% for status in status_list %}
+    <div class="kanban-col">
+      <div class="kanban-col-header">
+        <div class="kanban-col-title">{{ status }}</div>
+      </div>
+      <div class="kanban-cards">
+        {% for p in projetos if p.status == status %}
+        <div class="kanban-card" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=p.id) }}'" style="cursor:pointer;">
+          <div class="kc-name">{{ p.nome }}</div>
+          <div class="kc-client">{{ p.cliente_rel.usuario_rel.nome if p.cliente_rel else 'Sem Cliente' }}</div>
+          <!-- Equipe no Kanban -->
+          <div style="font-size: 11px; color: var(--primary-color); margin-bottom: 8px;">
+            {{ p.equipe_rel.nome if p.equipe_rel else 'Sem equipe' }}
+          </div>
+          <div class="progress-bar mb-3">
+            <div class="progress-fill blue" style="width:50%"></div>
           </div>
         </div>
+        {% else %}
+        <p style="color:var(--text-muted);font-size:12px;padding:8px 0;">Nenhum projeto.</p>
         {% endfor %}
       </div>
     </div>
+    {% endfor %}
+  </div>
+</div>
 
-    <!-- Table View -->
-    <div id="view-table" class="view-section fade-up fade-up-1" style="display:none;">
-      <div class="card proj-table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr><th>Projeto</th><th>Cliente</th><th>Status</th><th>Prioridade</th><th>Prazo</th><th>Budget</th></tr>
-          </thead>
-          <tbody>
-            {% set badge_prioridade = {'Alta': 'badge-red', 'Média': 'badge-yellow', 'Baixa': 'badge-green'} %}
-            {% set badge_status     = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow', 'Planejamento': 'badge-purple'} %}
-            {% if projetos %}
-              {% for p in projetos %}
-              <tr>
-                <td><div style="font-weight:600;">{{ p.nome }}</div></td>
-                <td>{{ p.cliente }}</td>
-                <td><span class="badge {{ badge_status.get(p.status, 'badge-blue') }}">{{ p.status }}</span></td>
-                <td><span class="badge {{ badge_prioridade.get(p.prioridade, 'badge-blue') }}">{{ p.prioridade }}</span></td>
-                <td>{{ p.prazo }}</td>
-                <td>R$ {{ "%.2f" | format(p.budget) }}</td>
-              </tr>
-              {% endfor %}
+<!-- Table View -->
+<!-- Table View -->
+<div id="view-table" class="view-section fade-up fade-up-1" style="display:none;">
+  <div class="card proj-table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Projeto</th>
+          <th>Cliente</th>
+          <th>Equipe</th> <!-- Coluna Adicionada -->
+          <th>Status</th>
+          <th>Prazo</th>
+          <th>Budget</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if projetos %}
+        {% for p in projetos %}
+        <tr>
+          <td>
+            <div style="font-weight:600;">{{ p.nome }}</div>
+          </td>
+          <td>{{ p.cliente_rel.usuario_rel.nome if p.cliente_rel else '---' }}</td>
+          <td>
+            {% if p.equipe_rel %}
+            <span class="badge badge-purple">{{ p.equipe_rel.nome }}</span>
             {% else %}
-              <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Nenhum projeto cadastrado.</td></tr>
+            <span style="color:var(--text-muted);">Não atribuída</span>
             {% endif %}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </td>
+          <td><span class="badge {{ badge_status.get(p.status, 'badge-blue') }}">{{ p.status }}</span></td>
+          <td>{{ p.prazo }}</td>
+          <td>R$ {{ "%.2f" | format(p.budget) }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="7" style="text-align:center;color:var(--text-muted);">Nenhum projeto cadastrado.</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
 
-    <!-- Modal Novo Projeto -->
-    <div class="modal-backdrop" id="modal-novo-projeto">
-      <div class="modal" style="width:550px;">
-        <div class="modal-header">
-          <h2 class="modal-title">Cadastrar Novo Projeto</h2>
-          <div class="modal-close" onclick="closeModal('modal-novo-projeto')">&times;</div>
-        </div>
-        <form action="{{ url_for('admin.add_projeto') }}" method="POST">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-            <div class="form-group" style="grid-column: span 2;">
-              <label class="form-label">Nome do Projeto</label>
-              <input type="text" name="nome" class="form-input" placeholder="Ex: Redesign E-commerce" required>
-            </div>
-            <div class="form-group" style="grid-column: span 2;">
-              <label class="form-label">Descrição</label>
-              <textarea name="descricao" class="form-input" rows="3" placeholder="Breve resumo do projeto..."></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Prazo</label>
-              <input type="date" name="prazo" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Budget (R$)</label>
-              <input type="number" step="0.01" name="budget" class="form-input" placeholder="0.00">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cliente</label>
-              <select name="cliente_id" class="form-input">
-                <option value="">Selecione um cliente</option>
-                {% for c in clientes %}
-                <option value="{{ c.id }}">{{ c.usuario_rel.nome }} ({{ c.empresa }})</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Equipe Responsável</label>
-              <select name="equipe_id" class="form-input">
-                <option value="">Selecione uma equipe</option>
-                {% for eq in equipes %}
-                <option value="{{ eq.id }}">{{ eq.nome }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="closeModal('modal-novo-projeto')">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Criar Projeto</button>
-          </div>
-        </form>
-      </div>
+<!-- Modal Novo Projeto -->
+<div class="modal-backdrop" id="modal-novo-projeto">
+  <div class="modal" style="width:550px;">
+    <div class="modal-header">
+      <h2 class="modal-title">Cadastrar Novo Projeto</h2>
+      <div class="modal-close" onclick="closeModal('modal-novo-projeto')">&times;</div>
     </div>
+    <form action="{{ url_for('admin.add_projeto') }}" method="POST">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Nome do Projeto</label>
+          <input type="text" name="nome" class="form-input" placeholder="Ex: Redesign E-commerce" required>
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Descrição</label>
+          <textarea name="descricao" class="form-input" rows="3" placeholder="Breve resumo do projeto..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prazo</label>
+          <input type="date" name="prazo" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Budget (R$)</label>
+          <input type="number" step="0.01" name="budget" class="form-input" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cliente</label>
+          <select name="cliente_id" class="form-input">
+            <option value="">Selecione um cliente</option>
+            {% for c in clientes %}
+            <option value="{{ c.id }}">{{ c.usuario_rel.nome }} ({{ c.empresa }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Equipe Responsável</label>
+          <select name="equipe_id" class="form-input">
+            <option value="">Selecione uma equipe</option>
+            {% for eq in equipes %}
+            <option value="{{ eq.id }}">{{ eq.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-novo-projeto')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Criar Projeto</button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_css %}

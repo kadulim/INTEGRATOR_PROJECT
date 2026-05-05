@@ -1,23 +1,27 @@
 {% extends 'admin/base.html' %}
 {% set active_page = 'projetos' %}
 
-{% block title %}Detalhe do Projeto — CoByte{% endblock %}
+{% block title %}{{ projeto.nome }} — CoByte{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/projeto-detalhe.css') }}">
 {% endblock %}
 
-{% block topbar_title %}Visão Geral do Projeto{% endblock %}
+{% block topbar_title %}{{ projeto.nome }}{% endblock %}
 
 {% block content %}
 <div class="proj-header">
   <div class="proj-header-inner" style="display:flex; justify-content:space-between; align-items:center;">
     <div class="proj-header-info">
-      <div class="proj-header-name">App Mobile CoByte</div>
+      <div class="proj-header-name">{{ projeto.nome }}</div>
       <div class="proj-header-meta">
-        <span class="badge badge-blue">Em andamento</span>
-        <span class="badge badge-red">Alta</span>
-        <span style="font-size:12px;color:var(--text-muted);">Prazo: 15/08/2025</span>
+        {% set badge_status = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow', 'Planejamento': 'badge-purple'} %}
+        {% set badge_prioridade = {'Alta': 'badge-red', 'Média': 'badge-yellow', 'Baixa': 'badge-green'} %}
+        <span class="badge {{ badge_status.get(projeto.status, 'badge-blue') }}">{{ projeto.status }}</span>
+        {% if projeto.prioridade %}
+        <span class="badge {{ badge_prioridade.get(projeto.prioridade, 'badge-blue') }}">{{ projeto.prioridade }}</span>
+        {% endif %}
+        <span style="font-size:12px;color:var(--text-muted);">Prazo: {{ projeto.prazo }}</span>
       </div>
     </div>
     <a href="{{ url_for('admin.projetos') }}" class="btn btn-outline btn-sm">
@@ -29,87 +33,109 @@
 
 <div class="proj-tab-nav">
   <button class="proj-tab active" onclick="switchTab('visao-geral', this)">Visão Geral</button>
-  <button class="proj-tab" onclick="switchTab('requisitos', this)">Requisitos</button>
   <button class="proj-tab" onclick="switchTab('equipe', this)">Equipe</button>
 </div>
 
 <div class="tab-content">
-  <!-- Aba Visão Geral -->
   <div id="tab-visao-geral" class="tab-pane active">
     <div class="overview-grid">
       <div style="display:flex;flex-direction:column;gap:20px;">
         <div class="overview-kpis">
           <div class="kpi-card fade-up fade-up-1">
-            <div class="kpi-icon" style="background:var(--blue-soft);color:var(--blue);">📅</div>
+            <div class="kpi-icon" style="background:var(--blue-soft);color:var(--blue);">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
             <div>
-              <div class="kpi-label">Dias Restantes</div>
-              <div class="kpi-value">45</div>
+              <div class="kpi-label">Prazo</div>
+              <div class="kpi-value">{{ projeto.prazo }}</div>
             </div>
           </div>
           <div class="kpi-card fade-up fade-up-2">
-            <div class="kpi-icon" style="background:var(--green-soft);color:var(--green);">📊</div>
+            <div class="kpi-icon" style="background:var(--green-soft);color:var(--green);">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
             <div>
-              <div class="kpi-label">Progresso</div>
-              <div class="kpi-value">68%</div>
+              <div class="kpi-label">Budget</div>
+              <div class="kpi-value">R$ {{ "%.0f" | format(projeto.budget) }}</div>
             </div>
           </div>
         </div>
         <div class="card">
           <div class="card-body">
             <h3>Sobre o Projeto</h3>
-            <p>Desenvolvimento do app mobile nativo para iOS e Android da plataforma CoByte.</p>
+            <p>{{ projeto.descricao or 'Sem descrição cadastrada.' }}</p>
+            {% if cliente %}
+            <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+              <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Cliente</div>
+              <div style="font-weight:600;">{{ cliente.usuario_rel.nome }} — {{ cliente.empresa }}</div>
+            </div>
+            {% endif %}
+            {% if equipe %}
+            <div style="margin-top:12px;">
+              <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Equipe</div>
+              <div style="font-weight:600;">{{ equipe.nome }}</div>
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:20px;">
         <div class="card">
           <div class="card-body">
-            <h3>Equipe (Resumo)</h3>
-            <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
-              <div class="avatar sm avatar-blue">AC</div>
-              <div><strong>Ana Carvalho</strong> <br><small>Tech Lead</small></div>
-            </div>
+            <h3 style="margin-bottom: 8px;">Equipe</h3>
+            <div style="font-size: 16px; font-weight: 600;">{{ equipe.nome if equipe else 'Nenhuma' }}</div>
           </div>
         </div>
+
+        {% if membros %}
+        <div class="card">
+          <div class="card-body">
+            <h3>Membros ({{ membros|length }})</h3>
+            {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-yellow'] %}
+            {% for funcionario, usuario in membros %}
+            <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
+              <div class="avatar sm {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ usuario.nome[:2].upper() }}</div>
+              <div>
+                <div style="font-weight:600; font-size:14px;">{{ usuario.nome }}</div>
+                <div style="font-size:12px; color:var(--text-muted);">{{ funcionario.cargo }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>
 
-  <!-- Aba Requisitos -->
-  <div id="tab-requisitos" class="tab-pane">
-    <div class="card">
-      <div class="card-body">
-        <h3>Requisitos do Projeto</h3>
-        <p>A listagem de requisitos estática foi carregada.</p>
-        <table class="data-table">
-          <thead><tr><th>ID</th><th>Título</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr><td>RF-001</td><td>Autenticação de Usuários</td><td><span class="badge badge-green">Concluído</span></td></tr>
-            <tr><td>RF-002</td><td>Gestão de Tarefas</td><td><span class="badge badge-blue">Em andamento</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Aba Equipe -->
   <div id="tab-equipe" class="tab-pane">
     <div class="card">
       <div class="card-body">
         <h3>Equipe Atribuída</h3>
+        {% if equipe %}
+        <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">{{ equipe.nome }}</p>
+        {% else %}
+        <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">Nenhuma equipe atribuída a este projeto.</p>
+        {% endif %}
+        {% if membros %}
         <div class="proj-team-grid">
+          {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-yellow'] %}
+          {% for funcionario, usuario in membros %}
           <div class="proj-member-card">
-            <div class="avatar avatar-blue">AC</div>
+            <div class="avatar {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ usuario.nome[:2].upper() }}</div>
             <div class="pmc-info">
-              <div class="pmc-name">Ana Carvalho</div>
-              <div class="pmc-role">Tech Lead</div>
+              <div class="pmc-name">{{ usuario.nome }}</div>
+              <div class="pmc-role">{{ funcionario.cargo }}</div>
             </div>
           </div>
+          {% endfor %}
         </div>
+        {% else %}
+        <p style="color:var(--text-muted);">Nenhum membro na equipe.</p>
+        {% endif %}
       </div>
     </div>
   </div>
-
 </div>
 
 {% endblock %}
@@ -123,5 +149,4 @@
     btn.classList.add('active');
   }
 </script>
-<script src="{{ url_for('static', filename='js/projeto-detalhe.js') }}"></script>
 {% endblock %}
