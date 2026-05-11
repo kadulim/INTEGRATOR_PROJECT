@@ -1,6 +1,6 @@
 import os
 from database import database
-from models import Usuario, Admin, Cliente, Funcionario, Projeto, Equipes, Skill
+from models import Usuario, Admin, Cliente, Funcionario, Projeto, Equipes, Skill, Requisito
 from werkzeug.security import generate_password_hash
 
 
@@ -17,6 +17,7 @@ def adicionar(app):
             try:
                 database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS equipe_id INTEGER REFERENCES equipes(id)"))
                 database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS prioridade VARCHAR(20)"))
+                database.session.execute(text("ALTER TABLE requisito ADD COLUMN IF NOT EXISTS tipo VARCHAR(50)"))
                 database.session.execute(text("ALTER TABLE funcionario ADD COLUMN IF NOT EXISTS skills VARCHAR(255)"))
                 database.session.execute(text("ALTER TABLE usuario ADD COLUMN IF NOT EXISTS nivel INTEGER"))
                 database.session.commit()
@@ -27,6 +28,9 @@ def adicionar(app):
                 try: database.session.execute(text("ALTER TABLE projeto ADD COLUMN equipe_id INTEGER REFERENCES equipes(id)"))
                 except: database.session.rollback()
                 try: database.session.execute(text("ALTER TABLE projeto ADD COLUMN prioridade VARCHAR(20)"))
+                except: database.session.rollback()
+                # Requisito
+                try: database.session.execute(text("ALTER TABLE requisito ADD COLUMN tipo VARCHAR(50)"))
                 except: database.session.rollback()
                 # Funcionario
                 try: database.session.execute(text("ALTER TABLE funcionario ADD COLUMN skills VARCHAR(255)"))

@@ -1,0 +1,60 @@
+{% extends 'funcionario/base.html' %}
+{% set active_page = 'projetos' %}
+
+{% block title %}Meus Projetos — CoByte{% endblock %}
+{% block topbar_title %}Meus Projetos{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header" style="padding: 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 18px; font-weight: 700;">Lista de Projetos Atribuídos</h3>
+        <div style="font-size: 13px; color: var(--text-muted);">{{ projetos|length }} Projetos encontrados</div>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        {% if projetos %}
+            <div class="projects-list-table">
+                {% for p in projetos %}
+                <a href="{{ url_for('funcionario.projeto_detalhe', projeto_id=p.id) }}" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="p-row" style="display: grid; grid-template-columns: 1fr 180px 180px 100px; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); transition: 0.2s;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--blue);">
+                            <i data-lucide="folder"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 15px; margin-bottom: 2px;">{{ p.nome }}</div>
+                            <div style="font-size: 12px; color: var(--text-muted); max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ p.descricao or 'Sem descrição' }}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px;">Status</div>
+                        <span class="badge {% if p.status == 'Em andamento' %}badge-blue{% elif p.status == 'Concluído' %}badge-green{% else %}badge-yellow{% endif %}" style="font-size: 11px;">{{ p.status }}</span>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px;">Prazo Final</div>
+                        <div style="font-size: 14px; font-weight: 500;">{{ p.prazo }}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <button class="btn btn-ghost btn-sm" title="Ver Detalhes">
+                            <i data-lucide="chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 100px 20px; color: var(--text-muted);">
+                <i data-lucide="folder-x" style="width: 64px; height: 64px; margin-bottom: 20px; opacity: 0.2;"></i>
+                <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Nenhum projeto</h4>
+                <p>Você ainda não faz parte de nenhuma equipe com projetos ativos.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .p-row:hover {
+        background: rgba(255, 255, 255, 0.02);
+    }
+</style>
+{% endblock %}

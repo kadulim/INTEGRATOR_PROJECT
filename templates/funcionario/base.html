@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CoByte — Funcionário{% endblock %}</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">C</div>
+      <span class="sidebar-logo-text">Co<span>Byte</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Menu</div>
+      
+      <a href="{{ url_for('funcionario.dashboard') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Meu Painel</span>
+      </a>
+      
+      <a href="{{ url_for('funcionario.projetos') }}" class="nav-item {% if active_page == 'projetos' %}active{% endif %}">
+        <i data-lucide="folder-kanban"></i>
+        <span>Meus Projetos</span>
+      </a>
+
+      <a href="{{ url_for('funcionario.equipe') }}" class="nav-item {% if active_page == 'equipe' %}active{% endif %}">
+        <i data-lucide="users-2"></i>
+        <span>Minha Equipe</span>
+      </a>
+      
+      <a href="{{ url_for('funcionario.configuracoes') }}" class="nav-item {% if active_page == 'configuracoes' %}active{% endif %}">
+        <i data-lucide="settings"></i>
+        <span>Configurações</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="avatar sm avatar-green">{{ current_user.nome[:2].upper() }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ current_user.nome }}</div>
+          <div class="user-role">Funcionário</div>
+        </div>
+        <a href="{{ url_for('logout') }}" title="Sair" style="color:rgba(255,255,255,0.35);margin-left:auto;text-decoration:none;">
+          <i data-lucide="log-out" style="width:16px;"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <h1 class="topbar-title">{% block topbar_title %}{% endblock %}</h1>
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Notificações">
+          <i data-lucide="bell"></i>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="divider-v"></div>
+        <div class="avatar sm avatar-green" title="{{ current_user.nome }}">
+          {{ current_user.nome[:2].upper() }}
+        </div>
+      </div>
+    </header>
+
+    <main class="page-content fade-up">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/shared.js') }}"></script>
+<script>lucide.createIcons();</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

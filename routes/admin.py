@@ -149,7 +149,35 @@ def projeto_detalhe():
         cliente=cliente,
         equipe=equipe,
         membros=membros,
+        requisitos=projeto.requisitos,
+        todas_equipes=Equipes.query.all()
     )
+
+@admin_bp.route('/vincular-equipe-projeto', methods=['POST'])
+def vincular_equipe_projeto():
+    projeto_id = request.form.get('projeto_id', type=int)
+    equipe_id = request.form.get('equipe_id', type=int)
+    
+    if projeto_id and equipe_id:
+        projeto = Projeto.query.get_or_404(projeto_id)
+        projeto.equipe_id = equipe_id
+        database.session.commit()
+    
+    return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
+
+@admin_bp.route('/editar-projeto', methods=['POST'])
+def editar_projeto():
+    projeto_id = request.form.get('projeto_id', type=int)
+    projeto = Projeto.query.get_or_404(projeto_id)
+    
+    projeto.nome = request.form.get('nome')
+    projeto.status = request.form.get('status')
+    projeto.budget = request.form.get('budget', type=float)
+    projeto.prazo = request.form.get('prazo')
+    projeto.descricao = request.form.get('descricao')
+    
+    database.session.commit()
+    return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
 
 @admin_bp.route('/clientes')
 def clientes():

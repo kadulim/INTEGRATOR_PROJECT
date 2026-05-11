@@ -85,7 +85,7 @@ def cliente_dashboard():
 @app.route('/funcionario')
 @login_required
 def funcionario():
-    return render_template('cliente/client.html')
+    return redirect(url_for('funcionario.dashboard'))
 
 # PREVENIR CACHE (Impede voltar para página logada após logout)
 @app.after_request
@@ -98,6 +98,10 @@ def add_header(response):
 # Registro do Blueprint de Admin
 from routes.admin import admin_bp
 app.register_blueprint(admin_bp)
+
+# Registro do Blueprint de Funcionário
+from routes.funcionario import funcionario_bp
+app.register_blueprint(funcionario_bp)
 
 # Registro do Blueprint CodeFlow (frontend)
 from routes.codeflow import codeflow_bp

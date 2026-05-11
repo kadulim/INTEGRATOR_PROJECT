@@ -1,0 +1,82 @@
+{% extends 'funcionario/base.html' %}
+{% set active_page = 'configuracoes' %}
+
+{% block title %}Configurações — CoByte{% endblock %}
+{% block topbar_title %}Configurações{% endblock %}
+
+{% block content %}
+<div class="settings-grid" style="display: grid; grid-template-columns: 300px 1fr; gap: 32px;">
+    <div class="settings-nav">
+        <div class="card" style="padding: 12px;">
+            <div class="s-nav-item active">
+                <i data-lucide="user"></i>
+                <span>Perfil</span>
+            </div>
+            <div class="s-nav-item">
+                <i data-lucide="lock"></i>
+                <span>Segurança</span>
+            </div>
+            <div class="s-nav-item">
+                <i data-lucide="bell"></i>
+                <span>Notificações</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-content">
+        <div class="card" style="padding: 32px;">
+            <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 24px;">Meu Perfil</h3>
+            
+            <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 32px; padding-bottom: 32px; border-bottom: 1px solid var(--border);">
+                <div class="avatar xl avatar-green" style="width: 100px; height: 100px; font-size: 32px;">{{ current_user.nome[:2].upper() }}</div>
+                <div>
+                    <h4 style="font-size: 18px; font-weight: 700;">{{ current_user.nome }}</h4>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 12px;">Funcionário na CoByte</p>
+                    <button class="btn btn-ghost btn-sm" style="background: rgba(255,255,255,0.05);">Alterar Foto</button>
+                </div>
+            </div>
+
+            <form style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Nome Completo</label>
+                    <input type="text" value="{{ current_user.nome }}" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 8px; outline: none;" readonly>
+                </div>
+                <div class="form-group">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">E-mail</label>
+                    <input type="email" value="{{ current_user.email }}" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 8px; outline: none;" readonly>
+                </div>
+                <div style="grid-column: 1 / -1; text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .s-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: 0.2s;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    .s-nav-item:hover {
+        background: rgba(255,255,255,0.02);
+        color: #fff;
+    }
+    .s-nav-item.active {
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-weight: 600;
+    }
+    .s-nav-item i {
+        width: 18px;
+    }
+</style>
+{% endblock %}
