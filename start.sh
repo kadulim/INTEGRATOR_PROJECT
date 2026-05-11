@@ -1,17 +1,9 @@
 #!/bin/bash
 set -e
 
-API_PORT=$((PORT + 1))
-
-cd api_codeflow
-FLASK_PORT=$API_PORT gunicorn app:create_app \
-  --bind "0.0.0.0:$API_PORT" \
-  --worker-class sync \
-  --threads 2 \
-  --timeout 60 &
-cd ../..
-
-sleep 2
+# Adiciona a API CodeFlow ao PYTHONPATH
+API_DIR="$(dirname "$0")/api_codeflow/api"
+export PYTHONPATH="$API_DIR:$PYTHONPATH"
 
 exec gunicorn app:app \
   --bind "0.0.0.0:$PORT" \

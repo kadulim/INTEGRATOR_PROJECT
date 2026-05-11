@@ -2,8 +2,8 @@ from flask import Flask
 from flask_cors import CORS
 
 from config import Config
-from routes.health import health_bp
-from routes.analyze import analyze_bp
+from cfroutes.health import health_bp
+from cfroutes.analyze import analyze_bp
 
 
 def create_app():

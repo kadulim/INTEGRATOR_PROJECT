@@ -3,14 +3,13 @@ from flask_login import LoginManager, login_required, current_user, logout_user
 import functools
 import os
 import sys
-import subprocess
-import time
-import socket
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 
 # Carrega variáveis do arquivo .env (apenas localmente)
 load_dotenv()
+
+_api_codeflow_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api_codeflow', 'api')
 
 from database import database
 from models import Usuario,Cliente
@@ -100,77 +99,20 @@ def add_header(response):
 from routes.admin import admin_bp
 app.register_blueprint(admin_bp)
 
-# Registro do Blueprint CodeFlow
+# Registro do Blueprint CodeFlow (frontend)
 from routes.codeflow import codeflow_bp
 app.register_blueprint(codeflow_bp)
-api_url = os.getenv('CODEFLOW_API_URL')
-if not api_url:
-    base_port = int(os.getenv('PORT', '5000'))
-    api_url = f'http://localhost:{base_port + 1}'
-app.config['CODEFLOW_API_URL'] = api_url
 
-def _port_in_use(port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('127.0.0.1', port)) == 0
+# ── CodeFlow API (mesmo servidor, mesma porta) ──────────────────────
+# Adiciona o path da API ao sys.path para importar os blueprints
+if _api_codeflow_path not in sys.path:
+    sys.path.insert(0, _api_codeflow_path)
+from cfroutes.health import health_bp
+from cfroutes.analyze import analyze_bp
+app.register_blueprint(health_bp)
+app.register_blueprint(analyze_bp)
 
-def _install_requirements(req_file):
-    try:
-        import pkg_resources
-        with open(req_file) as f:
-            missing = []
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith('#'):
-                    continue
-                try:
-                    pkg_resources.require(line)
-                except Exception:
-                    missing.append(line)
-        if missing:
-            print(f'[CodeFlow] Instalando dependencias: {", ".join(missing)}')
-            subprocess.check_call(
-                [sys.executable, '-m', 'pip', 'install', '-r', req_file, '-q'],
-            )
-    except Exception:
-        subprocess.check_call(
-            [sys.executable, '-m', 'pip', 'install', '-r', req_file, '-q'],
-        )
-
-def _start_codeflow_api():
-    base_port = int(os.getenv('CODEFLOW_PORT', '5001'))
-    cf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api_codeflow')
-    req_file = os.path.join(cf_dir, 'requirements.txt')
-    if os.path.exists(req_file):
-        _install_requirements(req_file)
-    env = os.environ.copy()
-    env['PYTHONPATH'] = cf_dir + os.pathsep + env.get('PYTHONPATH', '')
-    for attempt in range(5):
-        port = base_port + attempt
-        if _port_in_use(port):
-            print(f'[CodeFlow] Porta {port} ocupada, tentando proxima...')
-            continue
-        proc = subprocess.Popen(
-            [sys.executable, 'run.py'],
-            cwd=cf_dir,
-            env={**env, 'FLASK_PORT': str(port)},
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        time.sleep(1.5)
-        if proc.poll() is not None:
-            out, err = proc.communicate()
-            err_text = err.decode().strip()
-            if 'in use' in err_text.lower():
-                print(f'[CodeFlow] Porta {port} conflitou, tentando proxima...')
-                continue
-            print(f'[CodeFlow] ERRO ao iniciar API: {err_text}')
-            return None
-        print(f'[CodeFlow] API iniciada (PID {proc.pid}) na porta {port}')
-        app.config['CODEFLOW_API_URL'] = f'http://localhost:{port}'
-        return proc
-    print(f'[CodeFlow] Nao foi possivel encontrar uma porta livre')
-    return None
+app.config['CODEFLOW_API_URL'] = os.getenv('CODEFLOW_API_URL', '')
 
 if __name__ == '__main__':
-    _start_codeflow_api()
     app.run(debug=True)
