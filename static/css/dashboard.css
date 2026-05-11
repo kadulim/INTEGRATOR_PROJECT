@@ -135,15 +135,11 @@
 .light-mode .wb-text h2 { color: var(--brand-accent); }
 .light-mode .wb-text p { color: var(--text-secondary); }
 
-.light-mode .project-mini {
-  background: #ffffff;
-  border-color: var(--border-md);
-}
-.light-mode .project-mini-name { color: #000; }
-.light-mode .project-mini-pct { color: var(--brand-accent); }
+.light-mod.light-mode .project-mini-pct { color: var(--brand-accent); }
 
 .light-mode .activity-text { color: #000; }
 .light-mode .activity-time { color: var(--text-muted); }
 
 .light-mode .chart-label { color: var(--text-muted); }
 .light-mode .donut-val { color: #000; }
+.light-mode .project-mini-pct { color: var(--brand-accent); }

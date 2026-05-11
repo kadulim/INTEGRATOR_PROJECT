@@ -36,7 +36,7 @@ def adicionar(app):
                 except: database.session.rollback()
                 database.session.commit()
         except Exception as e:
-            print(f"ℹ️  Nota: Colunas já existem ou erro ao atualizar: {e}")
+            print(f"[INFO] Nota: Colunas ja existem ou erro ao atualizar: {e}")
 
 
 
@@ -57,7 +57,7 @@ def adicionar(app):
             admin = Admin(usuario_id=usuario.id, nivel='1')
             database.session.add(admin)
             database.session.commit()
-            print("✅ Admin criado.")
+            print("[OK] Admin criado.")
 
         # ─── Seed: Clientes (CLIENTE_1_, CLIENTE_2_, …) ─────────────────
         i = 1
@@ -84,9 +84,9 @@ def adicionar(app):
                 )
                 database.session.add(c)
                 database.session.commit()
-                print(f"✅ Cliente {i} criado: {os.getenv(f'{prefix}NOME')}")
+                print(f"[OK] Cliente {i} criado: {os.getenv(f'{prefix}NOME')}")
             else:
-                print(f"ℹ️  Cliente {i} já existe: {email}")
+                print(f"[INFO] Cliente {i} ja existe: {email}")
 
             i += 1
 
@@ -138,9 +138,9 @@ def adicionar(app):
 
                 database.session.add(f)
                 database.session.commit()
-                print(f"✅ Funcionário {i} criado: {os.getenv(f'{prefix}NOME')}")
+                print(f"[OK] Funcionario {i} criado: {os.getenv(f'{prefix}NOME')}")
             else:
-                print(f"ℹ️  Funcionário {i} já existe: {email}")
+                print(f"[INFO] Funcionario {i} ja existe: {email}")
 
             i += 1
 
@@ -175,10 +175,10 @@ def adicionar(app):
                 )
                 database.session.add(p)
                 database.session.commit()
-                print(f"✅ Projeto {i} criado: {nome}")
+                print(f"[OK] Projeto {i} criado: {nome}")
             else:
-                print(f"ℹ️  Projeto {i} já existe: {nome}")
+                print(f"[INFO] Projeto {i} ja existe: {nome}")
 
             i += 1
 
-        print("🚀 Seed concluído.")
+        print("[OK] Seed concluido.")

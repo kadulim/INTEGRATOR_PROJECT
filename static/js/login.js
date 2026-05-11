@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function quickLogin(email) {
-  document.getElementById('email').value    = email;
+  document.getElementById('identificador').value = email;
   document.getElementById('password').value = '123456';
   const errEl = document.getElementById('error-msg');
   if (errEl) errEl.style.display = 'none';

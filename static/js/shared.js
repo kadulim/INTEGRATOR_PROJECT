@@ -112,4 +112,54 @@ function loadAppTheme() {
 // Inicializa no carregamento
 document.addEventListener('DOMContentLoaded', () => {
   loadAppTheme();
+  initSidebarToggle();
 });
+
+// ── Sidebar Collapse Toggle ────────────────────────────────
+function initSidebarToggle() {
+  const sidebar = document.querySelector('.sidebar, .func-sidebar');
+  if (!sidebar) return;
+
+  // Create toggle button
+  const toggleBtn = document.createElement('button');
+  toggleBtn.className = 'sidebar-toggle';
+  toggleBtn.setAttribute('title', 'Minimizar menu');
+  toggleBtn.setAttribute('aria-label', 'Minimizar menu lateral');
+  toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+  sidebar.appendChild(toggleBtn);
+
+  // Add data-tooltip to nav items for collapsed tooltips
+  sidebar.querySelectorAll('.nav-item').forEach(item => {
+    const label = item.querySelector('span');
+    if (label) {
+      item.setAttribute('data-tooltip', label.textContent.trim());
+    }
+  });
+
+  // Restore saved state
+  const isCollapsed = localStorage.getItem('cobyte-sidebar-collapsed') === 'true';
+  if (isCollapsed) {
+    sidebar.classList.add('sidebar-collapsed');
+    toggleBtn.setAttribute('title', 'Expandir menu');
+  }
+
+  // Toggle handler
+  toggleBtn.addEventListener('click', () => {
+    const willCollapse = !sidebar.classList.contains('sidebar-collapsed');
+    sidebar.classList.toggle('sidebar-collapsed');
+    
+    if (willCollapse) {
+      localStorage.setItem('cobyte-sidebar-collapsed', 'true');
+      toggleBtn.setAttribute('title', 'Expandir menu');
+    } else {
+      localStorage.setItem('cobyte-sidebar-collapsed', 'false');
+      toggleBtn.setAttribute('title', 'Minimizar menu');
+    }
+
+    // Also adjust any sibling main content that uses inline styles
+    const funcMain = document.querySelector('[style*="margin-left: var(--sidebar-w)"]');
+    if (funcMain) {
+      funcMain.style.marginLeft = willCollapse ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)';
+    }
+  });
+}
