@@ -77,6 +77,9 @@
         <div class="pc-actions" onclick="event.stopPropagation()">
           <button class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11px;"
             onclick="location.href='{{ url_for('admin.projeto_detalhe', id=p.id) }}'">VER</button>
+          <form action="{{ url_for('admin.excluir_projeto', id=p.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Excluir este projeto?');">
+            <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--accent); padding:4px;"><i data-lucide="trash-2" style="width:14px;"></i></button>
+          </form>
         </div>
       </div>
       <div style="display:flex; gap:8px; margin-bottom: 12px;">
@@ -154,6 +157,7 @@
           <th>Status</th>
           <th>Prazo</th>
           <th>Budget</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -174,6 +178,14 @@
           <td><span class="badge {{ badge_status.get(p.status, 'badge-blue') }}">{{ p.status }}</span></td>
           <td>{{ p.prazo }}</td>
           <td>R$ {{ "%.2f" | format(p.budget) }}</td>
+          <td>
+            <div style="display:flex; gap:8px;">
+              <a href="{{ url_for('admin.projeto_detalhe', id=p.id) }}" class="btn btn-ghost btn-sm" style="padding:4px;"><i data-lucide="external-link" style="width:14px;"></i></a>
+              <form action="{{ url_for('admin.excluir_projeto', id=p.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Excluir este projeto?');">
+                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--accent); padding:4px;"><i data-lucide="trash-2" style="width:14px;"></i></button>
+              </form>
+            </div>
+          </td>
         </tr>
         {% endfor %}
         {% else %}

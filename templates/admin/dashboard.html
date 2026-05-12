@@ -7,95 +7,91 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 {% endblock %}
 
-{% block topbar_title %}Dashboard{% endblock %}
+{% block topbar_title %}
+Dashboard
+<div style="font-size: 13px; font-weight: 500; color: var(--text-muted); margin-top: 4px;">Visão geral dos seus projetos e atividades</div>
+{% endblock %}
 {% block topbar_actions %}
 {% endblock %}
 
 {% block content %}
-<!-- Boas-vindas -->
-<div class="welcome-banner fade-up">
-  <div class="wb-text">
-    <h2>Olá, {{ current_user.nome.split(' ')[0] if current_user.is_authenticated else 'Usuário' }}! 👋</h2>
-    <p>Você tem <strong>{{ projetos_ativos | length }}</strong> projeto(s) em andamento e <strong>{{ total_equipe
-        }}</strong> funcionário(s) na equipe.</p>
-  </div>
-  <a href="{{ url_for('admin.projetos') }}" class="btn btn-primary wb-btn">
-    Ver Projetos
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
-    </svg>
-  </a>
-</div>
 
 <!-- Stat Cards -->
 <div class="stat-grid fade-up fade-up-1">
-  <div class="stat-card">
-    <div class="stat-icon blue">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round">
-        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-      </svg>
-    </div>
-    <div>
-      <div class="stat-label">Projetos Ativos</div>
-      <div class="stat-value">{{ total_projetos }}</div>
-      <div class="stat-delta">{{ projetos_ativos | length }} em andamento</div>
-    </div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-icon green">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
-    </div>
-    <div>
-      <div class="stat-label">Clientes</div>
-      <div class="stat-value">{{ total_clientes }}</div>
-      <div class="stat-delta">cadastrados</div>
-    </div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-icon purple">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-    </div>
-    <div>
-      <div class="stat-label">Funcionários</div>
-      <div class="stat-value">{{ total_equipe }}</div>
-      <div class="stat-delta">funcionários</div>
-    </div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-icon accent">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="20" x2="18" y2="10" />
-        <line x1="12" y1="20" x2="12" y2="4" />
-        <line x1="6" y1="20" x2="6" y2="14" />
-      </svg>
-    </div>
-    <div>
-      <div class="stat-label">Budget Total</div>
-      <div class="stat-value">
-        R$
-        {% if budget_total >= 1000000000 %}
-        {{ "%.1f" | format(budget_total / 1000000000) }}B
-        {% elif budget_total >= 1000000 %}
-        {{ "%.1f" | format(budget_total / 1000000) }}M
-        {% elif budget_total >= 1000 %}
-        {{ "%.0f" | format(budget_total / 1000) }}k
-        {% else %}
-        {{ budget_total }}
-        {% endif %}
+  <!-- Projetos Ativos -->
+  <div class="stat-card-modern">
+    <div class="stat-card-header">
+      <div class="stat-icon-box" style="background: rgba(59, 130, 246, 0.1); color: var(--blue);">
+        <i data-lucide="folder" style="width: 20px;"></i>
       </div>
+      <div class="stat-label-modern">Projetos Ativos</div>
+    </div>
+    <div class="stat-main-content">
+      <div class="stat-value-modern">{{ projetos_ativos | length }}</div>
+      <div class="stat-sparkline" id="sparkline-projects"></div>
+    </div>
+    <div class="stat-card-footer">
+      <div class="status-dot" style="background: var(--blue);"></div>
+      <span style="color: var(--blue);">em andamento</span>
+    </div>
+  </div>
+
+  <!-- Clientes -->
+  <div class="stat-card-modern">
+    <div class="stat-card-header">
+      <div class="stat-icon-box" style="background: rgba(16, 185, 129, 0.1); color: var(--green);">
+        <i data-lucide="users" style="width: 20px;"></i>
+      </div>
+      <div class="stat-label-modern">Clientes</div>
+    </div>
+    <div class="stat-main-content">
+      <div class="stat-value-modern">{{ total_clientes }}</div>
+      <div class="stat-sparkline" id="sparkline-clients"></div>
+    </div>
+    <div class="stat-card-footer">
+      <div class="status-dot" style="background: var(--green);"></div>
+      <span style="color: var(--green);">cadastrados</span>
+    </div>
+  </div>
+
+  <!-- Funcionários -->
+  <div class="stat-card-modern">
+    <div class="stat-card-header">
+      <div class="stat-icon-box" style="background: rgba(139, 92, 246, 0.1); color: var(--purple);">
+        <i data-lucide="user-check" style="width: 20px;"></i>
+      </div>
+      <div class="stat-label-modern">Funcionários</div>
+    </div>
+    <div class="stat-main-content">
+      <div class="stat-value-modern">{{ total_equipe }}</div>
+      <div class="stat-sparkline" id="sparkline-staff"></div>
+    </div>
+    <div class="stat-card-footer">
+      <div class="status-dot" style="background: var(--purple);"></div>
+      <span style="color: var(--purple);">funcionários</span>
+    </div>
+  </div>
+
+  <!-- Budget Total -->
+  <div class="stat-card-modern">
+    <div class="stat-card-header">
+      <div class="stat-icon-box" style="background: rgba(233, 69, 96, 0.1); color: var(--accent);">
+        <i data-lucide="bar-chart-3" style="width: 20px;"></i>
+      </div>
+      <div class="stat-label-modern">Budget Total</div>
+    </div>
+    <div class="stat-main-content">
+      <div class="stat-value-modern">
+          R$
+          {% if budget_total >= 1000000 %}{{ "%.1f" | format(budget_total / 1000000) }}M
+          {% elif budget_total >= 1000 %}{{ "%.0f" | format(budget_total / 1000) }}k
+          {% else %}{{ budget_total }}{% endif %}
+      </div>
+      <div class="stat-sparkline" id="sparkline-budget"></div>
+    </div>
+    <div class="stat-card-footer">
+      <div class="status-dot" style="background: var(--accent);"></div>
+      <span style="color: var(--accent);">valor planejado</span>
     </div>
   </div>
 </div>
@@ -105,50 +101,54 @@
   <!-- Coluna Esquerda -->
   <div style="display:flex;flex-direction:column;gap:24px;">
 
-    <!-- Projetos Em Andamento -->
+    <!-- Projetos Ativos -->
     <div class="card fade-up fade-up-2">
       <div class="card-body">
-        <div class="flex items-center justify-between mb-6">
-          <h3 style="font-size:15px;font-weight:700;">Projetos Ativos</h3>
-          <a href="{{ url_for('admin.projetos') }}" class="btn btn-ghost btn-sm">Ver todos</a>
+        <div class="flex items-center justify-between mb-8">
+          <h3 style="font-size:16px;font-weight:700;">Projetos Ativos</h3>
+          <a href="{{ url_for('admin.projetos') }}" class="btn btn-ghost btn-sm" style="color: var(--text-muted); font-size: 13px;">Ver todos <i data-lucide="arrow-right" style="width: 14px; margin-left: 4px;"></i></a>
         </div>
-        <div class="project-mini-list">
-          {% set colors = ['#e94560','#3b82f6','#a78bfa','#10b981','#f59e0b'] %}
+        <div class="project-list-modern">
           {% if projetos_ativos %}
           {% for projeto in projetos_ativos %}
-          <div class="project-mini fade-up" style="animation-delay:{{ loop.index0 * 0.1 }}s"
-            onclick="location.href='{{ url_for('admin.projeto_detalhe', id=projeto.id) }}'">
-            <div class="project-mini-color" style="background:{{ colors[loop.index0 % colors|length] }}"></div>
-            <div class="project-mini-info">
-              <div class="project-mini-name">{{ projeto.nome }}</div>
-              <div class="project-mini-meta">
-                <div class="progress-bar" style="flex:1;height:5px;">
-                  <div class="progress-fill blue" style="width:50%"></div>
-                </div>
-              </div>
+          <div class="project-item-modern" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=projeto.id) }}'">
+            <div class="project-avatar" style="background: var(--accent);">
+              {{ projeto.nome[:1].upper() }}
             </div>
-            <div class="project-mini-pct">{{ projeto.status }}</div>
+            <div class="project-name-modern">{{ projeto.nome }}</div>
+            <div class="project-progress-container">
+              <div class="progress-track">
+                <div class="progress-fill-blue" style="width: 65%;"></div>
+              </div>
+              <div class="progress-pct">65%</div>
+            </div>
+            <span class="badge badge-blue" style="font-size: 11px; padding: 6px 12px; border-radius: 20px;">{{ projeto.status }}</span>
           </div>
           {% endfor %}
           {% else %}
-          <p style="color:var(--text-muted);font-size:13px;">Nenhum projeto em andamento.</p>
+          <div style="text-align: center; padding: 40px; color: var(--text-muted);">Nenhum projeto ativo.</div>
           {% endif %}
         </div>
       </div>
     </div>
 
-    <!-- Mini Chart - Projetos por status -->
+    <!-- Volume por Mês -->
     <div class="card fade-up fade-up-3">
       <div class="card-body">
-        <div class="flex items-center justify-between mb-6">
-          <h3 style="font-size:15px;font-weight:700;">Volume por Mês</h3>
-          <span class="badge badge-green">2025</span>
+        <div class="flex items-center justify-between mb-8">
+          <h3 style="font-size:16px;font-weight:700;">Volume por Mês</h3>
+          <div style="display: flex; align-items: center; gap: 8px; background: var(--surface-2); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+            <i data-lucide="calendar" style="width: 16px;"></i>
+            2025
+            <i data-lucide="chevron-down" style="width: 14px;"></i>
+          </div>
         </div>
-        <div class="chart-bars" id="chart-bars">
+        <div id="chart-bars-modern" class="chart-bars-container">
+            <!-- Renderizado via JS -->
         </div>
-        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-            <div style="width:10px;height:10px;border-radius:2px;background:var(--accent);"></div> Total de projetos
+        <div style="display:flex;gap:12px;margin-top:24px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);font-weight: 600;">
+            <div style="width:12px;height:12px;border-radius:3px;background: var(--accent);"></div> Total de projetos
           </div>
         </div>
       </div>
@@ -158,70 +158,108 @@
   <!-- Coluna Direita -->
   <div style="display:flex;flex-direction:column;gap:24px;">
 
-    <!-- Distribuição Status (Donut) -->
+    <!-- Status dos Projetos -->
     <div class="card fade-up fade-up-2">
-      <div class="card-body" style="padding-bottom:0;">
-        <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;">Status dos Projetos</h3>
-      </div>
-      <div class="donut-wrap" id="donut-wrap">
-        <!-- Renderizado visualmente via dashboard.js -->
-      </div>
-    </div>
-
-    <!-- Feed de Atividade -->
-    <div class="card fade-up fade-up-3" style="flex:1;">
       <div class="card-body">
-        <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">Projetos Cadastrados</h3>
-        <div class="activity-list">
-          {% if projetos_ativos %}
-          {% for projeto in projetos_ativos %}
-          <div class="activity-item">
-            <div class="activity-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-              </svg></div>
-            <div class="activity-body">
-              <div class="activity-text"><strong>{{ projeto.nome }}</strong> — {{ projeto.cliente }}</div>
-              <div class="activity-time">{{ projeto.status }} · Prazo: {{ projeto.prazo }}</div>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:24px;">Status dos Projetos</h3>
+        <div class="donut-section">
+            <div id="donut-modern" style="width: 120px; height: 120px;"></div>
+            <div class="donut-legend-modern">
+                <!-- Preenchido via JS -->
             </div>
-          </div>
-          {% endfor %}
-          {% else %}
-          <p style="color:var(--text-muted);font-size:13px;">Nenhum projeto cadastrado.</p>
-          {% endif %}
         </div>
       </div>
     </div>
 
-    <!-- Funcionários da Equipe -->
+    <!-- Logs -->
     <div class="card fade-up fade-up-3">
       <div class="card-body">
-        <div class="flex justify-between items-center mb-5">
-          <h3 style="font-size:15px;font-weight:700;">Funcionários</h3>
-          <a href="{{ url_for('admin.funcionarios') }}" class="btn btn-ghost btn-sm">Ver Todos</a>
+        <div class="flex items-center justify-between mb-8">
+            <h3 style="font-size:16px;font-weight:700;">Logs</h3>
+            <button onclick="openModal('modal-logs')" class="btn btn-ghost btn-sm" style="color: var(--text-muted); font-size: 13px;">Ver todos <i data-lucide="arrow-right" style="width: 14px; margin-left: 4px;"></i></button>
         </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-accent'] %}
-          {# funcionarios_dash é passado opcionalmente; se não vier, lista fica vazia #}
-          {% for func, usuario in funcionarios_dash %}
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="avatar sm {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ usuario.nome[:2].upper()
-              }}</div>
-            <div style="flex:1;min-width:0;">
-              <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{
-                usuario.nome }}</div>
-              <div style="font-size:11.5px;color:var(--text-muted);">{{ func.cargo }}</div>
+        <div class="logs-list-modern">
+            {% if logs %}
+            {% set log_icons = {'projeto': 'folder', 'requisito': 'file-text', 'equipe': 'users'} %}
+            {% set log_colors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#e94560'] %}
+            {% for log in logs %}
+            <div class="log-item-modern">
+                <div class="log-icon-circle" style="background: rgba(var(--color-rgb), 0.1); background-color: var(--surface-2); color: {{ log_colors[loop.index0 % 5] }};">
+                    <i data-lucide="{{ log_icons.get(log.tipo, 'activity') }}" style="width: 16px;"></i>
+                </div>
+                <div class="log-info-modern">
+                    <div class="log-title-modern">{{ log.acao }}</div>
+                    <div class="log-sub-modern">{{ log.descricao }}</div>
+                </div>
+                <div class="log-time-modern">{{ log.data.strftime('%d/%m, %H:%M') }}</div>
             </div>
-            <span class="badge badge-green">Ativo</span>
-          </div>
-          {% else %}
-          <p style="color:var(--text-muted);font-size:13px;">Sem funcionários cadastrados.</p>
-          {% endfor %}
+            {% endfor %}
+            {% else %}
+            <div style="text-align: center; padding: 20px; color: var(--text-muted);">Nenhum log disponível.</div>
+            {% endif %}
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Modal Logs -->
+<div id="modal-logs" class="modal-backdrop">
+    <div class="modal" style="width: 600px; max-height: 85vh; display: flex; flex-direction: column; border-radius: 20px; border: 1px solid var(--border); overflow: hidden;">
+        <div class="modal-header" style="padding: 24px 32px; border-bottom: 1px solid var(--border); background: var(--surface);">
+            <div>
+                <h3 class="modal-title" style="font-size: 18px; font-weight: 800; color: var(--text-primary);">Histórico de Atividades</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Acompanhe todas as mudanças em tempo real</p>
+            </div>
+            <button class="modal-close" onclick="closeModal('modal-logs')" style="background: var(--surface-2); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: 0.2s;"><i data-lucide="x" style="width: 18px; color: var(--text-muted);"></i></button>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; padding: 20px 32px; background: var(--surface);">
+            <div class="logs-list-modern">
+                {% if todos_logs %}
+                {% set log_icons = {'projeto': 'folder', 'requisito': 'file-text', 'equipe': 'users'} %}
+                {% set log_colors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#e94560'] %}
+                {% for log in todos_logs %}
+                <div class="log-item-modern" style="padding: 16px 0; border-bottom: 1px solid var(--border); align-items: flex-start;">
+                    <div class="log-icon-circle" style="background-color: var(--surface-2); color: {{ log_colors[loop.index0 % 5] }}; width: 36px; height: 36px; margin-top: 2px;">
+                        <i data-lucide="{{ log_icons.get(log.tipo, 'activity') }}" style="width: 18px;"></i>
+                    </div>
+                    <div class="log-info-modern">
+                        <div class="log-title-modern" style="font-size: 14px; font-weight: 700;">{{ log.acao }}</div>
+                        <div class="log-sub-modern" style="font-size: 13px; margin-top: 2px; line-height: 1.5;">{{ log.descricao }}</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; display: flex; align-items: center; gap: 4px;">
+                            <i data-lucide="clock" style="width: 12px;"></i>
+                            {{ log.data.strftime('%d de %B de %Y às %H:%M') }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="width: 64px; height: 64px; background: var(--surface-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                        <i data-lucide="activity" style="width: 32px; color: var(--text-muted); opacity: 0.5;"></i>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 14px; font-weight: 500;">Nenhuma atividade registrada ainda.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        if (window.lucide) lucide.createIcons();
+    }
+    function closeModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.remove('open');
+        document.body.style.overflow = 'auto';
+    }
+</script>
+
 {% endblock %}
 
 {% block extra_js %}

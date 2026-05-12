@@ -1,6 +1,6 @@
 import os
 from database import database
-from models import Usuario, Admin, Cliente, Funcionario, Projeto, Equipes, Skill, Requisito
+from models import Usuario, Admin, Cliente, Funcionario, Projeto, Equipes, Skill, Requisito, Log
 from werkzeug.security import generate_password_hash
 
 

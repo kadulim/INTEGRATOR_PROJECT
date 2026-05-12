@@ -85,3 +85,12 @@ class Projeto(database.Model):
 
     # Relacionamentos
     requisitos = database.relationship('Requisito', backref='projeto_rel', lazy=True)
+
+class Log(database.Model):
+    __tablename__ = 'log'
+    id = database.Column(database.Integer, primary_key=True)
+    tipo = database.Column(database.String(50)) # 'projeto', 'requisito', 'equipe', etc.
+    acao = database.Column(database.String(100)) # Ex: 'Projeto criado'
+    descricao = database.Column(database.String(255))
+    data = database.Column(database.DateTime, default=database.func.now())
+    projeto_id = database.Column(database.Integer, database.ForeignKey('projeto.id'), nullable=True)

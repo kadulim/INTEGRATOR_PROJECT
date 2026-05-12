@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, abort, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from database import database
-from models import Usuario, Cliente, Funcionario, Projeto, Equipes, Skill, membros_equipe
+from models import Usuario, Cliente, Funcionario, Projeto, Equipes, Skill, membros_equipe, Log, Requisito
 from werkzeug.security import generate_password_hash
 import functools
 
@@ -13,6 +13,20 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 def verificar_nivel_admin():
     if current_user.nivel != 1:
         abort(403)
+
+def registrar_log(tipo, acao, descricao, projeto_id=None):
+    try:
+        novo_log = Log(
+            tipo=tipo,
+            acao=acao,
+            descricao=descricao,
+            projeto_id=projeto_id
+        )
+        database.session.add(novo_log)
+        database.session.commit()
+    except Exception as e:
+        print(f"Erro ao registrar log: {e}")
+        database.session.rollback()
 
 @admin_bp.route('/')
 @admin_bp.route('/dashboard')
@@ -87,6 +101,8 @@ def dashboard():
         funcionarios_dash = funcionarios_dash,
         status_data_json  = json.dumps(status_data),
         volumes_json      = json.dumps(volumes),
+        logs              = Log.query.order_by(Log.data.desc()).limit(10).all(),
+        todos_logs        = Log.query.order_by(Log.data.desc()).all()
     )
 
 @admin_bp.route('/projetos')
@@ -120,6 +136,8 @@ def add_projeto():
     )
     database.session.add(projeto)
     database.session.commit()
+    
+    registrar_log('projeto', 'Projeto criado', f"O projeto '{nome}' foi criado com sucesso.", projeto.id)
     
     return redirect(url_for('admin.projetos'))
 
@@ -162,6 +180,9 @@ def vincular_equipe_projeto():
         projeto = Projeto.query.get_or_404(projeto_id)
         projeto.equipe_id = equipe_id
         database.session.commit()
+        
+        equipe = Equipes.query.get(equipe_id)
+        registrar_log('projeto', 'Equipe vinculada', f"A equipe '{equipe.nome}' foi vinculada ao projeto '{projeto.nome}'.", projeto.id)
     
     return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
 
@@ -177,6 +198,47 @@ def editar_projeto():
     projeto.descricao = request.form.get('descricao')
     
     database.session.commit()
+    registrar_log('projeto', 'Projeto atualizado', f"As informações do projeto '{projeto.nome}' foram atualizadas.", projeto.id)
+    return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
+
+@admin_bp.route('/excluir-projeto/<int:id>', methods=['POST'])
+def excluir_projeto(id):
+    projeto = Projeto.query.get_or_404(id)
+    nome_projeto = projeto.nome
+    try:
+        # Primeiro exclui requisitos associados (cascade manual se não definido)
+        Requisito.query.filter_by(projeto_id=id).delete()
+        
+        database.session.delete(projeto)
+        database.session.commit()
+        registrar_log('projeto', 'Projeto excluído', f"O projeto '{nome_projeto}' foi removido do sistema.")
+        flash("Projeto excluído com sucesso.", "sucesso")
+    except Exception as e:
+        database.session.rollback()
+        flash(f"Erro ao excluir projeto: {e}", "erro")
+    return redirect(url_for('admin.projetos'))
+
+@admin_bp.route('/add-requisito', methods=['POST'])
+def add_requisito():
+    projeto_id = request.form.get('projeto_id', type=int)
+    titulo = request.form.get('titulo')
+    descricao = request.form.get('descricao')
+    tipo = request.form.get('tipo') # Funcional ou Não-Funcional
+    
+    projeto = Projeto.query.get_or_404(projeto_id)
+    
+    novo_req = Requisito(
+        projeto_id=projeto_id,
+        titulo=titulo,
+        descricao=descricao,
+        tipo=tipo,
+        status='Pendente'
+    )
+    database.session.add(novo_req)
+    database.session.commit()
+    
+    registrar_log('requisito', 'Requisito adicionado', f"Novo requisito '{titulo}' adicionado ao projeto '{projeto.nome}'.", projeto.id)
+    
     return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
 
 @admin_bp.route('/clientes')

@@ -65,14 +65,19 @@
 }
 
 .close-btn {
-  background: none;
+  background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 24px;
   cursor: pointer;
-  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: all 0.2s;
 }
-.close-btn:hover { color: #fff; }
+.close-btn:hover { background: var(--surface-2); color: var(--text-primary); }
 
 .proj-header-divider { width: 1px; height: 20px; background: var(--border-md); }
 
