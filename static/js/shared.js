@@ -106,6 +106,8 @@ function loadAppTheme() {
   const saved = localStorage.getItem('cobyte-theme');
   if (saved === 'light') {
     document.body.classList.add('light-mode');
+  } else if (!saved) {
+    localStorage.setItem('cobyte-theme', 'dark');
   }
 }
 

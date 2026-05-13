@@ -6,19 +6,31 @@
   <title>Registro — CoByte</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cobyte-theme');
+      if (!savedTheme) localStorage.setItem('cobyte-theme', 'dark');
+      if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-mode');
+        document.body.classList.add('light-mode');
+      }
+    })();
+  </script>
 </head>
 <body>
 
 <div class="login-shell">
   <div class="login-brand">
     <div class="brand-content">
-      <div class="brand-logo">
-        <div class="brand-icon">C</div>
-        <span class="brand-name">Co<em>Byte</em></span>
+      <div class="brand-logo" style="display: flex; align-items: center; gap: 0; margin-bottom: 72px; margin-left: -56px; padding-right: 20px;">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 110px; width: auto; object-fit: contain;">
+        <span style="font-size: 72px; font-weight: 800; letter-spacing: -3px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-5px); margin-left: -15px; display: inline-block;">
+          <span style="color: #fff;">Co</span><span style="background: linear-gradient(90deg, #f72585, #4361ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding-right: 4px;">Byte</span>
+        </span>
       </div>
-      <div class="brand-headline">
-        <h2>Cadastre sua<br>empresa hoje.</h2>
-        <p>Acesse o portal do cliente e acompanhe seus projetos em tempo real.</p>
+      <div class="brand-headline" style="margin-bottom: 56px;">
+        <h2 style="font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 24px;">Cadastre sua<br>empresa <span>hoje.</span></h2>
+        <p style="font-size: 19px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; max-width: 440px;">Comece a gerenciar seus projetos com a tecnologia líder do mercado.</p>
       </div>
     </div>
     <div class="brand-bg-pattern"></div>

@@ -6,29 +6,93 @@
   <title>Login — CoByte</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cobyte-theme');
+      if (!savedTheme) localStorage.setItem('cobyte-theme', 'dark');
+      if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-mode');
+        document.body.classList.add('light-mode');
+      }
+    })();
+  </script>
 </head>
 <body>
 
 <div class="login-shell">
-  <!-- Painel Esquerdo -->
+  <!-- Painel Esquerdo: Brand & Features -->
   <div class="login-brand">
     <div class="brand-content">
-      <div class="brand-logo">
-        <div class="brand-icon">C</div>
-        <span class="brand-name">Co<em>Byte</em></span>
+      <div class="brand-logo" style="display: flex; align-items: center; gap: 0; margin-bottom: 72px; margin-left: -56px; padding-right: 20px;">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 110px; width: auto; object-fit: contain;">
+        <span style="font-size: 72px; font-weight: 800; letter-spacing: -3px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-5px); margin-left: -15px; display: inline-block;">
+          <span style="color: #fff;">Co</span><span style="background: linear-gradient(90deg, #f72585, #4361ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding-right: 4px;">Byte</span>
+        </span>
       </div>
-      <div class="brand-headline">
-        <h2>Gerencie projetos<br>com precisão.</h2>
-        <p>Uma plataforma completa para equipes que entregam resultados.</p>
+      
+      <div class="brand-headline" style="margin-bottom: 56px;">
+        <h2 style="font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 24px;">Gerencie projetos<br>com <span style="background: linear-gradient(90deg, #f72585, #4361ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">precisão.</span></h2>
+        <p style="font-size: 19px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; max-width: 440px;">Uma plataforma completa para equipes que entregam resultados.</p>
       </div>
 
+      <div class="features-list">
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+          </div>
+          <div class="feature-text">
+            <h3>Organização inteligente</h3>
+            <p>Centralize projetos, tarefas e documentos em um só lugar.</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          </div>
+          <div class="feature-text">
+            <h3>Acompanhamento em tempo real</h3>
+            <p>Visualize o progresso e tome decisões baseadas em dados.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="feature-text">
+            <h3>Colaboração eficiente</h3>
+            <p>Conecte sua equipe e aumente a produtividade juntos.</p>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Wavy background at the bottom -->
+    <div class="brand-waves">
+      <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="url(#wave-gradient)" fill-opacity="0.2" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        <defs>
+          <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#f72585;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#4361ee;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    
     <div class="brand-bg-pattern"></div>
   </div>
 
   <!-- Painel Direito: Formulário -->
   <div class="login-form-panel">
     <div class="login-card fade-up">
+      <div class="card-lock-container">
+        <div class="card-lock-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+      </div>
+
       <div class="lc-header">
         <h1>Entrar na conta</h1>
         <p>Use as credenciais fornecidas pela sua equipe</p>
@@ -36,46 +100,55 @@
 
       <form class="lc-form" method="POST" action="/">
         {% if error %}
-        <div id="error-msg" class="error-msg" style="display:block;">{{ error }}</div>
+        <div id="error-msg" class="error-msg">{{ error }}</div>
         {% endif %}
+        
         <div class="form-group">
-          <label class="form-label" for="identificador">Usuário ou E-mail</label>
+          <label class="form-label">USUÁRIO OU E-MAIL</label>
           <div class="input-wrap">
-            <span class="input-icon" id="identificador-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="input-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </span>
-            <input
-              class="form-input with-icon"
-              type="text"
-              id="identificador"
-              name="identificador"
-              placeholder="nome.usuario ou email@exemplo.com"
-              required
-              autocomplete="username"
-            >
+            <input class="form-input with-icon" type="text" name="identificador" placeholder="nome.usuario ou email@exemplo.com" required>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="password">Senha</label>
+          <label class="form-label">SENHA</label>
           <div class="input-wrap">
             <span class="input-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </span>
-            <input
-              class="form-input with-icon"
-              type="password"
-              id="password"
-              name="senha"
-              placeholder="••••••••"
-              required
-              autocomplete="current-password"
-            >
+            <input class="form-input with-icon" type="password" name="senha" placeholder="••••••••" required>
+            <button type="button" class="toggle-pw">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
           </div>
         </div>
-        <button class="btn btn-primary btn-lg w-full" type="submit" id="submit-btn">
+
+        <div class="form-options">
+          <label class="checkbox-container">
+            <input type="checkbox" name="remember">
+            <span class="checkmark"></span>
+            Lembrar-me
+          </label>
+          <a href="#" class="forgot-link">Esqueceu sua senha?</a>
+        </div>
+
+        <button class="btn-login-gradient" type="submit">
           Entrar
         </button>
+
+        <div class="lc-divider-label">
+          <span>Precisa de ajuda?</span>
+        </div>
+
+        <div class="help-box">
+          <div class="help-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <p>Fale com o Administrador para obter acesso à Plataforma CoByte</p>
+        </div>
       </form>
     </div>
   </div>
