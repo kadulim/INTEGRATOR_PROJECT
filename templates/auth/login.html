@@ -1,159 +1,190 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — CoByte</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-  <script>
-    (function() {
-      const savedTheme = localStorage.getItem('cobyte-theme');
-      if (!savedTheme) localStorage.setItem('cobyte-theme', 'dark');
-      if (savedTheme === 'light') {
-        document.documentElement.classList.add('light-mode');
-        document.body.classList.add('light-mode');
-      }
-    })();
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoByte — Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="login-shell">
-  <!-- Painel Esquerdo: Brand & Features -->
-  <div class="login-brand">
-    <div class="brand-content">
-      <div class="brand-logo" style="display: flex; align-items: center; gap: 0; margin-bottom: 72px; margin-left: -56px; padding-right: 20px;">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 110px; width: auto; object-fit: contain;">
-        <span style="font-size: 72px; font-weight: 800; letter-spacing: -3px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-5px); margin-left: -15px; display: inline-block;">
-          <span style="color: #fff;">Co</span><span style="background: linear-gradient(90deg, #f72585, #4361ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding-right: 4px;">Byte</span>
-        </span>
-      </div>
-      
-      <div class="brand-headline" style="margin-bottom: 56px;">
-        <h2 style="font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 24px;">Gerencie projetos<br>com <span style="background: linear-gradient(90deg, #f72585, #4361ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">precisão.</span></h2>
-        <p style="font-size: 19px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; max-width: 440px;">Uma plataforma completa para equipes que entregam resultados.</p>
-      </div>
-
-      <div class="features-list">
-        <div class="feature-item">
-          <div class="feature-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-          </div>
-          <div class="feature-text">
-            <h3>Organização inteligente</h3>
-            <p>Centralize projetos, tarefas e documentos em um só lugar.</p>
-          </div>
+    <!-- Cinematic Background System -->
+    <div class="cinematic-bg">
+        <div class="orb-container">
+            <div class="pulse-orb orb-a"></div>
+            <div class="pulse-orb orb-b"></div>
         </div>
+        <svg width="100%" height="100%" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" class="energy-lines">
+            <path class="energy-path" d="M-100,200 C300,50 600,600 1000,400 S1300,800 1600,600" stroke="url(#grad-pink)" stroke-width="2.5" fill="none" />
+            <path class="energy-path" d="M-50,700 C400,500 700,900 1100,450 S1400,100 1700,300" stroke="url(#grad-blue)" stroke-width="2" fill="none" />
+            <path class="energy-path" d="M1200,-100 C1000,400 800,100 400,700 S-200,300 -400,900" stroke="url(#grad-purple)" stroke-width="3" fill="none" opacity="0.3" />
+            
+            <defs>
+                <linearGradient id="grad-pink" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#f72585" stop-opacity="0" />
+                    <stop offset="50%" stop-color="#f72585" stop-opacity="0.9" />
+                    <stop offset="100%" stop-color="#f72585" stop-opacity="0" />
+                </linearGradient>
+                <linearGradient id="grad-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#4361ee" stop-opacity="0" />
+                    <stop offset="50%" stop-color="#4361ee" stop-opacity="0.7" />
+                    <stop offset="100%" stop-color="#4361ee" stop-opacity="0" />
+                </linearGradient>
+                <linearGradient id="grad-purple" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#7209b7" stop-opacity="0" />
+                    <stop offset="50%" stop-color="#7209b7" stop-opacity="0.6" />
+                    <stop offset="100%" stop-color="#7209b7" stop-opacity="0" />
+                </linearGradient>
+            </defs>
+        </svg>
+    </div>
+
+    <div class="layout-wrapper">
         
-        <div class="feature-item">
-          <div class="feature-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-          </div>
-          <div class="feature-text">
-            <h3>Acompanhamento em tempo real</h3>
-            <p>Visualize o progresso e tome decisões baseadas em dados.</p>
-          </div>
+        <!-- BRANDING SECTION -->
+        <div class="brand-section">
+            <div class="brand-top reveal">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CoByte Logo" class="brand-img">
+                <span class="brand-txt">Co<span class="byte">Byte</span></span>
+            </div>
+
+            <h1 class="brand-headline reveal">Gerencie projetos<br>com <span class="shimmer-text">precisão.</span></h1>
+            <p class="brand-subtext reveal">Uma plataforma completa para equipes que entregam resultados de verdade.</p>
+
+            <div class="features-grid">
+                <div class="feat-box reveal">
+                    <div class="feat-icon-wrap icon-pink">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <h4>Organização inteligente</h4>
+                    <p>Centralize projetos, tarefas e documentos em um só lugar.</p>
+                </div>
+
+                <div class="feat-box reveal">
+                    <div class="feat-icon-wrap icon-purple">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                    </div>
+                    <h4>Acompanhamento real</h4>
+                    <p>Visualize o progresso e tome decisões com confiança.</p>
+                </div>
+
+                <div class="feat-box reveal">
+                    <div class="feat-icon-wrap icon-blue">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    </div>
+                    <h4>Colaboração eficiente</h4>
+                    <p>Conecte sua equipe e aumente a produtividade.</p>
+                </div>
+            </div>
+
+            <div class="bottom-card reveal">
+                <div class="bottom-card-header">
+                    <div class="pulse-dot"></div>
+                    <span>Feito para equipes que constroem o futuro</span>
+                </div>
+                <div class="bottom-grid">
+                    <div class="bottom-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4361ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <h5>Segurança</h5>
+                        <p>Proteção avançada.</p>
+                    </div>
+                    <div class="bottom-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4361ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        <h5>Backup</h5>
+                        <p>Sempre salvo.</p>
+                    </div>
+                    <div class="bottom-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4361ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        <h5>Multi-acesso</h5>
+                        <p>Web e Tablet.</p>
+                    </div>
+                    <div class="bottom-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4361ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <h5>Suporte</h5>
+                        <p>Sempre pronto.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-note reveal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span>Plataforma <span class="bold">segura e confiável</span> para impulsionar sua equipe.</span>
+            </div>
         </div>
 
-        <div class="feature-item">
-          <div class="feature-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <div class="feature-text">
-            <h3>Colaboração eficiente</h3>
-            <p>Conecte sua equipe e aumente a produtividade juntos.</p>
-          </div>
+        <!-- LOGIN SECTION -->
+        <div class="login-section">
+            <div class="top-utils reveal">
+                <div class="theme-switcher">
+                    <button class="theme-btn" id="light-theme-btn" onclick="setTheme('light')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.07" x2="5.64" y2="17.66"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+                    <button class="theme-btn active" id="dark-theme-btn" onclick="setTheme('dark')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+                </div>
+                <button class="help-action">Ajuda</button>
+            </div>
+
+            <div class="auth-card reveal">
+                <div class="auth-card-glow"></div>
+                
+                <div class="auth-lock-icon">
+                    <div class="hex-shape">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f72585" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                </div>
+
+                <h2>Bem-vindo de volta! 👋</h2>
+                <p class="auth-subtitle">Faça login para acessar sua conta</p>
+
+                <form action="/" method="POST" class="auth-form">
+                    {% if error %}
+                    <div class="auth-error">{{ error }}</div>
+                    {% endif %}
+
+                    <div class="auth-group">
+                        <label>USUÁRIO OU E-MAIL</label>
+                        <div class="auth-input-wrap">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <input type="text" name="identificador" placeholder="nome.usuario@exemplo.com" required>
+                        </div>
+                    </div>
+
+                    <div class="auth-group">
+                        <label>SENHA</label>
+                        <div class="auth-input-wrap">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type="password" name="senha" id="auth-pw" placeholder="••••••••" required>
+                            <button type="button" class="pw-toggle" onclick="togglePassword()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="auth-extras">
+                        <label class="remember-me">
+                            <input type="checkbox" name="remember">
+                            <span class="box"></span>
+                            Lembrar-me
+                        </label>
+                        <a href="#" class="forgot-pw">Esqueceu sua senha?</a>
+                    </div>
+
+                    <button type="submit" class="auth-submit">
+                        <span>Entrar na plataforma</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                </form>
+
+                <div class="auth-divider"><span>OU</span></div>
+
+                <div class="auth-admin-help">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5"/></svg>
+                    <p>Fale com o Administrador para obter acesso à Plataforma CoByte</p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <!-- Wavy background at the bottom -->
-    <div class="brand-waves">
-      <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
-        <path fill="url(#wave-gradient)" fill-opacity="0.2" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-        <defs>
-          <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style="stop-color:#f72585;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#4361ee;stop-opacity:1" />
-          </linearGradient>
-        </defs>
-      </svg>
-    </div>
-    
-    <div class="brand-bg-pattern"></div>
-  </div>
-
-  <!-- Painel Direito: Formulário -->
-  <div class="login-form-panel">
-    <div class="login-card fade-up">
-      <div class="card-lock-container">
-        <div class="card-lock-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-      </div>
-
-      <div class="lc-header">
-        <h1>Entrar na conta</h1>
-        <p>Use as credenciais fornecidas pela sua equipe</p>
-      </div>
-
-      <form class="lc-form" method="POST" action="/">
-        {% if error %}
-        <div id="error-msg" class="error-msg">{{ error }}</div>
-        {% endif %}
-        
-        <div class="form-group">
-          <label class="form-label">USUÁRIO OU E-MAIL</label>
-          <div class="input-wrap">
-            <span class="input-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </span>
-            <input class="form-input with-icon" type="text" name="identificador" placeholder="nome.usuario ou email@exemplo.com" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">SENHA</label>
-          <div class="input-wrap">
-            <span class="input-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </span>
-            <input class="form-input with-icon" type="password" name="senha" placeholder="••••••••" required>
-            <button type="button" class="toggle-pw">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="form-options">
-          <label class="checkbox-container">
-            <input type="checkbox" name="remember">
-            <span class="checkmark"></span>
-            Lembrar-me
-          </label>
-          <a href="#" class="forgot-link">Esqueceu sua senha?</a>
-        </div>
-
-        <button class="btn-login-gradient" type="submit">
-          Entrar
-        </button>
-
-        <div class="lc-divider-label">
-          <span>Precisa de ajuda?</span>
-        </div>
-
-        <div class="help-box">
-          <div class="help-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          </div>
-          <p>Fale com o Administrador para obter acesso à Plataforma CoByte</p>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </body>
 </html>
