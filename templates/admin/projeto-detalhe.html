@@ -177,9 +177,14 @@
               {% set func_reqs = requisitos|selectattr('tipo', 'equalto', 'Funcional')|list %}
               {% if func_reqs %}
                 {% for req in func_reqs %}
-                <div class="requisito-item" style="padding:16px; border:1px solid var(--border); border-radius:12px; margin-bottom:12px; background:rgba(255,255,255,0.01);">
-                  <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ req.titulo }}</div>
-                  <div style="font-size:12px; color:var(--text-muted);">{{ req.descricao }}</div>
+                <div class="requisito-item" style="padding:16px; border:1px solid var(--border); border-radius:12px; margin-bottom:12px; background:rgba(255,255,255,0.01); display:flex; justify-content:space-between; align-items:center;">
+                  <div style="flex:1;">
+                    <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ req.titulo }}</div>
+                    <div style="font-size:12px; color:var(--text-muted);">{{ req.descricao }}</div>
+                  </div>
+                  <button type="button" onclick="abrirModalExcluirRequisito('{{ url_for('admin.excluir_requisito', id=req.id) }}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:8px; border-radius:8px; transition:0.2s;" onmouseover="this.style.color='var(--accent)'; this.style.background='rgba(233,69,96,0.1)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='transparent';">
+                    <i data-lucide="trash-2" style="width:16px;"></i>
+                  </button>
                 </div>
                 {% endfor %}
               {% else %}
@@ -194,9 +199,14 @@
               {% set non_func_reqs = requisitos|selectattr('tipo', 'equalto', 'Não-Funcional')|list %}
               {% if non_func_reqs %}
                 {% for req in non_func_reqs %}
-                <div class="requisito-item" style="padding:16px; border:1px solid var(--border); border-radius:12px; margin-bottom:12px; background:rgba(255,255,255,0.01);">
-                  <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ req.titulo }}</div>
-                  <div style="font-size:12px; color:var(--text-muted);">{{ req.descricao }}</div>
+                <div class="requisito-item" style="padding:16px; border:1px solid var(--border); border-radius:12px; margin-bottom:12px; background:rgba(255,255,255,0.01); display:flex; justify-content:space-between; align-items:center;">
+                  <div style="flex:1;">
+                    <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ req.titulo }}</div>
+                    <div style="font-size:12px; color:var(--text-muted);">{{ req.descricao }}</div>
+                  </div>
+                  <button type="button" onclick="abrirModalExcluirRequisito('{{ url_for('admin.excluir_requisito', id=req.id) }}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:8px; border-radius:8px; transition:0.2s;" onmouseover="this.style.color='var(--accent)'; this.style.background='rgba(233,69,96,0.1)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='transparent';">
+                    <i data-lucide="trash-2" style="width:16px;"></i>
+                  </button>
                 </div>
                 {% endfor %}
               {% else %}
@@ -206,6 +216,7 @@
           </div>
         </div>
       </div>
+    </div>
   </div>
 
   <!-- Aba Editar Projeto -->
@@ -219,7 +230,7 @@
           <h3 style="margin: 0; font-size: 18px; font-weight: 700;">Configurações do Projeto</h3>
         </div>
 
-        <form action="{{ url_for('admin.editar_projeto') }}" method="POST">
+        <form action="{{ url_for('admin.editar_projeto') }}" method="POST" id="form-editar-projeto">
           <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
           
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
@@ -249,19 +260,65 @@
             </div>
           </div>
 
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <div class="form-group">
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Cliente Associado</label>
+              <select name="cliente_id" class="form-input">
+                <option value="">Sem Cliente</option>
+                {% for cl in todos_clientes %}
+                <option value="{{ cl.id }}" {% if projeto.cliente_id == cl.id %}selected{% endif %}>
+                  {{ cl.usuario_rel.nome }} ({{ cl.empresa }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Equipe Responsável</label>
+              <select name="equipe_id" class="form-input">
+                <option value="">Nenhuma Equipe</option>
+                {% for eq in todas_equipes %}
+                <option value="{{ eq.id }}" {% if projeto.equipe_id == eq.id %}selected{% endif %}>{{ eq.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
           <div class="form-group" style="margin-bottom: 32px;">
             <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Descrição do Projeto</label>
-            <textarea name="descricao" rows="5" class="form-input">{{ projeto.descricao }}</textarea>
+            <textarea name="descricao" rows="4" class="form-input">{{ projeto.descricao }}</textarea>
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 16px;">
             <button type="reset" class="btn btn-ghost" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-weight:600;">Descartar</button>
             <button type="submit" class="btn btn-primary" 
-                    style="padding: 12px 32px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(255,51,102,0.2); transition: 0.2s;">
+                    style="padding: 12px 32px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(255,51,102,0.2); transition: 0.2s;"
+                    onclick="event.preventDefault(); openModal('modal-confirmar-edit-projeto')">
               Salvar Alterações
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmar Edição de Projeto -->
+<div id="modal-confirmar-edit-projeto" class="modal-overlay">
+  <div class="modal-content" style="max-width: 400px; background: var(--surface-solid); border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+    <div class="modal-header" style="padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+      <h3 style="font-size: 18px; font-weight: 800; margin: 0; color: var(--blue);">Confirmar Alterações</h3>
+      <button class="close-btn" onclick="closeModal('modal-confirmar-edit-projeto')"><i data-lucide="x"></i></button>
+    </div>
+    <div style="padding: 32px; text-align: center;">
+      <div style="width: 64px; height: 64px; background: var(--blue-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--blue);">
+        <i data-lucide="save" style="width: 32px; height: 32px;"></i>
+      </div>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">
+        Deseja salvar todas as alterações feitas nas informações deste projeto?
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-confirmar-edit-projeto')" style="font-weight:600; color:var(--text-muted);">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('form-editar-projeto').submit()" style="background: var(--blue); color: #fff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 16px rgba(59,130,246,0.2);">Confirmar e Salvar</button>
       </div>
     </div>
   </div>
@@ -342,9 +399,26 @@
     const target = document.getElementById('tab-' + tabId);
     if (target) {
       target.classList.add('active');
-      btn.classList.add('active');
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        // Find button by onclick if no btn provided (for direct calls)
+        const buttons = document.querySelectorAll('.proj-tab');
+        buttons.forEach(b => {
+          if (b.getAttribute('onclick').includes(tabId)) b.classList.add('active');
+        });
+      }
+      localStorage.setItem('activeProjectTab', tabId);
     }
   }
+
+  // Restore active tab on load
+  window.addEventListener('DOMContentLoaded', () => {
+    const activeTab = localStorage.getItem('activeProjectTab');
+    if (activeTab && activeTab !== 'visao-geral') {
+      switchTab(activeTab);
+    }
+  });
 
   function openModal(id) {
     const modal = document.getElementById(id);
@@ -366,5 +440,39 @@
       event.target.style.display = 'none';
     }
   }
+
+  function abrirModalExcluirRequisito(url) {
+    const modal = document.getElementById('modal-confirmar-exclusao-requisito');
+    const form = document.getElementById('form-excluir-requisito');
+    if (modal && form) {
+      form.action = url;
+      modal.style.display = 'flex';
+      if (window.lucide) lucide.createIcons();
+    }
+  }
 </script>
+
+<!-- Modal Confirmar Exclusão de Requisito -->
+<div id="modal-confirmar-exclusao-requisito" class="modal-overlay">
+  <div class="modal-content" style="max-width: 400px; background: var(--surface-solid); border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+    <div class="modal-header" style="padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+      <h3 style="font-size: 18px; font-weight: 800; margin: 0; color: var(--accent);">Confirmar Exclusão</h3>
+      <button class="close-btn" onclick="closeModal('modal-confirmar-exclusao-requisito')"><i data-lucide="x"></i></button>
+    </div>
+    <div style="padding: 32px; text-align: center;">
+      <div style="width: 64px; height: 64px; background: var(--accent-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--accent);">
+        <i data-lucide="alert-triangle" style="width: 32px; height: 32px;"></i>
+      </div>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">
+        Tem certeza que deseja excluir este requisito? Esta ação não pode ser desfeita.
+      </p>
+      <form id="form-excluir-requisito" action="" method="POST">
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('modal-confirmar-exclusao-requisito')" style="font-weight:600; color:var(--text-muted);">Cancelar</button>
+          <button type="submit" class="btn btn-primary" style="background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 16px rgba(233,69,96,0.2);">Excluir Agora</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}

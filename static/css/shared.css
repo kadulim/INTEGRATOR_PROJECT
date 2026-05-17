@@ -6,6 +6,7 @@
 
 /* ── Roberto's Premium Design Tokens ── */
 :root {
+  color-scheme: dark;
   --bg:          #0a0a0c;
   --surface:     rgba(255, 255, 255, 0.03);
   --surface-solid:#121216;
@@ -64,6 +65,7 @@
 
 /* ── Roberto's Light Mode Overrides ── */
 .light-mode {
+  color-scheme: light;
   --bg:          #f9fafb; /* Cinza mais claro como solicitado */
   --surface:     #ffffff;
   --surface-solid:#ffffff;
@@ -664,6 +666,16 @@ select.form-input, .filter-select {
   padding-right: 40px !important;
   cursor: pointer;
   color: var(--text-primary);
+}
+
+select option {
+  background-color: #121216; /* Cor sólida para o dropdown no dark */
+  color: #ffffff;
+}
+
+.light-mode select option {
+  background-color: #ffffff;
+  color: #000000;
 }
 
 .filter-select:focus, .form-input:focus {

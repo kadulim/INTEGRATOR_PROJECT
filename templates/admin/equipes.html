@@ -30,7 +30,7 @@
 <div class="members-grid fade-up fade-up-1">
   {% if equipes %}
     {% for equipe in equipes %}
-    <div class="member-card team-card">
+    <div class="member-card team-card" onclick="location.href='{{ url_for('admin.equipe_detalhe', id=equipe.id) }}'" style="cursor: pointer;">
       <div class="member-actions">
         <button class="action-btn edit" title="Editar" 
           data-id="{{ equipe.id }}"

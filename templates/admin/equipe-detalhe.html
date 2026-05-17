@@ -1,0 +1,600 @@
+{% extends 'admin/base.html' %}
+{% set active_page = 'equipes' %}
+
+{% block title %}{{ equipe.nome }} — CoByte{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Ocultar a topbar padrão para esta página */
+  .topbar { display: none !important; }
+  
+  /* Ajustar o conteúdo para subir e remover fundo padrão */
+  .page-content { 
+    padding: 24px 32px !important; 
+    background-color: #08090f !important;
+    min-height: 100vh;
+    color: #fff;
+  }
+
+  /* Cores e Variáveis Locais do Layout */
+  :root {
+    --bg-dark: #08090f;
+    --card-bg: #11131c;
+    --border-color: rgba(255, 255, 255, 0.03);
+    --purple: #a855f7;
+    --blue: #3b82f6;
+    --pink: #ec4899;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --text-muted: rgba(255, 255, 255, 0.4);
+  }
+
+  .premium-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+
+  /* Custom Header */
+  .custom-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .breadcrumbs a { color: var(--text-muted); text-decoration: none; }
+  .breadcrumbs span.active { color: #fff; font-weight: 600; }
+
+  /* Header Card */
+  .team-header-grid {
+    display: grid;
+    grid-template-columns: 180px 1fr 300px;
+    gap: 32px;
+    padding: 32px;
+    align-items: center;
+    border: 1px solid rgba(168, 85, 247, 0.15); /* Efeito de glow roxo */
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.05);
+  }
+
+  .team-avatar-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .team-avatar-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .team-avatar-overlay {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .team-info-main h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+  }
+  .team-description {
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    max-width: 500px;
+  }
+  .team-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .team-meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-size: 13px;
+    border-left: 1px solid rgba(255,255,255,0.05);
+    padding-left: 32px;
+  }
+  .team-meta-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .team-meta-label { color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+  .team-meta-value { color: #fff; font-weight: 600; }
+
+  /* KPIs */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #11131c;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .kpi-data h3 { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; color: #fff; }
+  .kpi-data p { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  
+  /* Sparklines simulados com SVG */
+  .sparkline {
+    width: 100px;
+    height: 40px;
+  }
+
+  /* Main Grid Layout */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .section-title { font-size: 14px; font-weight: 700; color: #fff; }
+  .section-action { color: var(--text-muted); font-size: 12px; text-decoration: none; cursor: pointer; }
+  .section-action:hover { color: #fff; }
+
+  /* Membros */
+  .members-list {
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .members-list::-webkit-scrollbar { display: none; }
+  .member-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 70px;
+  }
+  .member-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #1a1d29;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #3b82f6;
+    border: 2px solid transparent;
+    margin-bottom: 8px;
+    transition: 0.2s;
+  }
+  .member-avatar.leader { border-color: #a855f7; }
+  .member-name { font-size: 12px; font-weight: 600; color: #fff; max-width: 80px; }
+  .member-role { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Projetos List */
+  .project-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .project-row:last-child { border-bottom: none; }
+  
+  .project-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .project-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: #1a1d29;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* Progress Bar Custom */
+  .progress-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 200px;
+  }
+  .progress-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+  .progress-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    min-width: 30px;
+  }
+
+  /* Timeline / Logs */
+  .timeline {
+    padding: 24px;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 24px;
+    bottom: 24px;
+    width: 2px;
+    background: rgba(255,255,255,0.03);
+  }
+  .timeline-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .timeline-item:last-child { margin-bottom: 0; }
+  .timeline-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #1a1d29;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    z-index: 1;
+    border: 2px solid #11131c;
+  }
+  .timeline-content {
+    flex: 1;
+    padding-top: 4px;
+  }
+  .timeline-text { font-size: 12px; color: #fff; margin-bottom: 4px; line-height: 1.4; }
+  .timeline-text strong { color: #fff; font-weight: 600; }
+  .timeline-meta { font-size: 11px; color: var(--text-muted); }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  /* Badges */
+  .badge-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+  .badge-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+  .badge-red { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+  .badge-green { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  
+
+  <!-- Header Card -->
+  <div class="premium-card team-header-grid">
+    <!-- Avatar -->
+    <div class="team-avatar-container">
+      <img src="https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=400&q=80" alt="Team Avatar">
+      <div class="team-avatar-overlay">
+        <i data-lucide="camera" style="width: 14px;"></i>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="team-info-main">
+      <h1>
+        {{ equipe.nome|upper }}
+        <span class="badge badge-purple" style="font-size: 11px; padding: 2px 8px; border-radius: 4px;">Ativa</span>
+      </h1>
+      <p class="team-description">
+        Equipe especializada em desenvolvimento de soluções web e automações inteligentes. Focada em entregas de alta performance e código limpo.
+      </p>
+      <div class="team-tags">
+        <span class="badge badge-blue">Desenvolvimento Web</span>
+        <span class="badge badge-purple">Backend</span>
+        <span class="badge badge-red">Automação</span>
+      </div>
+    </div>
+
+    <!-- Meta -->
+    <div class="team-meta-list">
+      <div class="team-meta-item">
+        <span class="team-meta-label"><i data-lucide="user" style="width:14px;"></i>Líder da equipe</span>
+        <span class="team-meta-value">{{ funcionarios[0].usuario_rel.nome if funcionarios else 'Não definido' }}</span>
+      </div>
+      <div class="team-meta-item">
+        <span class="team-meta-label"><i data-lucide="calendar" style="width:14px;"></i>Criada em</span>
+        <span class="team-meta-value">10/03/2025</span>
+      </div>
+      <div class="team-meta-item">
+        <span class="team-meta-label"><i data-lucide="users" style="width:14px;"></i>Membros</span>
+        <span class="team-meta-value">{{ funcionarios|length }}</span>
+      </div>
+      <div class="team-meta-item">
+        <span class="team-meta-label"><i data-lucide="shield" style="width:14px;"></i>Status</span>
+        <span class="team-meta-value" style="color: #10b981;">Ativa</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs Row -->
+  <div class="kpi-grid">
+    <!-- Projetos Concluídos -->
+    <div class="premium-card kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+          <i data-lucide="check-circle"></i>
+        </div>
+        <div class="kpi-data">
+          <h3>{{ projetos|selectattr('status', 'equalto', 'Concluído')|list|length }}</h3>
+          <p>Projetos Concluídos</p>
+        </div>
+      </div>
+      <!-- Sparkline SVG -->
+      <svg class="sparkline" viewBox="0 0 100 40">
+        <path d="M0,30 Q20,10 40,25 T80,5 T100,20" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- Projetos em Desenvolvimento -->
+    <div class="premium-card kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+          <i data-lucide="code"></i>
+        </div>
+        <div class="kpi-data">
+          <h3>{{ projetos|selectattr('status', 'equalto', 'Em andamento')|list|length }}</h3>
+          <p>Projetos em Desenvolvimento</p>
+        </div>
+      </div>
+      <!-- Sparkline SVG -->
+      <svg class="sparkline" viewBox="0 0 100 40">
+        <path d="M0,35 Q20,20 40,30 T80,10 T100,5" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- Tarefas Concluídas -->
+    <div class="premium-card kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+          <i data-lucide="list-checks"></i>
+        </div>
+        <div class="kpi-data">
+          <h3>87</h3>
+          <p>Tarefas Concluídas</p>
+        </div>
+      </div>
+      <!-- Sparkline SVG -->
+      <svg class="sparkline" viewBox="0 0 100 40">
+        <path d="M0,25 Q20,35 40,15 T80,30 T100,10" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    
+    <!-- Left Column -->
+    <div>
+      
+      <!-- Membros da Equipe -->
+      <div class="premium-card">
+        <div class="section-header">
+          <span class="section-title">Membros da Equipe</span>
+          <a class="section-action">Ver todos</a>
+        </div>
+        <div class="members-list">
+          {% for func in funcionarios %}
+            <div class="member-item">
+              <div class="member-avatar {% if loop.first %}leader{% endif %}">
+                {{ func.usuario_rel.nome[:2].upper() }}
+              </div>
+              <span class="member-name">{{ func.usuario_rel.nome }}</span>
+              <span class="member-role">{% if loop.first %}Líder{% else %}Dev{% endif %}</span>
+            </div>
+          {% else %}
+            <p style="color: var(--text-muted); font-size: 13px; padding: 24px;">Nenhum membro vinculado.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Projetos em Desenvolvimento -->
+      <div class="premium-card">
+        <div class="section-header">
+          <span class="section-title">Projetos em Desenvolvimento</span>
+          <a class="section-action">Ver todos</a>
+        </div>
+        <div>
+          {% for proj in projetos if proj.status == 'Em andamento' %}
+            <div class="project-row">
+              <div class="project-info">
+                <div class="project-icon" style="color: #a855f7;"><i data-lucide="folder" style="width: 16px;"></i></div>
+                <div>
+                  <div style="font-weight: 600; font-size: 13px; color: #fff;">{{ proj.nome }}</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">{{ proj.descricao[:40] }}...</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 24px;">
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                  <div class="progress-bar-bg">
+                    {% set pct = [30, 45, 60, 75]|random %}
+                    <div class="progress-bar-fill" style="width: {{ pct }}%; background: {% if loop.index == 1 %}#a855f7{% elif loop.index == 2 %}#3b82f6{% else %}#ec4899{% endif %};"></div>
+                  </div>
+                  <span class="progress-text">{{ pct }}%</span>
+                </div>
+                <span style="font-size: 11px; color: var(--text-muted);">Entrega: {{ proj.prazo }}</span>
+              </div>
+            </div>
+          {% else %}
+            <p style="color: var(--text-muted); font-size: 13px; padding: 24px;">Nenhum projeto em andamento.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Projetos Concluídos -->
+      <div class="premium-card">
+        <div class="section-header">
+          <span class="section-title">Projetos Concluídos</span>
+          <a class="section-action">Ver todos</a>
+        </div>
+        <div>
+          {% for proj in projetos if proj.status == 'Concluído' %}
+            <div class="project-row">
+              <div class="project-info">
+                <div class="project-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i data-lucide="check" style="width: 16px;"></i></div>
+                <div>
+                  <div style="font-weight: 600; font-size: 13px; color: #fff;">{{ proj.nome }}</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">{{ proj.descricao[:40] }}...</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 24px;">
+                <span class="badge badge-green" style="font-size: 10px; padding: 2px 6px; border-radius: 4px;">Concluído</span>
+                <span style="font-size: 11px; color: var(--text-muted);">{{ proj.prazo }}</span>
+              </div>
+            </div>
+          {% else %}
+            <p style="color: var(--text-muted); font-size: 13px; padding: 24px;">Nenhum projeto concluído.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Logs da Equipe -->
+    <div class="premium-card">
+      <div class="section-header">
+        <span class="section-title">Logs da Equipe</span>
+        <a class="section-action" onclick="openModal('modal-todos-logs')">Ver Todos os Logs</a>
+      </div>
+      <div class="timeline">
+        {% for log in logs[:5] %}
+          <div class="timeline-item">
+            <div class="timeline-icon" style="
+              {% if loop.index == 1 %}color: #a855f7; background: rgba(168, 85, 247, 0.1);
+              {% elif loop.index == 2 %}color: #10b981; background: rgba(16, 185, 129, 0.1);
+              {% elif loop.index == 3 %}color: #3b82f6; background: rgba(59, 130, 246, 0.1);
+              {% elif loop.index == 4 %}color: #f59e0b; background: rgba(245, 158, 11, 0.1);
+              {% elif loop.index == 5 %}color: #ef4444; background: rgba(239, 68, 68, 0.1);
+              {% else %}color: #a855f7; background: rgba(168, 85, 247, 0.1);{% endif %}">
+              <i data-lucide="{% if loop.index == 1 %}code{% elif loop.index == 2 %}check{% elif loop.index == 3 %}git-branch{% elif loop.index == 4 %}git-merge{% elif loop.index == 5 %}alert-circle{% else %}activity{% endif %}" style="width: 14px;"></i>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-text">{{ log.descricao|safe }}</div>
+              <div class="timeline-meta">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
+            </div>
+          </div>
+        {% else %}
+          <p style="color: var(--text-muted); font-size: 13px; padding: 24px; text-align: center;">Nenhum log registrado para esta equipe.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modal Todos os Logs -->
+<div id="modal-todos-logs" class="modal-overlay">
+  <div class="modal-content" style="max-width: 600px; width: 90%; background: #11131c; border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+    <div class="modal-header" style="padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: space-between;">
+      <h3 style="font-size: 14px; font-weight: 700; margin: 0; color: #fff;">Todos os Logs da Equipe</h3>
+      <button class="close-btn" onclick="closeModal('modal-todos-logs')" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer;"><i data-lucide="x" style="width: 18px;"></i></button>
+    </div>
+    <div style="padding: 24px; max-height: 400px; overflow-y: auto;">
+      <div class="timeline" style="padding: 0;">
+        {% for log in logs %}
+          <div class="timeline-item">
+            <div class="timeline-icon" style="color: #a855f7; background: rgba(168, 85, 247, 0.1);">
+              <i data-lucide="activity" style="width: 14px;"></i>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-text">{{ log.descricao|safe }}</div>
+              <div class="timeline-meta">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
+            </div>
+          </div>
+        {% else %}
+          <p style="color: var(--text-muted); font-size: 13px; text-align: center;">Nenhum log registrado.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  lucide.createIcons();
+</script>
+{% endblock %}

@@ -4,269 +4,562 @@
 {% block title %}Dashboard — CoByte{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-{% endblock %}
+<style>
+  /* Esconder Topbar original para remover o ícone de notificações */
+  .topbar {
+    display: none !important;
+  }
 
-{% block topbar_title %}
-Dashboard
-<div style="font-size: 13px; font-weight: 500; color: var(--text-muted); margin-top: 4px;">Visão geral dos seus projetos e atividades</div>
-{% endblock %}
-{% block topbar_actions %}
+  /* Ajustar o conteúdo para ocupar o espaço */
+  .main-content {
+    padding-top: 0 !important;
+  }
+
+  .page-content {
+    background-color: #08090f !important;
+    color: #fff;
+    padding: 32px 40px !important;
+    min-height: 100vh;
+  }
+
+  :root {
+    --bg-dark: #08090f;
+    --card-bg: #11131c;
+    --border-color: rgba(255, 255, 255, 0.03);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    --purple: #a855f7;
+    --blue: #3b82f6;
+    --pink: #ec4899;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+  }
+
+  .premium-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+
+  /* Header */
+  .dashboard-header {
+    margin-bottom: 32px;
+  }
+  .dashboard-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+  .dashboard-header p {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  /* KPIs */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .kpi-card {
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg);
+  }
+  .kpi-left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .kpi-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .kpi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .kpi-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .kpi-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    margin-top: 4px;
+  }
+  .kpi-trend {
+    font-size: 12px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+  }
+
+  .sparkline {
+    width: 100px;
+    height: 40px;
+  }
+
+  /* Grid Principal */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .section-title { font-size: 15px; font-weight: 700; color: #fff; }
+  .section-action { color: var(--text-muted); font-size: 13px; text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 600; }
+  .section-action:hover { color: #fff; }
+
+  /* Projetos Ativos */
+  .project-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .project-row:last-child { border-bottom: none; }
+  
+  .project-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .project-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: #1a1d29;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .progress-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 200px;
+  }
+  .progress-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+  .progress-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    min-width: 35px;
+  }
+
+  /* Donut Chart SVG */
+  .donut-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+  }
+  .donut-chart-wrapper {
+    position: relative;
+    width: 140px;
+    height: 140px;
+  }
+  .donut-center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .donut-center-text h4 { font-size: 24px; font-weight: 800; color: #fff; margin: 0; }
+  .donut-center-text p { font-size: 11px; color: var(--text-muted); margin: 0; }
+
+  .donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 12px;
+  }
+  .legend-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 160px;
+  }
+  .legend-label { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .legend-value { color: #fff; font-weight: 600; }
+
+  /* Bar Chart SVG */
+  .bar-chart-container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .bars-wrapper {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 160px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .bar-item {
+    width: 20px;
+    border-radius: 4px 4px 0 0;
+    background: #a855f7;
+    transition: 0.3s;
+    position: relative;
+  }
+  .bar-item:hover { background: #c084fc; }
+  .bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .bar-label { width: 20px; text-align: center; }
+
+  /* Timeline / Logs */
+  .timeline {
+    padding: 24px;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 24px;
+    bottom: 24px;
+    width: 2px;
+    background: rgba(255,255,255,0.03);
+  }
+  .timeline-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .timeline-item:last-child { margin-bottom: 0; }
+  .timeline-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #1a1d29;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    z-index: 1;
+    border: 2px solid #11131c;
+  }
+  .timeline-content {
+    flex: 1;
+    padding-top: 4px;
+  }
+  .timeline-text { font-size: 12px; color: #fff; margin-bottom: 4px; line-height: 1.4; }
+  .timeline-text strong { color: #fff; font-weight: 600; }
+  .timeline-meta { font-size: 11px; color: var(--text-muted); }
+</style>
 {% endblock %}
 
 {% block content %}
-
-<!-- Stat Cards -->
-<div class="stat-grid fade-up fade-up-1">
-  <!-- Projetos Ativos -->
-  <div class="stat-card-modern">
-    <div class="stat-card-header">
-      <div class="stat-icon-box" style="background: rgba(59, 130, 246, 0.1); color: var(--blue);">
-        <i data-lucide="folder" style="width: 20px;"></i>
-      </div>
-      <div class="stat-label-modern">Projetos Ativos</div>
-    </div>
-    <div class="stat-main-content">
-      <div class="stat-value-modern">{{ projetos_ativos | length }}</div>
-      <div class="stat-sparkline" id="sparkline-projects"></div>
-    </div>
-    <div class="stat-card-footer">
-      <div class="status-dot" style="background: var(--blue);"></div>
-      <span style="color: var(--blue);">em andamento</span>
-    </div>
+<div class="page-content">
+  
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p>Visão geral dos seus projetos e atividades</p>
   </div>
 
-  <!-- Clientes -->
-  <div class="stat-card-modern">
-    <div class="stat-card-header">
-      <div class="stat-icon-box" style="background: rgba(16, 185, 129, 0.1); color: var(--green);">
-        <i data-lucide="users" style="width: 20px;"></i>
+  <!-- KPIs Row -->
+  <div class="kpi-grid">
+    <!-- Projetos Ativos -->
+    <div class="premium-card kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-header">
+          <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+            <i data-lucide="folder" style="width: 16px;"></i>
+          </div>
+          <span class="kpi-label">Projetos Ativos</span>
+        </div>
+        <div class="kpi-value">{{ total_projetos }}</div>
+        <div class="kpi-trend" style="color: #3b82f6;">
+          <i data-lucide="arrow-up-right" style="width: 12px;"></i>
+          1 novo este mês
+        </div>
       </div>
-      <div class="stat-label-modern">Clientes</div>
+      <svg class="sparkline" viewBox="0 0 100 40">
+        <path d="M0,30 Q20,10 40,25 T80,5 T100,20" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/>
+      </svg>
     </div>
-    <div class="stat-main-content">
-      <div class="stat-value-modern">{{ total_clientes }}</div>
-      <div class="stat-sparkline" id="sparkline-clients"></div>
-    </div>
-    <div class="stat-card-footer">
-      <div class="status-dot" style="background: var(--green);"></div>
-      <span style="color: var(--green);">cadastrados</span>
-    </div>
-  </div>
 
-  <!-- Funcionários -->
-  <div class="stat-card-modern">
-    <div class="stat-card-header">
-      <div class="stat-icon-box" style="background: rgba(139, 92, 246, 0.1); color: var(--purple);">
-        <i data-lucide="user-check" style="width: 20px;"></i>
+    <!-- Clientes -->
+    <div class="premium-card kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-header">
+          <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+            <i data-lucide="users" style="width: 16px;"></i>
+          </div>
+          <span class="kpi-label">Clientes</span>
+        </div>
+        <div class="kpi-value">{{ total_clientes }}</div>
+        <div class="kpi-trend" style="color: #10b981;">
+          <i data-lucide="arrow-up-right" style="width: 12px;"></i>
+          2 novos este mês
+        </div>
       </div>
-      <div class="stat-label-modern">Funcionários</div>
+      <svg class="sparkline" viewBox="0 0 100 40">
+        <path d="M0,35 Q20,20 40,30 T80,10 T100,5" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+      </svg>
     </div>
-    <div class="stat-main-content">
-      <div class="stat-value-modern">{{ total_equipe }}</div>
-      <div class="stat-sparkline" id="sparkline-staff"></div>
-    </div>
-    <div class="stat-card-footer">
-      <div class="status-dot" style="background: var(--purple);"></div>
-      <span style="color: var(--purple);">funcionários</span>
-    </div>
-  </div>
 
-  <!-- Budget Total -->
-  <div class="stat-card-modern">
-    <div class="stat-card-header">
-      <div class="stat-icon-box" style="background: rgba(233, 69, 96, 0.1); color: var(--accent);">
-        <i data-lucide="bar-chart-3" style="width: 20px;"></i>
+    <!-- Funcionários -->
+    <div class="premium-card kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-header">
+          <div class="kpi-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+            <i data-lucide="user-check" style="width: 16px;"></i>
+          </div>
+          <span class="kpi-label">Funcionários</span>
+        </div>
+        <div class="kpi-value">{{ total_equipe }}</div>
+        <div class="kpi-trend" style="color: #a855f7;">
+          <i data-lucide="arrow-up-right" style="width: 12px;"></i>
+          3 novos este mês
+        </div>
       </div>
-      <div class="stat-label-modern">Budget Total</div>
+      <svg class="sparkline" viewBox="0 0 100 40">
+        <path d="M0,25 Q20,35 40,15 T80,30 T100,10" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
+      </svg>
     </div>
-    <div class="stat-main-content">
-      <div class="stat-value-modern">
+
+    <!-- Budget Total -->
+    <div class="premium-card kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-header">
+          <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+            <i data-lucide="bar-chart-3" style="width: 16px;"></i>
+          </div>
+          <span class="kpi-label">Budget Total</span>
+        </div>
+        <div class="kpi-value">
           R$
           {% if budget_total >= 1000000 %}{{ "%.1f" | format(budget_total / 1000000) }}M
           {% elif budget_total >= 1000 %}{{ "%.0f" | format(budget_total / 1000) }}k
           {% else %}{{ budget_total }}{% endif %}
+        </div>
+        <div class="kpi-trend" style="color: #ef4444;">
+          <i data-lucide="arrow-up-right" style="width: 12px;"></i>
+          12% vs mês passado
+        </div>
       </div>
-      <div class="stat-sparkline" id="sparkline-budget"></div>
-    </div>
-    <div class="stat-card-footer">
-      <div class="status-dot" style="background: var(--accent);"></div>
-      <span style="color: var(--accent);">valor planejado</span>
+      <svg class="sparkline" viewBox="0 0 100 40">
+        <path d="M0,10 Q20,5 40,25 T80,15 T100,30" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+      </svg>
     </div>
   </div>
-</div>
 
-<!-- Grid Principal -->
-<div class="dash-grid">
-  <!-- Coluna Esquerda -->
-  <div style="display:flex;flex-direction:column;gap:24px;">
-
-    <!-- Projetos Ativos -->
-    <div class="card fade-up fade-up-2">
-      <div class="card-body">
-        <div class="flex items-center justify-between mb-8">
-          <h3 style="font-size:16px;font-weight:700;">Projetos Ativos</h3>
-          <a href="{{ url_for('admin.projetos') }}" class="btn btn-ghost btn-sm" style="color: var(--text-muted); font-size: 13px;">Ver todos <i data-lucide="arrow-right" style="width: 14px; margin-left: 4px;"></i></a>
-        </div>
-        <div class="project-list-modern">
-          {% if projetos_ativos %}
-          {% for projeto in projetos_ativos %}
-          <div class="project-item-modern" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=projeto.id) }}'">
-            <div class="project-avatar" style="background: var(--accent);">
-              {{ projeto.nome[:1].upper() }}
-            </div>
-            <div class="project-name-modern">{{ projeto.nome }}</div>
-            <div class="project-progress-container">
-              <div class="progress-track">
-                <div class="progress-fill-blue" style="width: 65%;"></div>
+  <!-- Content Grid 1 -->
+  <div class="dash-grid">
+    <!-- Left Column: Projetos em Desenvolvimento -->
+    <div class="premium-card">
+      <div class="section-header">
+        <span class="section-title">Projetos em Desenvolvimento</span>
+        <a href="{{ url_for('admin.projetos') }}" class="section-action">Ver todos <i data-lucide="arrow-right" style="width:12px;"></i></a>
+      </div>
+      <div>
+        {% for proj in projetos_ativos %}
+          <div class="project-row" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=proj.id) }}'" style="cursor:pointer;">
+            <div class="project-info">
+              <div class="project-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;"><i data-lucide="folder" style="width: 16px;"></i></div>
+              <div>
+                <div style="font-weight: 600; font-size: 13px; color: #fff;">{{ proj.nome }}</div>
+                <div style="font-size: 11px; color: var(--text-muted);">{{ proj.descricao[:40] if proj.descricao else 'Sem descrição' }}...</div>
               </div>
-              <div class="progress-pct">65%</div>
             </div>
-            <span class="badge badge-blue" style="font-size: 11px; padding: 6px 12px; border-radius: 20px;">{{ projeto.status }}</span>
+            <div style="display: flex; align-items: center; gap: 24px;">
+              <div class="progress-container">
+                <div class="progress-bar-bg">
+                  {% set pct = [30, 45, 60, 75]|random %}
+                  <div class="progress-bar-fill" style="width: {{ pct }}%; background: {% if loop.index % 3 == 1 %}#a855f7{% elif loop.index % 3 == 2 %}#3b82f6{% else %}#ec4899{% endif %};"></div>
+                </div>
+                <span class="progress-text">{{ pct }}%</span>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 10px; color: var(--text-muted);">Entrega</div>
+                <div style="font-size: 11px; color: #3b82f6; font-weight: 600;">{{ proj.prazo }}</div>
+              </div>
+            </div>
           </div>
-          {% endfor %}
-          {% else %}
-          <div style="text-align: center; padding: 40px; color: var(--text-muted);">Nenhum projeto ativo.</div>
-          {% endif %}
-        </div>
+        {% else %}
+          <p style="color: var(--text-muted); font-size: 13px; padding: 24px;">Nenhum projeto em desenvolvimento.</p>
+        {% endfor %}
       </div>
     </div>
 
-    <!-- Volume por Mês -->
-    <div class="card fade-up fade-up-3">
-      <div class="card-body">
-        <div class="flex items-center justify-between mb-8">
-          <h3 style="font-size:16px;font-weight:700;">Volume por Mês</h3>
-          <div style="display: flex; align-items: center; gap: 8px; background: var(--surface-2); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
-            <i data-lucide="calendar" style="width: 16px;"></i>
-            2025
-            <i data-lucide="chevron-down" style="width: 14px;"></i>
+    <!-- Right Column: Status dos Projetos -->
+    <div class="premium-card">
+      <div class="section-header">
+        <span class="section-title">Status dos Projetos</span>
+      </div>
+      <div class="donut-container">
+        <!-- SVG Donut Chart -->
+        <div class="donut-chart-wrapper">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <!-- Segmentos serão ajustados via JS para serem "condizentes" -->
+            <circle cx="70" cy="70" r="55" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="114 231" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="55" fill="none" stroke="#3b82f6" stroke-width="12" stroke-dasharray="172 173" stroke-dashoffset="-114" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="55" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12" stroke-dasharray="59 286" stroke-dashoffset="-286" transform="rotate(-90 70 70)"/>
+          </svg>
+          <div class="donut-center-text">
+            <h4 id="total-projetos-center">{{ total_projetos }}</h4>
+            <p>Projetos</p>
           </div>
         </div>
-        <div id="chart-bars-modern" class="chart-bars-container">
-            <!-- Renderizado via JS -->
-        </div>
-        <div style="display:flex;gap:12px;margin-top:24px;">
-          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);font-weight: 600;">
-            <div style="width:12px;height:12px;border-radius:3px;background: var(--accent);"></div> Total de projetos
-          </div>
+        <!-- Legend (Atualizada via JS) -->
+        <div class="donut-legend" id="donut-legend-list">
+          <!-- Preenchido via JS -->
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Coluna Direita -->
-  <div style="display:flex;flex-direction:column;gap:24px;">
-
-    <!-- Status dos Projetos -->
-    <div class="card fade-up fade-up-2">
-      <div class="card-body">
-        <h3 style="font-size:16px;font-weight:700;margin-bottom:24px;">Status dos Projetos</h3>
-        <div class="donut-section">
-            <div id="donut-modern" style="width: 120px; height: 120px;"></div>
-            <div class="donut-legend-modern">
-                <!-- Preenchido via JS -->
-            </div>
+  <!-- Content Grid 2 -->
+  <div class="dash-grid">
+    <!-- Left Column: Volume de Projetos -->
+    <div class="premium-card">
+      <div class="section-header">
+        <span class="section-title">Volume de Projetos</span>
+        <div style="display: flex; align-items: center; gap: 8px; background: #1a1d29; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.05);">
+          <i data-lucide="calendar" style="width: 12px;"></i>
+          2025
+          <i data-lucide="chevron-down" style="width: 12px;"></i>
+        </div>
+      </div>
+      <div class="bar-chart-container">
+        <div class="bars-wrapper" id="bars-wrapper-container">
+          <!-- Preenchido via JS -->
+        </div>
+        <div class="bar-labels">
+          <span class="bar-label">Jan</span>
+          <span class="bar-label">Fev</span>
+          <span class="bar-label">Mar</span>
+          <span class="bar-label">Abr</span>
+          <span class="bar-label">Mai</span>
+          <span class="bar-label">Jun</span>
+          <span class="bar-label">Jul</span>
+          <span class="bar-label">Ago</span>
+          <span class="bar-label">Set</span>
+          <span class="bar-label">Out</span>
+          <span class="bar-label">Nov</span>
+          <span class="bar-label">Dez</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:11px; color:var(--text-muted); margin-top:16px;">
+          <div style="width:10px; height:10px; border-radius:2px; background: #a855f7;"></div>
+          Total de projetos
         </div>
       </div>
     </div>
 
-    <!-- Logs -->
-    <div class="card fade-up fade-up-3">
-      <div class="card-body">
-        <div class="flex items-center justify-between mb-8">
-            <h3 style="font-size:16px;font-weight:700;">Logs</h3>
-            <button onclick="openModal('modal-logs')" class="btn btn-ghost btn-sm" style="color: var(--text-muted); font-size: 13px;">Ver todos <i data-lucide="arrow-right" style="width: 14px; margin-left: 4px;"></i></button>
-        </div>
-        <div class="logs-list-modern">
-            {% if logs %}
-            {% set log_icons = {'projeto': 'folder', 'requisito': 'file-text', 'equipe': 'users'} %}
-            {% set log_colors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#e94560'] %}
-            {% for log in logs %}
-            <div class="log-item-modern">
-                <div class="log-icon-circle" style="background: rgba(var(--color-rgb), 0.1); background-color: var(--surface-2); color: {{ log_colors[loop.index0 % 5] }};">
-                    <i data-lucide="{{ log_icons.get(log.tipo, 'activity') }}" style="width: 16px;"></i>
-                </div>
-                <div class="log-info-modern">
-                    <div class="log-title-modern">{{ log.acao }}</div>
-                    <div class="log-sub-modern">{{ log.descricao }}</div>
-                </div>
-                <div class="log-time-modern">{{ log.data.strftime('%d/%m, %H:%M') }}</div>
+    <!-- Right Column: Logs das Equipes -->
+    <div class="premium-card">
+      <div class="section-header">
+        <span class="section-title">Logs das Equipes</span>
+        <a class="section-action">Ver todos <i data-lucide="arrow-right" style="width:12px;"></i></a>
+      </div>
+      <div class="timeline">
+        {% for log in logs[:5] %}
+          <div class="timeline-item">
+            <div class="timeline-icon" style="
+              {% if loop.index % 5 == 1 %}color: #a855f7; background: rgba(168, 85, 247, 0.1);
+              {% elif loop.index % 5 == 2 %}color: #10b981; background: rgba(16, 185, 129, 0.1);
+              {% elif loop.index % 5 == 3 %}color: #3b82f6; background: rgba(59, 130, 246, 0.1);
+              {% elif loop.index % 5 == 4 %}color: #f59e0b; background: rgba(245, 158, 11, 0.1);
+              {% else %}color: #ef4444; background: rgba(239, 68, 68, 0.1);{% endif %}">
+              <i data-lucide="{% if loop.index % 5 == 1 %}folder{% elif loop.index % 5 == 2 %}check{% elif loop.index % 5 == 3 %}code{% elif loop.index % 5 == 4 %}user{% else %}trash{% endif %}" style="width: 14px;"></i>
             </div>
-            {% endfor %}
-            {% else %}
-            <div style="text-align: center; padding: 20px; color: var(--text-muted);">Nenhum log disponível.</div>
-            {% endif %}
-        </div>
+            <div class="timeline-content">
+              <div class="timeline-text">
+                <strong>{{ log.equipe_nome }}</strong>: {{ log.acao }}<br>
+                {{ log.descricao }}
+              </div>
+              <div class="timeline-meta">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
+            </div>
+          </div>
+        {% else %}
+          <p style="color: var(--text-muted); font-size: 13px; padding: 24px; text-align: center;">Nenhum log registrado.</p>
+        {% endfor %}
       </div>
     </div>
   </div>
+
 </div>
-
-<!-- Modal Logs -->
-<div id="modal-logs" class="modal-backdrop">
-    <div class="modal" style="width: 600px; max-height: 85vh; display: flex; flex-direction: column; border-radius: 20px; border: 1px solid var(--border); overflow: hidden;">
-        <div class="modal-header" style="padding: 24px 32px; border-bottom: 1px solid var(--border); background: var(--surface);">
-            <div>
-                <h3 class="modal-title" style="font-size: 18px; font-weight: 800; color: var(--text-primary);">Histórico de Atividades</h3>
-                <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Acompanhe todas as mudanças em tempo real</p>
-            </div>
-            <button class="modal-close" onclick="closeModal('modal-logs')" style="background: var(--surface-2); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: 0.2s;"><i data-lucide="x" style="width: 18px; color: var(--text-muted);"></i></button>
-        </div>
-        <div class="modal-body" style="overflow-y: auto; padding: 20px 32px; background: var(--surface);">
-            <div class="logs-list-modern">
-                {% if todos_logs %}
-                {% set log_icons = {'projeto': 'folder', 'requisito': 'file-text', 'equipe': 'users'} %}
-                {% set log_colors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#e94560'] %}
-                {% for log in todos_logs %}
-                <div class="log-item-modern" style="padding: 16px 0; border-bottom: 1px solid var(--border); align-items: flex-start;">
-                    <div class="log-icon-circle" style="background-color: var(--surface-2); color: {{ log_colors[loop.index0 % 5] }}; width: 36px; height: 36px; margin-top: 2px;">
-                        <i data-lucide="{{ log_icons.get(log.tipo, 'activity') }}" style="width: 18px;"></i>
-                    </div>
-                    <div class="log-info-modern">
-                        <div class="log-title-modern" style="font-size: 14px; font-weight: 700;">{{ log.acao }}</div>
-                        <div class="log-sub-modern" style="font-size: 13px; margin-top: 2px; line-height: 1.5;">{{ log.descricao }}</div>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; display: flex; align-items: center; gap: 4px;">
-                            <i data-lucide="clock" style="width: 12px;"></i>
-                            {{ log.data.strftime('%d de %B de %Y às %H:%M') }}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-                {% else %}
-                <div style="text-align: center; padding: 60px 20px;">
-                    <div style="width: 64px; height: 64px; background: var(--surface-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                        <i data-lucide="activity" style="width: 32px; color: var(--text-muted); opacity: 0.5;"></i>
-                    </div>
-                    <p style="color: var(--text-muted); font-size: 14px; font-weight: 500;">Nenhuma atividade registrada ainda.</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function openModal(id) {
-        const modal = document.getElementById(id);
-        modal.classList.add('open');
-        document.body.style.overflow = 'hidden';
-        if (window.lucide) lucide.createIcons();
-    }
-    function closeModal(id) {
-        const modal = document.getElementById(id);
-        modal.classList.remove('open');
-        document.body.style.overflow = 'auto';
-    }
-</script>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  /* Dados injetados pelo servidor — usados por dashboard.js */
-  window.DASHBOARD_STATUS = {{ status_data_json | safe }};
-  window.DASHBOARD_VOLUMES = {{ volumes_json | safe }};
+  lucide.createIcons();
+  
+  /* Dados injetados pelo servidor */
+  const statusData = {{ status_data_json | safe }};
+  const volumes = {{ volumes_json | safe }};
+  
+  // Atualizar Legenda do Donut de forma "condizente"
+  const legendContainer = document.getElementById('donut-legend-list');
+  if (legendContainer && statusData) {
+    legendContainer.innerHTML = '';
+    statusData.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'legend-item';
+      div.innerHTML = `
+        <div class="legend-label"><div class="legend-dot" style="background: ${item.color};"></div>${item.label}</div>
+        <span class="legend-value">${item.val}</span>
+      `;
+      legendContainer.appendChild(div);
+    });
+  }
+  
+  // Atualizar Gráfico de Barras de forma "condizente"
+  const barsContainer = document.getElementById('bars-wrapper-container');
+  if (barsContainer && volumes) {
+    barsContainer.innerHTML = '';
+    const maxVal = Math.max(...volumes, 1); // evita divisão por zero
+    volumes.forEach(val => {
+      const heightPct = (val / maxVal) * 100;
+      const bar = document.createElement('div');
+      bar.className = 'bar-item';
+      bar.style.height = `${Math.max(heightPct, 5)}%`; // altura mínima de 5% para visibilidade
+      barsContainer.appendChild(bar);
+    });
+  }
 </script>
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

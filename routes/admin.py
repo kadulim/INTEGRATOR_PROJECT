@@ -4,6 +4,7 @@ from database import database
 from models import Usuario, Cliente, Funcionario, Projeto, Equipes, Skill, membros_equipe, Log, Requisito
 from werkzeug.security import generate_password_hash
 import functools
+import json
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -90,7 +91,28 @@ def dashboard():
             
     volumes = [monthly_map.get(m, 0) for m in range(1, 13)]
 
-    import json
+    # ── Logs com Equipe ──────────────────────────────────────────
+    logs_query = database.session.query(Log, Projeto, Equipes).outerjoin(Projeto, Log.projeto_id == Projeto.id).outerjoin(Equipes, Projeto.equipe_id == Equipes.id).order_by(Log.data.desc()).limit(10).all()
+    
+    logs_data = []
+    for log, projeto, equipe in logs_query:
+        logs_data.append({
+            'acao': log.acao,
+            'descricao': log.descricao,
+            'data': log.data,
+            'equipe_nome': equipe.nome if equipe else (projeto.nome if projeto else 'Geral')
+        })
+
+    todos_logs_query = database.session.query(Log, Projeto, Equipes).outerjoin(Projeto, Log.projeto_id == Projeto.id).outerjoin(Equipes, Projeto.equipe_id == Equipes.id).order_by(Log.data.desc()).all()
+    todos_logs_data = []
+    for log, projeto, equipe in todos_logs_query:
+        todos_logs_data.append({
+            'acao': log.acao,
+            'descricao': log.descricao,
+            'data': log.data,
+            'equipe_nome': equipe.nome if equipe else (projeto.nome if projeto else 'Geral')
+        })
+
     return render_template(
         'admin/dashboard.html',
         total_projetos    = total_projetos,
@@ -101,8 +123,8 @@ def dashboard():
         funcionarios_dash = funcionarios_dash,
         status_data_json  = json.dumps(status_data),
         volumes_json      = json.dumps(volumes),
-        logs              = Log.query.order_by(Log.data.desc()).limit(10).all(),
-        todos_logs        = Log.query.order_by(Log.data.desc()).all()
+        logs              = logs_data,
+        todos_logs        = todos_logs_data
     )
 
 @admin_bp.route('/projetos')
@@ -168,7 +190,8 @@ def projeto_detalhe():
         equipe=equipe,
         membros=membros,
         requisitos=projeto.requisitos,
-        todas_equipes=Equipes.query.all()
+        todas_equipes=Equipes.query.all(),
+        todos_clientes=Cliente.query.all()
     )
 
 @admin_bp.route('/vincular-equipe-projeto', methods=['POST'])
@@ -196,6 +219,8 @@ def editar_projeto():
     projeto.budget = request.form.get('budget', type=float)
     projeto.prazo = request.form.get('prazo')
     projeto.descricao = request.form.get('descricao')
+    projeto.cliente_id = request.form.get('cliente_id', type=int)
+    projeto.equipe_id = request.form.get('equipe_id', type=int)
     
     database.session.commit()
     registrar_log('projeto', 'Projeto atualizado', f"As informações do projeto '{projeto.nome}' foram atualizadas.", projeto.id)
@@ -239,6 +264,18 @@ def add_requisito():
     
     registrar_log('requisito', 'Requisito adicionado', f"Novo requisito '{titulo}' adicionado ao projeto '{projeto.nome}'.", projeto.id)
     
+    return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
+
+@admin_bp.route('/excluir-requisito/<int:id>', methods=['POST'])
+def excluir_requisito(id):
+    req = Requisito.query.get_or_404(id)
+    projeto_id = req.projeto_id
+    titulo = req.titulo
+    
+    database.session.delete(req)
+    database.session.commit()
+    
+    registrar_log('requisito', 'Requisito excluído', f"O requisito '{titulo}' foi removido do projeto.", projeto_id)
     return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
 
 @admin_bp.route('/clientes')
@@ -360,6 +397,28 @@ def editar_equipe(id):
     return redirect(url_for('admin.equipes'))
 
 
+@admin_bp.route('/equipes/<int:id>')
+def equipe_detalhe(id):
+    equipe = Equipes.query.get_or_404(id)
+    funcionarios = equipe.membros_da_equipe
+    projetos = Projeto.query.filter_by(equipe_id=equipe.id).all()
+    
+    # Busca os logs dos projetos dessa equipe
+    projeto_ids = [p.id for p in projetos]
+    logs = []
+    if projeto_ids:
+        logs = Log.query.filter(Log.projeto_id.in_(projeto_ids)).order_by(Log.data.desc()).all()
+    
+    return render_template('admin/equipe-detalhe.html', 
+                           equipe=equipe, 
+                           funcionarios=funcionarios, 
+                           projetos=projetos,
+                           logs=logs)
+
+
+
+
+
 @admin_bp.route('/funcionarios')
 def funcionarios():
     funcionarios = (
@@ -461,4 +520,8 @@ def add_funcionario():
 @admin_bp.route('/configuracoes')
 def configuracoes():
     return render_template('admin/configuracoes.html')
+
+
+
+
     
