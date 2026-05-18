@@ -737,10 +737,13 @@
     </div>
     <div class="modal-footer">
       <button type="button" class="btn-outline" onclick="closeModal('modal-deletar-funcionario')">Cancelar</button>
-      <a id="btn-confirmar-delete" class="btn-danger" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">Confirmar Exclusão</a>
+      <form id="form-deletar-funcionario" method="POST" style="margin:0;">
+        <button type="submit" class="btn-danger">Confirmar Exclusão</button>
+      </form>
     </div>
   </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -798,7 +801,7 @@
     const nome = btn.getAttribute('data-nome');
 
     document.getElementById('delete-funcionario-nome').innerText = nome;
-    document.getElementById('btn-confirmar-delete').href = `/admin/funcionario/excluir/${id}`;
+    document.getElementById('form-deletar-funcionario').action = `/admin/funcionario/excluir/${id}`;
     openModal('modal-deletar-funcionario');
   }
 

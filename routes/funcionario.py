@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from database import database
 import json
 import datetime
@@ -289,3 +290,28 @@ def equipe():
 @login_required
 def configuracoes():
     return render_template('funcionario/configuracoes.html')
+
+
+@funcionario_bp.route('/configuracoes/senha', methods=['POST'])
+@login_required
+def salvar_senha():
+    senha_atual = request.form.get('senha_atual')
+    nova_senha = request.form.get('nova_senha')
+    confirmar_senha = request.form.get('confirmar_senha')
+    
+    if not senha_atual or not nova_senha or not confirmar_senha:
+        flash('Preencha todos os campos!', 'danger')
+        return redirect(url_for('funcionario.configuracoes') + '#seguranca')
+        
+    if nova_senha != confirmar_senha:
+        flash('As senhas não coincidem!', 'danger')
+        return redirect(url_for('funcionario.configuracoes') + '#seguranca')
+        
+    if not check_password_hash(current_user.senha, senha_atual):
+        flash('Senha atual incorreta!', 'danger')
+        return redirect(url_for('funcionario.configuracoes') + '#seguranca')
+        
+    current_user.senha = generate_password_hash(nova_senha)
+    database.session.commit()
+    flash('Senha atualizada com sucesso!', 'success')
+    return redirect(url_for('funcionario.configuracoes') + '#seguranca')

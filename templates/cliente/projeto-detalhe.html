@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes do Projeto — CoByte</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+
+  <!-- Theme Check -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cobyte-theme');
+      if (!savedTheme) {
+        localStorage.setItem('cobyte-theme', 'dark');
+      }
+      if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-mode');
+        document.body.classList.add('light-mode');
+      }
+    })();
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cliente-dashboard.css') }}">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    /* iOS Dock Style */
+    .ios-dock {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      background: rgba(17, 19, 28, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: none;
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 32px;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+      height: 20px;
+      width: 280px;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .ios-handle {
+      width: 40px;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.25);
+      margin-bottom: 12px;
+      transition: 0.3s;
+      flex-shrink: 0;
+    }
+
+    .ios-dock:hover {
+      height: 90px; /* Expands to show content */
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .ios-dock:hover .ios-handle {
+      background: var(--accent); /* Glow color */
+      box-shadow: 0 0 10px var(--accent);
+      width: 70px;
+    }
+
+    .dock-content {
+      display: flex;
+      gap: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: 0.4s 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .ios-dock:hover .dock-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dock-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: 0.3s;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: 0.3s;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .dock-btn:hover {
+      color: #fff;
+    }
+
+    .dock-btn:hover .btn-icon {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .dock-btn i {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* iOS Dock Light Mode overrides */
+    .light-mode .ios-dock {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.06);
+    }
+    .light-mode .ios-dock:hover {
+      background: rgba(255, 255, 255, 0.98);
+    }
+    .light-mode .ios-handle {
+      background: rgba(0, 0, 0, 0.15);
+    }
+    .light-mode .dock-btn {
+      color: rgba(0, 0, 0, 0.6);
+    }
+    .light-mode .dock-btn:hover {
+      color: #000;
+    }
+    .light-mode .btn-icon {
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      color: rgba(0, 0, 0, 0.6);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo" style="display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; gap: 6px;">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 44px; width: auto; object-fit: contain; transition: all 0.35s ease;">
+      <span class="sidebar-logo-text" style="font-size: 24px; font-weight: 800; letter-spacing: -1.2px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-1px); margin-left: 0px; display: inline-block; white-space: nowrap; transition: all 0.35s ease;">
+        <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
+      </span>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <div class="nav-label">Menu</div>
+      
+      <a href="{{ url_for('cliente_dashboard') }}" class="nav-item">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Meu Painel</span>
+      </a>
+      
+      <a href="{{ url_for('cliente_projetos') }}" class="nav-item active">
+        <i data-lucide="folder-kanban"></i>
+        <span>Meus Projetos</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">{{ current_user.nome[:2].upper() }}</div>
+        <div class="user-info">
+          <div class="user-name" style="font-size: 13px; font-weight: 600; color: var(--text-primary);">{{ current_user.nome }}</div>
+          <div class="user-role" style="font-size: 11px; color: var(--text-muted);">Cliente</div>
+        </div>
+        <a href="{{ url_for('logout') }}" title="Sair" style="color: rgba(255,255,255,0.35); margin-left: auto; text-decoration: none; transition: color 0.2s;">
+          <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Conteúdo Principal -->
+  <div class="main-content">
+    <main class="page-content fade-up" style="max-width: 1200px; margin: 0 auto; padding: 40px 32px 64px; width: 100%;">
+      
+      <!-- Topbar Custom -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <a href="{{ url_for('cliente_dashboard') }}" class="btn btn-ghost" style="padding: 8px; border-radius: 50%; min-width: auto; height: 38px; width: 38px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border);">
+            <i data-lucide="arrow-left" style="width: 18px; height: 18px; color: var(--text-primary);"></i>
+          </a>
+          <div>
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 2px;">CoByte / Painel do Cliente</div>
+            <h1 style="font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px;">{{ projeto.nome }}</h1>
+          </div>
+        </div>
+        <div>
+          <span class="badge {% if projeto.status == 'Em andamento' %}badge-blue{% elif projeto.status == 'Concluído' %}badge-green{% else %}badge-yellow{% endif %}" style="font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 20px;">
+            {{ projeto.status }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Bento Layout Grid -->
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px; align-items: start;">
+        
+        <!-- Coluna da Esquerda (Informações Principais & Requisitos) -->
+        <div style="display: flex; flex-direction: column; gap: 28px;">
+          
+          <!-- Card de Visão Geral -->
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <h2 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="file-text" style="width: 18px; height: 18px; color: var(--blue);"></i>
+              Visão Geral do Projeto
+            </h2>
+            <p style="font-size: 14.5px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 24px;">
+              {{ projeto.descricao or 'Sem descrição cadastrada para este projeto.' }}
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding-top: 24px; border-top: 1px solid var(--border);">
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Prioridade</div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ projeto.prioridade or 'Média' }}</div>
+              </div>
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Prazo Final</div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ projeto.prazo }}</div>
+              </div>
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Orçamento</div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--green);">
+                  {% if projeto.budget %} R$ {{ "{:,.2f}".format(projeto.budget).replace(",", "X").replace(".", ",").replace("X", ".") }} {% else %} Sob demanda {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card de Requisitos -->
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <h2 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="check-square" style="width: 18px; height: 18px; color: var(--blue);"></i>
+              Requisitos do Sistema
+            </h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              {% for req in projeto.requisitos %}
+              <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <span style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">{{ req.titulo }}</span>
+                    <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(59,130,246,0.1); color: var(--blue);">{{ req.tipo or 'Funcional' }}</span>
+                  </div>
+                  <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">{{ req.descricao or 'Sem descrição.' }}</div>
+                </div>
+                <span class="badge {% if req.status == 'Concluído' %}badge-green{% elif req.status == 'Em andamento' %}badge-blue{% else %}badge-gray{% endif %}" style="font-size: 11px; padding: 3px 8px;">
+                  {{ req.status }}
+                </span>
+              </div>
+              {% else %}
+              <div style="text-align: center; padding: 40px 10px; color: var(--text-muted);">
+                <i data-lucide="info" style="width: 32px; height: 32px; opacity: 0.3; margin-bottom: 12px;"></i>
+                <div style="font-size: 13.5px;">Nenhum requisito cadastrado para este projeto ainda.</div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Coluna da Direita (Equipe & Feedback) -->
+        <div style="display: flex; flex-direction: column; gap: 28px;">
+          
+          <!-- Card da Equipe -->
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <h2 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="users" style="width: 18px; height: 18px; color: var(--blue);"></i>
+              Equipe CoByte Alocada
+            </h2>
+            
+            {% if projeto.equipe_rel %}
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Nome da Equipe: {{ projeto.equipe_rel.nome }}</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for membro in projeto.equipe_rel.membros_da_equipe %}
+                <div style="display: flex; align-items: center; gap: 12px; padding: 8px 0;">
+                  <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">
+                    {{ membro.usuario_rel.nome[:2].upper() }}
+                  </div>
+                  <div>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">{{ membro.usuario_rel.nome }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">{{ membro.cargo or 'Desenvolvedor' }}</div>
+                  </div>
+                </div>
+                {% else %}
+                <div style="font-size: 13px; color: var(--text-muted);">Esta equipe não possui membros no momento.</div>
+                {% endfor %}
+              </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
+              <i data-lucide="users-round" style="width: 32px; height: 32px; opacity: 0.3; margin-bottom: 12px;"></i>
+              <div style="font-size: 13px;">Nenhuma equipe alocada a este projeto no momento.</div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Card de Feedbacks & Histórico -->
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <h2 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="message-square-plus" style="width: 18px; height: 18px; color: var(--blue);"></i>
+              Canal de Feedbacks
+            </h2>
+
+            <!-- Enviar Novo Feedback -->
+            <form action="{{ url_for('cliente_feedback', projeto_id=projeto.id) }}" method="POST" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+              <div>
+                <label style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Tipo de Feedback</label>
+                <select name="feedback_tipo" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); outline: none; font-size: 13.5px; font-family: var(--font);">
+                  <option value="Geral">💬 Feedback Geral</option>
+                  <option value="Aprovação">✅ Aprovação de Etapa</option>
+                  <option value="Revisão">⚠️ Solicitação de Revisão</option>
+                  <option value="Elogio">🎉 Elogio à Equipe</option>
+                  <option value="Urgente">🚨 Chamado Urgente</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Mensagem</label>
+                <textarea name="comentario" required placeholder="Digite aqui o que você gostaria de comunicar à equipe..." style="width: 100%; height: 100px; padding: 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); outline: none; font-size: 13.5px; font-family: var(--font); resize: none;"></textarea>
+              </div>
+              <button type="submit" class="btn btn-blue" style="width: 100%; padding: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13.5px;">
+                <i data-lucide="send" style="width: 16px; height: 16px;"></i> Enviar Feedback
+              </button>
+            </form>
+
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; padding-top: 16px; border-top: 1px solid var(--border);">Histórico de Feedbacks</div>
+            
+            <div style="display: flex; flex-direction: column; gap: 14px; max-height: 350px; overflow-y: auto; padding-right: 4px;">
+              {% for log in logs %}
+                {% if log.tipo == 'feedback' %}
+                <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span class="avatar xs avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600; width: 22px; height: 22px; font-size: 10px;">CL</span>
+                      <span style="font-size: 12.5px; font-weight: 600; color: var(--text-primary);">Você</span>
+                    </div>
+                    {% set badge_class = 'ft-Geral' %}
+                    {% if 'Aprovação' in log.acao %}{% set badge_class = 'ft-Aprovação' %}
+                    {% elif 'Revisão' in log.acao %}{% set badge_class = 'ft-Revisão' %}
+                    {% elif 'Elogio' in log.acao %}{% set badge_class = 'ft-Elogio' %}
+                    {% elif 'Urgente' in log.acao %}{% set badge_class = 'ft-Urgente' %}
+                    {% endif %}
+                    <span class="feedback-tipo-badge {{ badge_class }}" style="font-size: 9.5px; padding: 2px 8px; border-radius: 12px;">{{ log.acao.replace('Feedback - ', '') }}</span>
+                  </div>
+                  <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; word-break: break-word;">{{ log.descricao }}</div>
+                  <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px; text-align: right;">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
+                </div>
+                {% endif %}
+              {% else %}
+              <div style="text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: 12.5px;">Você ainda não enviou nenhum feedback para este projeto.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Bottom Dock Menu (iOS Style Pull-up) -->
+<div class="ios-dock">
+  <div class="ios-handle"></div>
+  <div class="dock-content">
+    <button class="dock-btn" onclick="window.history.back()">
+      <div class="btn-icon"><i data-lucide="arrow-left"></i></div>
+      <span>Voltar</span>
+    </button>
+    <a href="{{ url_for('cliente_dashboard') }}" class="dock-btn">
+      <div class="btn-icon"><i data-lucide="home"></i></div>
+      <span>Início</span>
+    </a>
+    <button class="dock-btn" onclick="toggleTheme()">
+      <div class="btn-icon">
+        <i data-lucide="sun" class="theme-icon-sun"></i>
+        <i data-lucide="moon" class="theme-icon-moon" style="display:none;"></i>
+      </div>
+      <span>Tema</span>
+    </button>
+    <a href="{{ url_for('logout') }}" class="dock-btn">
+      <div class="btn-icon"><i data-lucide="log-out"></i></div>
+      <span>Sair</span>
+    </a>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/shared.js') }}"></script>
+<script>
+  function toggleTheme() {
+    const isLight = document.documentElement.classList.toggle('light-mode');
+    document.body.classList.toggle('light-mode');
+    localStorage.setItem('cobyte-theme', isLight ? 'light' : 'dark');
+    
+    // Update icons
+    const sunIcon = document.querySelector('.theme-icon-sun');
+    const moonIcon = document.querySelector('.theme-icon-moon');
+    if (isLight) {
+      if (sunIcon) sunIcon.style.display = 'none';
+      if (moonIcon) moonIcon.style.display = 'block';
+    } else {
+      if (sunIcon) sunIcon.style.display = 'block';
+      if (moonIcon) moonIcon.style.display = 'none';
+    }
+  }
+
+  // Initialize icons on load
+  document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+    
+    const savedTheme = localStorage.getItem('cobyte-theme');
+    const sunIcon = document.querySelector('.theme-icon-sun');
+    const moonIcon = document.querySelector('.theme-icon-moon');
+    if (savedTheme === 'light') {
+      if (sunIcon) sunIcon.style.display = 'none';
+      if (moonIcon) moonIcon.style.display = 'block';
+    }
+  });
+</script>
+</body>
+</html>

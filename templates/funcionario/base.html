@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}CoByte — Funcionário{% endblock %}</title>
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+
+  <!-- Theme Check -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('cobyte-theme');
+      // Se não houver tema salvo, garante que seja dark
+      if (!savedTheme) {
+        localStorage.setItem('cobyte-theme', 'dark');
+      }
+      // Aplica light-mode apenas se explicitamente salvo como light
+      if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-mode');
+        document.body.classList.add('light-mode');
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
   <script src="https://unpkg.com/lucide@latest"></script>
   {% block extra_css %}{% endblock %}
@@ -16,7 +32,7 @@
   <aside class="sidebar">
     <div class="sidebar-logo" style="display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
       <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 44px; width: auto; object-fit: contain; transition: all 0.35s ease;">
-      <span class="sidebar-logo-text" style="font-size: 24px; font-weight: 800; letter-spacing: -1.2px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-1px); margin-left: 8px; display: inline-block; white-space: nowrap; transition: all 0.35s ease;">
+      <span class="sidebar-logo-text" style="font-size: 24px; font-weight: 800; letter-spacing: -1.2px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-1px); margin-left: 0px; display: inline-block; white-space: nowrap; transition: all 0.35s ease;">
         <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
       </span>
     </div>
@@ -59,25 +75,195 @@
   </aside>
 
   <div class="main-content">
-    <header class="topbar">
-      <h1 class="topbar-title">{% block topbar_title %}{% endblock %}</h1>
-      <div class="topbar-actions">
-        <button class="icon-btn" title="Notificações">
-          <i data-lucide="bell"></i>
-          <span class="notif-dot"></span>
-        </button>
-        <div class="divider-v"></div>
-        <div class="avatar sm avatar-green" title="{{ current_user.nome }}">
-          {{ current_user.nome[:2].upper() }}
-        </div>
-      </div>
-    </header>
-
     <main class="page-content fade-up">
       {% block content %}{% endblock %}
     </main>
   </div>
 </div>
+
+<!-- Bottom Dock Menu (iOS Style Pull-up) -->
+<div class="ios-dock">
+  <div class="ios-handle"></div>
+  <div class="dock-content">
+    <button class="dock-btn" onclick="window.history.back()">
+      <div class="btn-icon"><i data-lucide="arrow-left"></i></div>
+      <span>Voltar</span>
+    </button>
+    <a href="{{ url_for('funcionario.dashboard') }}" class="dock-btn">
+      <div class="btn-icon"><i data-lucide="home"></i></div>
+      <span>Início</span>
+    </a>
+    <button class="dock-btn" onclick="toggleTheme()">
+      <div class="btn-icon">
+        <i data-lucide="sun" class="theme-icon-sun"></i>
+        <i data-lucide="moon" class="theme-icon-moon" style="display:none;"></i>
+      </div>
+      <span>Tema</span>
+    </button>
+    <a href="{{ url_for('logout') }}" class="dock-btn">
+      <div class="btn-icon"><i data-lucide="log-out"></i></div>
+      <span>Sair</span>
+    </a>
+  </div>
+</div>
+
+<style>
+  .ios-dock {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    background: rgba(17, 19, 28, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 32px;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+    
+    /* Initial state: only handle visible */
+    height: 24px;
+    overflow: hidden;
+    transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+  }
+
+  .ios-handle {
+    width: 50px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    margin-bottom: 12px;
+    transition: 0.3s;
+    flex-shrink: 0;
+  }
+
+  .ios-dock:hover {
+    height: 90px; /* Expands to show content */
+    background: rgba(15, 23, 42, 0.95);
+  }
+
+  .ios-dock:hover .ios-handle {
+    background: var(--accent); /* Glow color */
+    box-shadow: 0 0 10px var(--accent);
+    width: 70px;
+  }
+
+  .dock-content {
+    display: flex;
+    gap: 40px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: 0.4s 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .ios-dock:hover .dock-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .dock-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: 0.3s;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .dock-btn:hover {
+    color: #fff;
+  }
+
+  .dock-btn:hover .btn-icon {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .dock-btn i {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* iOS Dock Light Mode overrides */
+  .light-mode .ios-dock {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.06);
+  }
+  .light-mode .ios-dock:hover {
+    background: rgba(255, 255, 255, 0.98);
+  }
+  .light-mode .ios-handle {
+    background: rgba(0, 0, 0, 0.15);
+  }
+  .light-mode .dock-btn {
+    color: rgba(0, 0, 0, 0.6);
+  }
+  .light-mode .dock-btn:hover {
+    color: #000;
+  }
+  .light-mode .btn-icon {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.6);
+  }
+</style>
+
+<script>
+  function toggleTheme() {
+    const isLight = document.documentElement.classList.toggle('light-mode');
+    document.body.classList.toggle('light-mode');
+    localStorage.setItem('cobyte-theme', isLight ? 'light' : 'dark');
+    
+    // Update icons
+    const sunIcon = document.querySelector('.theme-icon-sun');
+    const moonIcon = document.querySelector('.theme-icon-moon');
+    if (isLight) {
+      if (sunIcon) sunIcon.style.display = 'none';
+      if (moonIcon) moonIcon.style.display = 'block';
+    } else {
+      if (sunIcon) sunIcon.style.display = 'block';
+      if (moonIcon) moonIcon.style.display = 'none';
+    }
+  }
+
+  // Initialize icons on load
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('cobyte-theme');
+    const sunIcon = document.querySelector('.theme-icon-sun');
+    const moonIcon = document.querySelector('.theme-icon-moon');
+    if (savedTheme === 'light') {
+      if (sunIcon) sunIcon.style.display = 'none';
+      if (moonIcon) moonIcon.style.display = 'block';
+    }
+  });
+</script>
 
 <script src="{{ url_for('static', filename='js/shared.js') }}"></script>
 <script>lucide.createIcons();</script>

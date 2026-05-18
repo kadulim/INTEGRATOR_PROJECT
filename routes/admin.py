@@ -290,6 +290,9 @@ def excluir_projeto(id):
     projeto = Projeto.query.get_or_404(id)
     nome_projeto = projeto.nome
     try:
+        # Desvincular logs associados para evitar violação de FK no PostgreSQL
+        Log.query.filter_by(projeto_id=id).update({Log.projeto_id: None})
+        
         # Primeiro exclui requisitos associados (cascade manual se não definido)
         Requisito.query.filter_by(projeto_id=id).delete()
         
@@ -301,6 +304,7 @@ def excluir_projeto(id):
         database.session.rollback()
         flash(f"Erro ao excluir projeto: {e}", "erro")
     return redirect(url_for('admin.projetos'))
+
 
 @admin_bp.route('/add-requisito', methods=['POST'])
 def add_requisito():
@@ -375,14 +379,22 @@ def add_cliente():
 @admin_bp.route('/cliente/excluir/<int:id>', methods=['POST'])
 def excluir_cliente(id):
     cliente = Cliente.query.get_or_404(id)
+    user = Usuario.query.get(cliente.usuario_id)
     try:
+        # Desvincular cliente de todos os seus projetos para evitar violação de FK no PostgreSQL
+        Projeto.query.filter_by(cliente_id=id).update({Projeto.cliente_id: None})
+        
         database.session.delete(cliente)
+        if user:
+            database.session.delete(user)
+            
         database.session.commit()
         flash("Cliente excluído com sucesso.", "sucesso")
-    except:
+    except Exception as e:
         database.session.rollback()
-        flash("Ocorreu um erro ao excluir o cliente.", "erro")
+        flash(f"Erro ao excluir cliente: {e}", "erro")
     return redirect(url_for('admin.clientes'))
+
 
 @admin_bp.route('/cliente/editar/<int:id>', methods=['POST'])
 def editar_cliente(id):
@@ -414,7 +426,8 @@ def equipes():
 @admin_bp.route('/add-equipe', methods=['POST'])
 def add_equipe():
     nome = request.form.get('nome')
-    funcionarios_ids = request.form.getlist('check_funcionarios')
+    # Converter IDs para inteiros explicitamente para evitar erro de tipo no PostgreSQL (in_)
+    funcionarios_ids = [int(x) for x in request.form.getlist('check_funcionarios') if x.isdigit()]
     
     equipe = Equipes(nome=nome)
     
@@ -426,23 +439,32 @@ def add_equipe():
     database.session.commit()
     return redirect(url_for('admin.equipes'))
 
+
 @admin_bp.route('/equipes/excluir/<int:id>', methods=['POST'])
 def excluir_equipe(id):
     equipe = Equipes.query.get_or_404(id)
     try:
+        # Desvincular todos os projetos desta equipe para evitar violação de FK
+        Projeto.query.filter_by(equipe_id=id).update({Projeto.equipe_id: None})
+        
+        # Limpar associação de membros
+        equipe.membros_da_equipe = []
+        
         database.session.delete(equipe)
         database.session.commit()
         flash("Equipe excluída com sucesso.", "sucesso")
-    except:
+    except Exception as e:
         database.session.rollback()
-        flash("Ocorreu um erro ao excluir a equipe.", "erro")
+        flash(f"Erro ao excluir equipe: {e}", "erro")
     return redirect(url_for('admin.equipes'))
+
 
 @admin_bp.route('/equipes/editar/<int:id>', methods=['POST'])
 def editar_equipe(id):
     equipe = Equipes.query.get_or_404(id)
     nome = request.form.get('nome')
-    funcionarios_ids = request.form.getlist('check_funcionarios')
+    # Converter IDs para inteiros explicitamente para evitar erro de tipo no PostgreSQL (in_)
+    funcionarios_ids = [int(x) for x in request.form.getlist('check_funcionarios') if x.isdigit()]
     
     equipe.nome = nome
     
@@ -454,6 +476,7 @@ def editar_equipe(id):
 
     database.session.commit()
     return redirect(url_for('admin.equipes'))
+
 
 
 @admin_bp.route('/equipes/<int:id>')
@@ -468,11 +491,62 @@ def equipe_detalhe(id):
     if projeto_ids:
         logs = Log.query.filter(Log.projeto_id.in_(projeto_ids)).order_by(Log.data.desc()).all()
     
+    # Busca todos os funcionários ativos para o formulário de adicionar novo membro
+    todos_funcionarios = (
+        Funcionario.query
+        .join(Usuario, Funcionario.usuario_id == Usuario.id)
+        .add_entity(Usuario)
+        .all()
+    )
+    
     return render_template('admin/equipe-detalhe.html', 
                            equipe=equipe, 
                            funcionarios=funcionarios, 
                            projetos=projetos,
-                           logs=logs)
+                           logs=logs,
+                           todos_funcionarios=todos_funcionarios)
+
+
+@admin_bp.route('/equipes/<int:equipe_id>/add-membro', methods=['POST'])
+def equipe_add_membro(equipe_id):
+    equipe = Equipes.query.get_or_404(equipe_id)
+    funcionario_id = request.form.get('funcionario_id')
+    if funcionario_id:
+        funcionario = Funcionario.query.get(int(funcionario_id))
+        if funcionario and funcionario not in equipe.membros_da_equipe:
+            equipe.membros_da_equipe.append(funcionario)
+            
+            # Registrar log
+            log = Log(
+                tipo="equipe",
+                acao="Membro adicionado",
+                descricao=f"Funcionário {funcionario.usuario_rel.nome} foi adicionado à equipe {equipe.nome}.",
+                projeto_id=None
+            )
+            database.session.add(log)
+            database.session.commit()
+            flash("Membro adicionado com sucesso!", "sucesso")
+    return redirect(url_for('admin.equipe_detalhe', id=equipe_id))
+
+
+@admin_bp.route('/equipes/<int:equipe_id>/remover-membro/<int:funcionario_id>', methods=['POST'])
+def equipe_remover_membro(equipe_id, funcionario_id):
+    equipe = Equipes.query.get_or_404(equipe_id)
+    funcionario = Funcionario.query.get_or_404(funcionario_id)
+    if funcionario in equipe.membros_da_equipe:
+        equipe.membros_da_equipe.remove(funcionario)
+        
+        # Registrar log
+        log = Log(
+            tipo="equipe",
+            acao="Membro removido",
+            descricao=f"Funcionário {funcionario.usuario_rel.nome} foi removido da equipe {equipe.nome}.",
+            projeto_id=None
+        )
+        database.session.add(log)
+        database.session.commit()
+        flash("Membro removido com sucesso!", "sucesso")
+    return redirect(url_for('admin.equipe_detalhe', id=equipe_id))
 
 
 
@@ -505,14 +579,21 @@ def excluir_funcionario(id):
     membro = Funcionario.query.get_or_404(id)
     user = Usuario.query.get(membro.usuario_id)
     try:
+        # Limpar associação com equipes e skills para evitar violação de chaves estrangeiras no PostgreSQL
+        membro.lista_equipes = []
+        membro.lista_skills = []
+        
         database.session.delete(membro)
-        database.session.delete(user)
+        if user:
+            database.session.delete(user)
+            
         database.session.commit()
         flash("Funcionário excluído com sucesso.", "sucesso")
-    except:
+    except Exception as e:
         database.session.rollback()
-        flash("Ocorreu um erro ao excluir o funcionário.", "erro")
+        flash(f"Erro ao excluir funcionário: {e}", "erro")
     return redirect(url_for('admin.funcionarios'))
+
 
 @admin_bp.route('/funcionario/editar/<int:id>', methods=['POST'])
 def editar_funcionario(id):

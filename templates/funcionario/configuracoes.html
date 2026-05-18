@@ -5,50 +5,96 @@
 {% block topbar_title %}Configurações{% endblock %}
 
 {% block content %}
-<div class="settings-grid" style="display: grid; grid-template-columns: 300px 1fr; gap: 32px;">
+<!-- Render Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-messages" style="max-width: 900px; margin: 0 auto 24px auto;">
+      {% for category, msg in messages %}
+        <div class="flash-alert flash-{{ category }}" style="padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; font-weight: 500; border: 1px solid;
+          {% if category == 'success' %}
+            background: rgba(34, 197, 94, 0.1); color: #22c55e; border-color: rgba(34, 197, 94, 0.2);
+          {% else %}
+            background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2);
+          {% endif %}">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="settings-grid" style="display: grid; grid-template-columns: 300px 1fr; gap: 32px; max-width: 1200px; margin: 0 auto;">
+    <!-- Sidebar Navigation -->
     <div class="settings-nav">
-        <div class="card" style="padding: 12px;">
-            <div class="s-nav-item active">
+        <div class="card" style="padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;">
+            <div class="s-nav-item active" id="tab-perfil" onclick="switchTab('perfil')">
                 <i data-lucide="user"></i>
                 <span>Perfil</span>
             </div>
-            <div class="s-nav-item">
+            <div class="s-nav-item" id="tab-seguranca" onclick="switchTab('seguranca')">
                 <i data-lucide="lock"></i>
                 <span>Segurança</span>
-            </div>
-            <div class="s-nav-item">
-                <i data-lucide="bell"></i>
-                <span>Notificações</span>
             </div>
         </div>
     </div>
 
+    <!-- Content Panel -->
     <div class="settings-content">
-        <div class="card" style="padding: 32px;">
-            <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 24px;">Meu Perfil</h3>
+        <div class="card" style="padding: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; min-height: 400px;">
             
-            <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 32px; padding-bottom: 32px; border-bottom: 1px solid var(--border);">
-                <div class="avatar xl avatar-green" style="width: 100px; height: 100px; font-size: 32px;">{{ current_user.nome[:2].upper() }}</div>
-                <div>
-                    <h4 style="font-size: 18px; font-weight: 700;">{{ current_user.nome }}</h4>
-                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 12px;">Funcionário na CoByte</p>
-                    <button class="btn btn-ghost btn-sm" style="background: rgba(255,255,255,0.05);">Alterar Foto</button>
-                </div>
+            <!-- Painel Meu Perfil (Excluída a parte de cima com foto e avatar) -->
+            <div id="panel-perfil" class="panel-section">
+                <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 24px; color: var(--text-primary);">Meu Perfil</h3>
+                
+                <form style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Nome Completo</label>
+                        <input type="text" value="{{ current_user.nome }}" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: inherit;" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">E-mail</label>
+                        <input type="email" value="{{ current_user.email }}" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: inherit;" readonly>
+                    </div>
+                    <div style="grid-column: 1 / -1; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                        <p style="font-size: 12px; color: var(--text-muted); font-style: italic; line-height: 1.5; display: flex; align-items: center; gap: 6px;">
+                            <i data-lucide="info" style="width: 14px;"></i>
+                            As informações cadastrais de perfil são gerenciadas exclusivamente pelo administrador do sistema.
+                        </p>
+                    </div>
+                </form>
             </div>
 
-            <form style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div class="form-group">
-                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Nome Completo</label>
-                    <input type="text" value="{{ current_user.nome }}" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 8px; outline: none;" readonly>
-                </div>
-                <div class="form-group">
-                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">E-mail</label>
-                    <input type="email" value="{{ current_user.email }}" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 8px; outline: none;" readonly>
-                </div>
-                <div style="grid-column: 1 / -1; text-align: right; margin-top: 20px;">
-                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
-                </div>
-            </form>
+            <!-- Painel Segurança (Troca de senha igual ao Admin) -->
+            <div id="panel-seguranca" class="panel-section" style="display: none;">
+                <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">Segurança</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Gerencie a segurança da sua conta e altere sua senha</p>
+                
+                <form action="{{ url_for('funcionario.salvar_senha') }}" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="form-group">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Senha Atual</label>
+                        <input type="password" name="senha_atual" placeholder="Sua senha atual" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: inherit;" required>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Nova Senha</label>
+                            <input type="password" name="nova_senha" placeholder="Mínimo 6 caracteres" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: inherit;" required minlength="6">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Confirmar Nova Senha</label>
+                            <input type="password" name="confirmar_senha" placeholder="Repita a nova senha" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: inherit;" required minlength="6">
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 24px;">
+                        <button type="submit" class="btn btn-primary" style="font-weight: 600; padding: 10px 20px;">Atualizar Senha</button>
+                    </div>
+                </form>
+            </div>
+
+
+
         </div>
     </div>
 </div>
@@ -62,13 +108,17 @@
         border-radius: 8px;
         color: var(--text-muted);
         cursor: pointer;
-        transition: 0.2s;
+        transition: all 0.2s;
         font-weight: 500;
         font-size: 14px;
+        margin-bottom: 4px;
+    }
+    .s-nav-item:last-child {
+        margin-bottom: 0;
     }
     .s-nav-item:hover {
-        background: rgba(255,255,255,0.02);
-        color: #fff;
+        background: var(--surface-2);
+        color: var(--text-primary);
     }
     .s-nav-item.active {
         background: var(--accent-soft);
@@ -77,6 +127,39 @@
     }
     .s-nav-item i {
         width: 18px;
+        height: 18px;
     }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function switchTab(tabId) {
+    // Esconder todas as seções e remover ativa das abas
+    document.querySelectorAll('.panel-section').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.s-nav-item').forEach(el => el.classList.remove('active'));
+    
+    // Mostrar a seção selecionada e marcar a aba como ativa
+    const targetPanel = document.getElementById('panel-' + tabId);
+    const targetTab = document.getElementById('tab-' + tabId);
+    
+    if (targetPanel && targetTab) {
+        targetPanel.style.display = 'block';
+        targetTab.classList.add('active');
+    }
+    
+    // Salvar o estado da aba ativa no hash da URL
+    window.location.hash = tabId;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+    
+    // Restaurar a aba ativa pelo hash da URL se houver
+    const hash = window.location.hash.substring(1);
+    if (hash && document.getElementById('tab-' + hash)) {
+      switchTab(hash);
+    }
+  });
+</script>
 {% endblock %}

@@ -12,7 +12,7 @@ load_dotenv()
 _api_codeflow_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api_codeflow', 'api')
 
 from database import database
-from models import Usuario,Cliente
+from models import Usuario, Cliente, Projeto, Log
 
 import function.login as logar
 import function.adicionar_na_tabela as adicionar_na_tabela
@@ -80,7 +80,62 @@ def cliente_dashboard():
     # Busca o registro de Cliente associado ao Usuario logado
     cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
     projetos = cliente.projetos if cliente else []
-    return render_template('cliente/cliente-dashboard.html', projetos=projetos)
+    
+    total = len(projetos)
+    ativos = sum(1 for p in projetos if p.status == 'Em andamento')
+    concluidos = sum(1 for p in projetos if p.status == 'Concluído')
+    
+    return render_template('cliente/cliente-dashboard.html', 
+                           projetos=projetos, 
+                           total=total, 
+                           ativos=ativos, 
+                           concluidos=concluidos)
+
+@app.route('/cliente-dashboard/projetos')
+@login_required
+def cliente_projetos():
+    cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
+    projetos = cliente.projetos if cliente else []
+    return render_template('cliente/projetos.html', projetos=projetos)
+
+@app.route('/cliente-dashboard/projeto/<int:projeto_id>')
+@login_required
+def cliente_projeto_detalhe(projeto_id):
+    cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
+    if not cliente:
+        abort(403)
+    projeto = Projeto.query.get_or_404(projeto_id)
+    if projeto.cliente_id != cliente.id:
+        abort(403)
+    
+    # Buscar logs associados ao projeto
+    logs = Log.query.filter_by(projeto_id=projeto_id).order_by(Log.data.desc()).all()
+    return render_template('cliente/projeto-detalhe.html', projeto=projeto, logs=logs)
+
+@app.route('/cliente-dashboard/projeto/<int:projeto_id>/feedback', methods=['POST'])
+@login_required
+def cliente_feedback(projeto_id):
+    cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
+    if not cliente:
+        abort(403)
+    projeto = Projeto.query.get_or_404(projeto_id)
+    if projeto.cliente_id != cliente.id:
+        abort(403)
+    
+    feedback_tipo = request.form.get('feedback_tipo', 'Geral')
+    comentario = request.form.get('comentario', '').strip()
+    
+    if comentario:
+        log = Log(
+            tipo='feedback',
+            acao=f"Feedback - {feedback_tipo}",
+            descricao=comentario,
+            projeto_id=projeto_id
+        )
+        database.session.add(log)
+        database.session.commit()
+    
+    return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
 
 @app.route('/funcionario')
 @login_required

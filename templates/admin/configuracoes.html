@@ -5,6 +5,11 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/configuracoes.css') }}">
+<style>
+  .topbar {
+    display: none !important;
+  }
+</style>
 {% endblock %}
 
 {% block topbar_title %}Configurações{% endblock %}
@@ -52,16 +57,6 @@
       <div>
         <div class="settings-panel-title">Meu Perfil</div>
         <div class="settings-panel-desc">Gerencie suas informações pessoais</div>
-      </div>
-      <div class="settings-section">
-        <div class="settings-section-title">Foto de Perfil</div>
-        <div class="avatar-upload-area">
-          <div class="avatar lg avatar-blue">{{ current_user.nome[:2].upper() if current_user.is_authenticated else 'CB' }}</div>
-          <div>
-            <button class="avatar-upload-btn">Alterar foto</button>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">JPG, PNG ou GIF · Máx 2MB</div>
-          </div>
-        </div>
       </div>
       <div class="settings-section">
         <div class="settings-section-title">Informações Pessoais</div>
