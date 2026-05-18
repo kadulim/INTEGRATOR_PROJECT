@@ -16,19 +16,11 @@ function onSearch(val) {
 }
 
 function onFilter(val) {
-  // O filtro atual na UI tem 'Disponível' e 'Em projeto'
-  // No momento as badges estão fixas como 'Ativo'
-  // Mas vamos implementar a lógica básica para o futuro
   const cards = document.querySelectorAll('.member-card');
 
   cards.forEach(card => {
-    if (val === 'Todos') {
-      card.style.display = 'flex';
-      return;
-    }
-    
-    // Busca pela badge de status
-    const status = card.querySelector('.badge').textContent.trim();
-    card.style.display = (status === val) ? 'flex' : 'none';
+    const cardStatus = card.getAttribute('data-status');
+    const matches = val === 'Todos' || cardStatus === val;
+    card.style.display = matches ? 'flex' : 'none';
   });
 }

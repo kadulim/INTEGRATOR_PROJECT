@@ -36,6 +36,8 @@
 .search-box input::placeholder { color: var(--text-muted); }
 
 
+
+
 /* View Toggle */
 .view-toggle {
   display: flex;

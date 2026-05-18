@@ -44,7 +44,7 @@
         {% for projeto in projetos %}
         <div class="client-proj-card">
           <div class="cpc-header">
-            <div class="cpc-accent-bar" style="background:#e94560;"></div>
+            <div class="cpc-accent-bar" style="background:var(--accent);"></div>
             <div class="cpc-title">{{ projeto.nome }}</div>
             <div class="cpc-badges"><span class="badge badge-blue">{{ projeto.status }}</span></div>
           </div>
@@ -52,7 +52,7 @@
             <div class="cpc-progress-label"><span>Prioridade</span><strong>{{ projeto.prioridade }}</strong></div>
             <div class="cpc-progress-label"><span>Prazo</span><strong>{{ projeto.prazo }}</strong></div>
             <div class="progress-bar" style="height:8px;border-radius:6px;">
-              <div class="progress-fill blue" style="width:100%;border-radius:6px;background:#e94560;"></div>
+              <div class="progress-fill blue" style="width:100%;border-radius:6px;background:var(--accent);"></div>
             </div>
           </div>
         </div>

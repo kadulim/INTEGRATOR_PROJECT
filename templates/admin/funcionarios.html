@@ -4,213 +4,779 @@
 {% block title %}Funcionários — CoByte{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/equipes.css') }}">
-{% endblock %}
+<style>
+  /* Force hide original topbar and clean up content wrapper */
+  .topbar { display: none !important; }
+  .main-content { padding-top: 0 !important; height: 100vh !important; overflow: hidden !important; }
+  .page-content { padding: 0 !important; height: 100vh !important; overflow: hidden !important; }
+  body { height: 100vh !important; overflow: hidden !important; }
 
-{% block topbar_title %}Funcionários{% endblock %}
-{% block topbar_actions %}
-  <button class="btn btn-primary btn-sm" onclick="openModal('modal-novo-funcionario')">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Novo Funcionário
-  </button>
+  :root {
+    --bg: #060910;
+    --s1: #0B1220;
+    --s2: #101A2D;
+    --s3: #162033;
+    --b1: rgba(255, 255, 255, 0.055);
+    --b2: rgba(255, 255, 255, 0.10);
+    --b3: rgba(255, 255, 255, 0.16);
+    --ac: #00CFFF;
+    --ac-d: rgba(0, 207, 255, 0.10);
+    --ac-d2: rgba(0, 207, 255, 0.06);
+    --gr: #00E5A0;
+    --gr-d: rgba(0, 229, 160, 0.10);
+    --am: #FFB020;
+    --am-d: rgba(255, 176, 32, 0.10);
+    --rd: #FF5577;
+    --rd-d: rgba(255, 85, 119, 0.10);
+    --pu: #A78BFA;
+    --pu-d: rgba(167, 139, 250, 0.10);
+    --tx: #DCE5F0;
+    --tx2: #7A8FA8;
+    --tx3: #3A4D62;
+    --r: 12px;
+    --rl: 16px;
+  }
+
+  .light-mode {
+    --bg: #F3F4F6;
+    --s1: #FFFFFF;
+    --s2: #F8FAFC;
+    --s3: #E2E8F0;
+    --b1: rgba(15, 23, 42, 0.05);
+    --b2: rgba(15, 23, 42, 0.08);
+    --b3: rgba(15, 23, 42, 0.12);
+    --tx: #0F172A;
+    --tx2: #475569;
+    --tx3: #94A3B8;
+  }
+
+  /* Reset & Container */
+  .db-wrapper {
+    background: var(--bg) !important;
+    color: var(--tx);
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .content-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 32px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* Custom Scrollbar */
+  .content-scrollable::-webkit-scrollbar { width: 6px; }
+  .content-scrollable::-webkit-scrollbar-track { background: transparent; }
+  .content-scrollable::-webkit-scrollbar-thumb { background: var(--b3); border-radius: 3px; }
+  .light-mode .content-scrollable::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); }
+
+  /* ─── CUSTOM TOPBAR ─── */
+  .topbar-custom {
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--b1);
+    background: rgba(6, 9, 16, 0.88);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .light-mode .topbar-custom {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-bottom-color: var(--b1);
+  }
+  .tb-left .page-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: var(--tx);
+  }
+  .tb-left .breadcrumb {
+    font-size: 11.5px;
+    color: var(--tx2);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .tb-right { display: flex; align-items: center; gap: 10px; }
+  .date-pill {
+    padding: 6px 14px;
+    background: var(--s2);
+    border: 1px solid var(--b2);
+    border-radius: 20px;
+    font-size: 11.5px;
+    color: var(--tx2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .icon-btn-custom {
+    width: 36px;
+    height: 36px;
+    background: var(--s2);
+    border: 1px solid var(--b1);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--tx2);
+    transition: all 0.15s;
+  }
+  .icon-btn-custom:hover { color: var(--tx); border-color: var(--b2); }
+  .icon-btn-custom svg { width: 16px; height: 16px; }
+
+  /* ─── STAT CARDS ─── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .scard {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--rl);
+    padding: 24px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    cursor: pointer;
+    transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .scard:hover { border-color: var(--b2); transform: translateY(-2px); }
+
+  /* High prominence card shadow & border rules for Light Mode */
+  .light-mode .scard,
+  .light-mode .pcard {
+    box-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.045), 0 2px 6px -1px rgba(15, 23, 42, 0.015) !important;
+    border-color: rgba(15, 23, 42, 0.085) !important;
+  }
+  .light-mode .scard:hover,
+  .light-mode .pcard:hover {
+    border-color: rgba(15, 23, 42, 0.16) !important;
+    box-shadow: 0 14px 32px -4px rgba(15, 23, 42, 0.09), 0 6px 14px -2px rgba(15, 23, 42, 0.04) !important;
+  }
+
+  /* Accent top border */
+  .scard::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: var(--rl) var(--rl) 0 0;
+  }
+  .scard-total::before { background: var(--ac); }
+  .scard-andamento::before { background: var(--gr); }
+  .scard-concluido::before { background: var(--pu); }
+
+  .scard-top { display: flex; align-items: center; justify-content: space-between; }
+  .scard-ico {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .scard-ico svg { width: 19px; height: 19px; }
+
+  .scard-lbl {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--tx2);
+    margin-bottom: 8px;
+  }
+  .scard-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 42px; font-weight: 600; letter-spacing: -2px;
+    line-height: 1;
+  }
+  .scard-sub {
+    font-size: 11.5px; color: var(--tx2);
+    display: flex; align-items: center; gap: 6px; margin-top: 4px;
+  }
+  .tag { font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 20px; }
+  .tag-ac { background: var(--ac-d); color: var(--ac); }
+  .tag-am { background: var(--am-d); color: var(--am); }
+  .tag-gr { background: var(--gr-d); color: var(--gr); }
+  .tag-pu { background: var(--pu-d); color: var(--pu); }
+
+  /* ─── TOOLBAR ─── */
+  .toolbar {
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap; flex-shrink: 0;
+  }
+  .search-wrap {
+    flex: 1; min-width: 240px;
+    position: relative; display: flex; align-items: center;
+  }
+  .search-wrap svg {
+    position: absolute; left: 14px; width: 15px; height: 15px;
+    color: var(--tx3); pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    padding: 10px 14px 10px 40px;
+    background: var(--s1);
+    border: 1px solid var(--b2);
+    border-radius: 10px;
+    color: var(--tx); font-size: 13.5px; font-family: 'Outfit', sans-serif;
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .search-input::placeholder { color: var(--tx3); }
+  .search-input:focus { border-color: rgba(0, 207, 255, 0.35); box-shadow: 0 0 10px rgba(0,207,255,0.05); }
+
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+
+  .filter-btn-select {
+    appearance: none; -webkit-appearance: none;
+    padding: 9px 36px 9px 16px;
+    background: var(--s1); border: 1px solid var(--b2);
+    border-radius: 10px; font-size: 12.5px; color: var(--tx2);
+    cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 500;
+    transition: all 0.15s; white-space: nowrap; outline: none;
+  }
+  .filter-btn-select:hover { border-color: var(--b3); color: var(--tx); }
+  .light-mode .filter-btn-select { background: #ffffff; }
+
+  .btn-new {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px;
+    background: var(--ac); border: none; border-radius: 10px;
+    color: #020c14; font-size: 13px; font-weight: 700;
+    font-family: 'Outfit', sans-serif; cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s; white-space: nowrap;
+    letter-spacing: 0.2px;
+  }
+  .btn-new:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-new svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  /* ─── PROJECT GRID ─── */
+  .proj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ─── PROJECT CARD ─── */
+  .pcard {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--rl);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+    display: flex; flex-direction: column;
+  }
+  .pcard:hover {
+    border-color: var(--b2);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .light-mode .pcard:hover {
+    box-shadow: 0 14px 32px -4px rgba(15, 23, 42, 0.09) !important;
+  }
+
+  /* card accent strip */
+  .pcard-strip { height: 3px; width: 100%; }
+  .pcard-strip-ac { background: var(--ac); }
+  .pcard-strip-gr { background: var(--gr); }
+
+  .pcard-body { padding: 22px 22px 0; }
+  .pcard-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 14px; gap: 12px;
+  }
+  
+  .pcard-ico-wrap {
+    width: 44px; height: 44px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 16px; font-weight: 700;
+  }
+  .avatar-color-0 { background: var(--ac-d); border: 1px solid rgba(0,207,255,0.25); color: var(--ac); }
+  .avatar-color-1 { background: var(--pu-d); border: 1px solid rgba(167,139,250,0.25); color: var(--pu); }
+  .avatar-color-2 { background: var(--gr-d); border: 1px solid rgba(0,229,160,0.25); color: var(--gr); }
+  .avatar-color-3 { background: var(--am-d); border: 1px solid rgba(255,176,32,0.25); color: var(--am); }
+  .avatar-color-4 { background: var(--rd-d); border: 1px solid rgba(255,85,119,0.25); color: var(--rd); }
+
+  .pcard-actions { display: flex; gap: 6px; }
+  .pcard-menu {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--tx3); cursor: pointer; flex-shrink: 0;
+    transition: all 0.15s; margin-top: 2px;
+  }
+  .pcard-menu:hover { background: var(--s2); color: var(--tx2); }
+  .pcard-menu-edit:hover { color: var(--ac); }
+  .pcard-menu-delete:hover { color: var(--rd); }
+  .pcard-menu svg { width: 15px; height: 15px; }
+
+  .pcard-name {
+    font-size: 16.5px; font-weight: 700; color: var(--tx);
+    letter-spacing: -0.2px; margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .pcard-client {
+    font-size: 12px; color: var(--tx2);
+    display: flex; align-items: center; gap: 5px; margin-bottom: 16px;
+    font-family: 'Outfit', sans-serif;
+  }
+  .pcard-client svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+  .pcard-tags { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 18px; }
+  .ptag {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 11px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .ptag-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .ptag-ac { background: var(--ac-d); color: var(--ac); }
+  .ptag-am { background: var(--am-d); color: var(--am); }
+  .ptag-gr { background: var(--gr-d); color: var(--gr); }
+  .ptag-rd { background: var(--rd-d); color: var(--rd); }
+  .ptag-pu { background: var(--pu-d); color: var(--pu); }
+  .ptag-user { background: var(--s3); color: var(--tx2); border: 1px solid var(--b2); }
+
+  /* Modal Backdrop Centered and Premium */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 6, 12, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .light-mode .modal-backdrop {
+    background: rgba(15, 23, 42, 0.35) !important;
+  }
+  .modal-backdrop.open {
+    display: flex !important;
+  }
+  .modal {
+    background: var(--s1);
+    border: 1px solid var(--b2);
+    border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+    padding: 24px;
+    width: 500px !important;
+    max-width: 90vw;
+    animation: modalAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .light-mode .modal {
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.12) !important;
+  }
+  @keyframes modalAppear {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--b1);
+  }
+  .modal-title { font-size: 16px; font-weight: 700; color: var(--tx); }
+  .modal-close {
+    font-size: 24px; cursor: pointer; color: var(--tx3); line-height: 1;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--rd); }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .form-label { font-size: 11.5px; font-weight: 600; color: var(--tx2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input {
+    background: var(--s2); border: 1px solid var(--b2); border-radius: 8px;
+    padding: 10px 14px; color: var(--tx); font-family: 'Outfit', sans-serif;
+    font-size: 13.5px; outline: none; transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--ac); }
+  .light-mode .form-input { background: #ffffff; }
+
+  .modal-footer {
+    display: flex; justify-content: flex-end; gap: 12px;
+    margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--b1);
+  }
+
+  .btn-outline {
+    background: transparent; border: 1px solid var(--b2); border-radius: 8px;
+    padding: 10px 20px; color: var(--tx2); font-family: 'Outfit', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-outline:hover { border-color: var(--b3); color: var(--tx); }
+
+  .btn-primary {
+    background: var(--ac); border: none; border-radius: 8px;
+    padding: 10px 20px; color: #020c14; font-family: 'Outfit', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-danger {
+    background: var(--rd); border: none; border-radius: 8px;
+    padding: 10px 20px; color: #ffffff; font-family: 'Outfit', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-danger:hover { opacity: 0.9; }
+
+  /* Premium Card Footer and Actions Styles */
+  .pcard-actions { display: flex; gap: 6px; }
+  .pcard-menu {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--tx3); cursor: pointer; flex-shrink: 0;
+    transition: all 0.15s; margin-top: 2px;
+  }
+  .pcard-menu:hover { background: var(--s2); color: var(--tx2); }
+  .pcard-menu-edit:hover { color: var(--ac); }
+  .pcard-menu-delete:hover { color: var(--rd); }
+  .pcard-menu svg { width: 15px; height: 15px; }
+
+  .pcard-footer {
+    padding: 14px 22px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--b1);
+    margin-top: auto;
+  }
+  .pcard-date {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px; color: var(--tx3);
+  }
+  .pcard-date svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+  .pcard-team { display: flex; align-items: center; gap: -4px; }
+  .team-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--pu-d); border: 2px solid var(--s1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--pu);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .light-mode .team-avatar {
+    border-color: #ffffff !important;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-    <!-- Stats -->
-    <div class="team-stats fade-up">
-      <div class="stat-card">
-        <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-        <div>
-          <div class="stat-label">Total de Funcionários</div>
-          <div class="stat-value">{{ total }}</div>
+<div class="db-wrapper">
+
+  <div class="content-scrollable">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+      <h2 style="font-size:24px; font-weight:800; color:var(--tx); letter-spacing:-0.5px;">Funcionários</h2>
+    </div>
+
+    <!-- ═══ STATS ═══ -->
+    <div class="stats-row">
+      <div class="scard scard-total">
+        <div class="scard-top">
+          <div>
+            <div class="scard-lbl">Total de Funcionários</div>
+            <div class="scard-val" style="color:var(--ac);">{{ total }}</div>
+            <div class="scard-sub">
+              <span class="tag tag-ac">Profissionais</span> registrados
+            </div>
+          </div>
+          <div class="scard-ico" style="background:var(--ac-d);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            </svg>
+          </div>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div>
-          <div class="stat-label">Funcionários Ativos</div>
-          <div class="stat-value">{{ total }}</div>
-          <div class="stat-delta">cadastrados</div>
+
+      <div class="scard scard-andamento">
+        <div class="scard-top">
+          <div>
+            <div class="scard-lbl">Funcionários Ativos</div>
+            <div class="scard-val" style="color:var(--gr);">{{ total }}</div>
+            <div class="scard-sub">
+              <span class="tag tag-gr">Em operação ativa</span>
+            </div>
+          </div>
+          <div class="scard-ico" style="background:var(--gr-d);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-        <div>
-          <div class="stat-label">Total de Equipes</div>
-          <div class="stat-value">{{ equipes|length }}</div>
-          <div class="stat-delta">grupos ativos</div>
+
+      <div class="scard scard-concluido">
+        <div class="scard-top">
+          <div>
+            <div class="scard-lbl">Total de Equipes</div>
+            <div class="scard-val" style="color:var(--pu);">{{ equipes|length }}</div>
+            <div class="scard-sub">
+              <span class="tag tag-pu">Grupos ativos</span>
+            </div>
+          </div>
+          <div class="scard-ico" style="background:var(--pu-d);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--pu)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Toolbar -->
-    <div class="proj-toolbar fade-up fade-up-1">
-      <div class="search-box">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Buscar funcionários…" oninput="onSearch(this.value)">
+    <!-- ═══ TOOLBAR ═══ -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="search-input" type="text" placeholder="Buscar funcionários por nome, e-mail ou cargo..." id="search-input" oninput="onSearch(this.value)">
       </div>
-      <select class="filter-select" onchange="onFilter(this.value)">
-        <option value="Todos">Todos</option>
-        <option value="Disponível">Disponíveis</option>
-        <option value="Em projeto">Em projeto</option>
-      </select>
+
+      <div class="filter-group">
+        <div style="position: relative; display: inline-block;">
+          <select class="filter-btn-select" onchange="onFilter(this.value)">
+            <option value="Todos">Todos os status</option>
+            <option value="Disponível">Disponível</option>
+            <option value="Em projeto">Em projeto</option>
+          </select>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.7;">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+
+      <button class="btn-new" onclick="openModal('modal-novo-funcionario')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Novo Funcionário
+      </button>
     </div>
 
-    <!-- Members Grid -->
-    <div id="members-root" class="fade-up fade-up-2">
-      <div class="members-grid">
-        {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-accent','avatar-red'] %}
-        {% if funcionarios %}
-          {% for func, usuario in funcionarios %}
-          <div class="member-card fade-up" onclick="location.href='{{ url_for('admin.funcionario_perfil', id=func.id) }}'" style="cursor:pointer;">
-            <div class="member-actions">
-              <button class="action-btn edit" title="Editar" 
-                data-id="{{ func.id }}"
-                data-nome="{{ usuario.nome }}"
-                data-email="{{ usuario.email }}"
-                data-cargo="{{ func.cargo }}"
-                data-skills="{% for skill in func.lista_skills %}{{ skill.nome }}{% if not loop.last %}, {% endif %}{% endfor %}"
-                onclick="event.stopPropagation(); handleEditClick(this)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
-              <button class="action-btn delete" title="Excluir" 
-                data-id="{{ func.id }}"
-                data-nome="{{ usuario.nome }}"
-                onclick="event.stopPropagation(); handleDeleteClick(this)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-              </button>
-            </div>
-            <div class="member-avatar {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ usuario.nome[:2].upper() }}</div>
-            <div>
-              <div class="member-name">{{ usuario.nome }}</div>
-              <div class="member-role">{{ func.cargo }}</div>
-            </div>
-            <span class="badge badge-green">Ativo</span>
-            <div class="member-email">{{ usuario.email }}</div>
-            <div class="member-skills">
-              {% for skill in func.lista_skills %}
-                <span class="skill-tag">{{ skill.nome }}</span>
-              {% else %}
-                <span class="skill-tag">{{ func.cargo }}</span>
-              {% endfor %}
-            </div>
-            <div class="member-footer">
-              <div class="member-projects-count" title="Equipes vinculadas">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                Equipes: <strong>
-                  {% for eq in func.lista_equipes %}
-                    {{ eq.nome }}{% if not loop.last %}, {% endif %}
-                  {% else %}
-                    Nenhuma
-                  {% endfor %}
-                </strong>
+    <!-- results count -->
+    <div class="results-info">
+      <div class="results-count">Mostrando <strong id="func-count">{{ total }}</strong> funcionário(s) encontrado(s)</div>
+    </div>
+
+    <!-- ═══ MEMBERS GRID VIEW ═══ -->
+    <div class="proj-grid">
+      {% if funcionarios %}
+        {% for func, usuario in funcionarios %}
+        {% set in_project = func.lista_equipes|length > 0 %}
+        <div class="pcard member-card" data-status="{% if in_project %}Em projeto{% else %}Disponível{% endif %}" onclick="location.href='{{ url_for('admin.funcionario_perfil', id=func.id) }}'">
+          <div class="pcard-strip {% if in_project %}pcard-strip-ac{% else %}pcard-strip-gr{% endif %}"></div>
+          <div class="pcard-body">
+
+            <div class="pcard-top">
+              <div class="pcard-ico-wrap avatar-color-{{ loop.index0 % 5 }}">
+                {{ usuario.nome[:2].upper() }}
+              </div>
+              <div class="pcard-actions">
+                <button class="pcard-menu pcard-menu-edit" title="Editar Funcionário" 
+                  data-id="{{ func.id }}"
+                  data-nome="{{ usuario.nome }}"
+                  data-email="{{ usuario.email }}"
+                  data-cargo="{{ func.cargo }}"
+                  data-skills="{% for skill in func.lista_skills %}{{ skill.nome }}{% if not loop.last %}, {% endif %}{% endfor %}"
+                  onclick="event.stopPropagation(); handleEditClick(this)">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="pcard-menu pcard-menu-delete" title="Excluir Funcionário" 
+                  data-id="{{ func.id }}"
+                  data-nome="{{ usuario.nome }}"
+                  onclick="event.stopPropagation(); handleDeleteClick(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
               </div>
             </div>
+
+            <div class="pcard-name">{{ usuario.nome }}</div>
+            <div class="pcard-client" style="margin-bottom: 12px; color: var(--ac); font-weight: 500;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="stroke: var(--ac);">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0116 0"/>
+              </svg>
+              {{ func.cargo }}
+            </div>
+            
+            <div class="pcard-client" style="margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+              </svg>
+              {{ usuario.email }}
+            </div>
+
+            <div class="pcard-tags" style="margin-bottom: 20px;">
+              {% for skill in func.lista_skills %}
+                <span class="ptag ptag-user">{{ skill.nome }}</span>
+              {% else %}
+                <span class="ptag ptag-user">{{ func.cargo }}</span>
+              {% endfor %}
+            </div>
+
           </div>
-          {% endfor %}
-        {% else %}
-          <p style="color:var(--text-muted);font-size:14px;">Nenhum funcionário cadastrado.</p>
-        {% endif %}
-      </div>
+
+          <div class="pcard-footer">
+            <div class="pcard-date" style="color: var(--tx2); line-height: 1.4; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">
+              Equipes: 
+              <strong style="color: var(--tx);">
+                {% for eq in func.lista_equipes %}
+                  {{ eq.nome }}{% if not loop.last %}, {% endif %}
+                {% else %}
+                  Nenhuma
+                {% endfor %}
+              </strong>
+            </div>
+            <div class="pcard-team">
+              <span class="tag {% if in_project %}tag-ac{% else %}tag-gr{% endif %}">
+                {% if in_project %}Em projeto{% else %}Disponível{% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="grid-column:1/-1; padding: 64px 32px; text-align: center; color: var(--tx3);">
+          Nenhum funcionário cadastrado no sistema.
+        </div>
+      {% endif %}
     </div>
 
-    <!-- Modal Novo Funcionário -->
-    <div class="modal-backdrop" id="modal-novo-funcionario">
-      <div class="modal">
-        <div class="modal-header">
-          <h2 class="modal-title">Novo Funcionário da Equipe</h2>
-          <div class="modal-close" onclick="closeModal('modal-novo-funcionario')">&times;</div>
-        </div>
-        <form action="{{ url_for('admin.add_funcionario') }}" method="POST">
-          <div class="flex-col gap-4">
-            <div class="form-group">
-              <label class="form-label">Nome Completo</label>
-              <input type="text" name="nome" class="form-input" placeholder="Ex: Ana Silva" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">E-mail</label>
-              <input type="email" name="email" class="form-input" placeholder="ana@cobyte.dev" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Senha Inicial</label>
-              <input type="password" name="senha" class="form-input" placeholder="••••••••" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cargo</label>
-              <input type="text" name="cargo" class="form-input" placeholder="Ex: Desenvolvedora Frontend" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Skills (separadas por vírgula)</label>
-              <input type="text" name="skills" class="form-input" placeholder="React, CSS, Node.js">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="closeModal('modal-novo-funcionario')">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Salvar Funcionário</button>
-          </div>
-        </form>
-      </div>
-    </div>
+  </div>
+</div>
 
-    <!-- Modal Editar Funcionário -->
-    <div class="modal-backdrop" id="modal-editar-funcionario">
-      <div class="modal">
-        <div class="modal-header">
-          <h2 class="modal-title">Editar Funcionário</h2>
-          <div class="modal-close" onclick="closeModal('modal-editar-funcionario')">&times;</div>
-        </div>
-        <form id="form-editar-funcionario" method="POST">
-          <div class="flex-col gap-4">
-            <div class="form-group">
-              <label class="form-label">Nome Completo</label>
-              <input type="text" name="nome" id="edit-nome" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">E-mail</label>
-              <input type="email" name="email" id="edit-email" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cargo</label>
-              <input type="text" name="cargo" id="edit-cargo" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Skills (separadas por vírgula)</label>
-              <input type="text" name="skills" id="edit-skills" class="form-input">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="closeModal('modal-editar-funcionario')">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Atualizar Funcionário</button>
-          </div>
-        </form>
-      </div>
+<!-- Modal Novo Funcionário -->
+<div class="modal-backdrop" id="modal-novo-funcionario">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Cadastrar Novo Funcionário</h2>
+      <div class="modal-close" onclick="closeModal('modal-novo-funcionario')">&times;</div>
     </div>
+    <form action="{{ url_for('admin.add_funcionario') }}" method="POST">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Nome Completo</label>
+          <input type="text" name="nome" class="form-input" placeholder="Ex: Ana Silva" required>
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">E-mail Corporativo</label>
+          <input type="email" name="email" class="form-input" placeholder="ana@cobyte.dev" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha de Acesso</label>
+          <input type="password" name="senha" class="form-input" placeholder="••••••••" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cargo / Função</label>
+          <input type="text" name="cargo" class="form-input" placeholder="Ex: Dev Frontend" required>
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Skills (separadas por vírgula)</label>
+          <input type="text" name="skills" class="form-input" placeholder="React, CSS, Python">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" onclick="closeModal('modal-novo-funcionario')">Cancelar</button>
+        <button type="submit" class="btn-primary">Criar Cadastro</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-    <!-- Modal Deletar Funcionário -->
-    <div class="modal-backdrop" id="modal-deletar-funcionario">
-      <div class="modal modal-sm">
-        <div class="modal-header">
-          <h2 class="modal-title">Confirmar Exclusão</h2>
-          <div class="modal-close" onclick="closeModal('modal-deletar-funcionario')">&times;</div>
+<!-- Modal Editar Funcionário -->
+<div class="modal-backdrop" id="modal-editar-funcionario">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Editar Funcionário</h2>
+      <div class="modal-close" onclick="closeModal('modal-editar-funcionario')">&times;</div>
+    </div>
+    <form id="form-editar-funcionario" method="POST">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Nome Completo</label>
+          <input type="text" name="nome" id="edit-nome" class="form-input" required>
         </div>
-        <div class="modal-body">
-          <p style="color: var(--text-secondary); line-height: 1.6;">
-            Tem certeza que deseja excluir o funcionário <strong id="delete-funcionario-nome" style="color: var(--text-primary);"></strong>? 
-            Esta ação não pode ser desfeita e removerá o acesso deste usuário ao sistema.
-          </p>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">E-mail Corporativo</label>
+          <input type="email" name="email" id="edit-email" class="form-input" required>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline" onclick="closeModal('modal-deletar-funcionario')">Cancelar</button>
-          <a id="btn-confirmar-delete" class="btn btn-danger">Excluir Permanentemente</a>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Cargo / Função</label>
+          <input type="text" name="cargo" id="edit-cargo" class="form-input" required>
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Skills (separadas por vírgula)</label>
+          <input type="text" name="skills" id="edit-skills" class="form-input">
         </div>
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" onclick="closeModal('modal-editar-funcionario')">Cancelar</button>
+        <button type="submit" class="btn-primary">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Deletar Funcionário -->
+<div class="modal-backdrop" id="modal-deletar-funcionario">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Confirmar Exclusão</h2>
+      <div class="modal-close" onclick="closeModal('modal-deletar-funcionario')">&times;</div>
     </div>
+    <div style="padding: 4px 0 16px;">
+      <p style="color: var(--tx2); line-height: 1.6; font-size: 14px;">
+        Tem certeza que deseja excluir permanentemente o funcionário <strong id="delete-funcionario-nome" style="color: var(--tx);"></strong>? 
+        Esta ação removerá completamente o acesso do usuário ao sistema. Esta ação não poderá ser desfeita.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-outline" onclick="closeModal('modal-deletar-funcionario')">Cancelar</button>
+      <a id="btn-confirmar-delete" class="btn-danger" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">Confirmar Exclusão</a>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
   function openModal(id) { document.getElementById(id).classList.add('open'); }
   function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  function onSearch(val) {
+    const q = val.toLowerCase().trim();
+    let visible = 0;
+    document.querySelectorAll('.member-card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      if (text.includes(q)) {
+        card.style.display = 'flex';
+        visible++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    document.getElementById('func-count').textContent = visible;
+  }
+
+  function onFilter(status) {
+    const filterVal = status.trim();
+    let visible = 0;
+    document.querySelectorAll('.member-card').forEach(card => {
+      const cardStatus = card.getAttribute('data-status');
+      if (filterVal === 'Todos' || cardStatus === filterVal) {
+        card.style.display = 'flex';
+        visible++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    document.getElementById('func-count').textContent = visible;
+  }
 
   function handleEditClick(btn) {
     const id = btn.getAttribute('data-id');
@@ -235,6 +801,14 @@
     document.getElementById('btn-confirmar-delete').href = `/admin/funcionario/excluir/${id}`;
     openModal('modal-deletar-funcionario');
   }
+
+  // Set the current date dynamic pill
+  document.addEventListener('DOMContentLoaded', () => {
+    const d = new Date();
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    document.getElementById('live-date').textContent = `${day} / ${month} / ${year}`;
+  });
 </script>
-<script src="{{ url_for('static', filename='js/equipes.js') }}"></script>
 {% endblock %}

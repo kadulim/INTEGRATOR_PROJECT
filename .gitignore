@@ -1,12 +1,46 @@
+# ── Ambiente local e credenciais (Segurança)
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ── Caches de compilação Python
 __pycache__/
 *.pyc
-.venv/
-venv/
-instance/
+*.pyo
+*.pyd
 .pytest_cache/
 .coverage
 htmlcov/
+.ipynb_checkpoints
+
+# ── Ambientes virtuais
+venv/
+.venv/
+env/
+Active/
+lib/
+pip-selfcheck.json
+
+# ── Pastas de ferramentas e IDEs (Editor Configs)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+
+# ── Bancos de dados locais e SQLite
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Empacotamento e builds
 dist/
 build/
 *.egg-info/
+node_modules/

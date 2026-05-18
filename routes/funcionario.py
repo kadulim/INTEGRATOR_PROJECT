@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from database import database
-from models import Usuario, Funcionario, Projeto, Equipes, Requisito
+import json
+import datetime
+from models import Usuario, Funcionario, Projeto, Equipes, Requisito, Log, Cliente
 
 funcionario_bp = Blueprint('funcionario', __name__, url_prefix='/funcionario')
 
@@ -25,19 +27,183 @@ def dashboard():
     if equipes_ids:
         projetos = Projeto.query.filter(Projeto.equipe_id.in_(equipes_ids)).all()
     
-    # Estatísticas simples
+    # Cálculo das métricas premium
+    total_projetos = len(projetos)
+    
+    # Membros únicos de equipe
+    membros_ids = set()
+    for eq in equipes:
+        for m in eq.membros_da_equipe:
+            membros_ids.add(m.id)
+    total_equipe = len(membros_ids)
+    
+    # Clientes únicos vinculados
+    cliente_ids = set()
+    for p in projetos:
+        if p.cliente_id:
+            cliente_ids.add(p.cliente_id)
+    total_clientes = len(cliente_ids)
+    
+    # Total de Budget envolvido nos projetos do funcionário
+    budget_total = sum(p.budget for p in projetos if p.budget) or 0
+    
+    # Requisitos pendentes associados aos projetos do funcionário
+    requisitos_pendentes = 0
+    for proj in projetos:
+        for req in proj.requisitos:
+            if req.status == 'Pendente':
+                requisitos_pendentes += 1
+                
     stats = {
         'projetos_ativos': len([p for p in projetos if p.status == 'Em andamento']),
         'equipes_count': len(equipes),
-        'requisitos_pendentes': 0 # Placeholder para futura lógica de tarefas
+        'requisitos_pendentes': requisitos_pendentes
     }
     
+    # ── Status dos Projetos (Donut) ──────────────────
+    status_cores = {
+        'Em andamento': '#3b82f6',
+        'Concluído':    '#22c55e',
+        'Pendente':     '#6b7280',
+    }
+    status_counts = {s: 0 for s in status_cores.keys()}
+    for p in projetos:
+        s = p.status or 'Pendente'
+        if s in status_counts:
+            status_counts[s] += 1
+            
+    status_data = [
+        {'label': s, 'val': c, 'color': status_cores.get(s, '#6b7280')}
+        for s, c in status_counts.items()
+    ]
+    
+    # ── Atividade Mensal (barras por status por mês dos projetos associados) ──────────────────
+    monthly_map = {m: {'Em andamento': 0, 'Concluído': 0, 'Pendente': 0} for m in range(1, 13)}
+    for p in projetos:
+        if p.prazo and len(p.prazo) >= 7:
+            try:
+                parts = p.prazo.split('-')
+                m = int(parts[1])
+                st = p.status or 'Pendente'
+                if st in monthly_map[m]:
+                    monthly_map[m][st] += 1
+            except (ValueError, IndexError):
+                pass
+                
+    volumes = [
+        {
+            'em_andamento': monthly_map[m]['Em andamento'],
+            'concluido': monthly_map[m]['Concluído'],
+            'pendente': monthly_map[m]['Pendente']
+        }
+        for m in range(1, 13)
+    ]
+    
+    # ── Logs dos projetos do funcionário ──────────────────
+    logs_data = []
+    todos_logs_data = []
+    if projetos:
+        proj_ids = [p.id for p in projetos]
+        logs_query = (
+            database.session.query(Log, Projeto, Equipes)
+            .outerjoin(Projeto, Log.projeto_id == Projeto.id)
+            .outerjoin(Equipes, Projeto.equipe_id == Equipes.id)
+            .filter(Log.projeto_id.in_(proj_ids))
+            .order_by(Log.data.desc())
+            .limit(10)
+            .all()
+        )
+        for log, proj_obj, eq_obj in logs_query:
+            logs_data.append({
+                'acao': log.acao,
+                'descricao': log.descricao,
+                'data': log.data,
+                'equipe_nome': eq_obj.nome if eq_obj else (proj_obj.nome if proj_obj else 'Geral')
+            })
+            
+        todos_logs_query = (
+            database.session.query(Log, Projeto, Equipes)
+            .outerjoin(Projeto, Log.projeto_id == Projeto.id)
+            .outerjoin(Equipes, Projeto.equipe_id == Equipes.id)
+            .filter(Log.projeto_id.in_(proj_ids))
+            .order_by(Log.data.desc())
+            .all()
+        )
+        for log, proj_obj, eq_obj in todos_logs_query:
+            todos_logs_data.append({
+                'acao': log.acao,
+                'descricao': log.descricao,
+                'data': log.data,
+                'equipe_nome': eq_obj.nome if eq_obj else (proj_obj.nome if proj_obj else 'Geral')
+            })
+            
+    # Para o painel de atividades recentes no rodapé do dashboard, vamos associar o último log a cada projeto
+    for proj in projetos:
+        latest_log = Log.query.filter_by(projeto_id=proj.id).order_by(Log.data.desc()).first()
+        proj.ultimo_log = latest_log.descricao if latest_log else "Sem alterações recentes"
+            
+    # ── Atividade Mensal do Mês Atual ──────────────────
+    now = datetime.datetime.now()
+    current_month_num = now.month
+    meses_nomes = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    current_month_name = meses_nomes[current_month_num]
+    
+    current_month_projects = {
+        'em_andamento': [],
+        'concluido': [],
+        'pendente': []
+    }
+    
+    current_year = now.year
+    prefix_current_month = f"{current_year}-{current_month_num:02d}"
+    month_infix = f"-{current_month_num:02d}-"
+    
+    for proj in projetos:
+        if proj.prazo:
+            is_match = proj.prazo.startswith(prefix_current_month) or month_infix in proj.prazo
+            if not is_match and len(proj.prazo) >= 7:
+                try:
+                    parts = proj.prazo.split('-')
+                    if len(parts) >= 2 and int(parts[1]) == current_month_num:
+                        is_match = True
+                except ValueError:
+                    pass
+            if is_match:
+                status_str = proj.status or 'Pendente'
+                if status_str == 'Em andamento':
+                    current_month_projects['em_andamento'].append(proj)
+                elif status_str == 'Concluído':
+                    current_month_projects['concluido'].append(proj)
+                else:
+                    current_month_projects['pendente'].append(proj)
+                    
+    # Funcionários da equipe para o widget
+    funcionarios_dash = (
+        Funcionario.query
+        .join(Usuario, Funcionario.usuario_id == Usuario.id)
+        .add_entity(Usuario)
+        .limit(4)
+        .all()
+    )
+
     return render_template(
         'funcionario/dashboard.html',
         funcionario=funcionario,
         equipes=equipes,
         projetos=projetos,
-        stats=stats
+        stats=stats,
+        total_projetos=total_projetos,
+        total_equipe=total_equipe,
+        total_clientes=total_clientes,
+        projetos_recentes=projetos,
+        budget_total=budget_total,
+        funcionarios_dash=funcionarios_dash,
+        status_data_json=json.dumps(status_data),
+        volumes_json=json.dumps(volumes),
+        logs=logs_data,
+        todos_logs=todos_logs_data,
+        current_month_name=current_month_name,
+        current_month_projects=current_month_projects
     )
 
 @funcionario_bp.route('/projetos')

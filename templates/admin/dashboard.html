@@ -1,565 +1,1112 @@
 {% extends 'admin/base.html' %}
 {% set active_page = 'dashboard' %}
-
 {% block title %}Dashboard — CoByte{% endblock %}
 
 {% block extra_css %}
 <style>
-  /* Esconder Topbar original para remover o ícone de notificações */
-  .topbar {
-    display: none !important;
-  }
-
-  /* Ajustar o conteúdo para ocupar o espaço */
-  .main-content {
-    padding-top: 0 !important;
-  }
-
-  .page-content {
-    background-color: #08090f !important;
-    color: #fff;
-    padding: 32px 40px !important;
-    min-height: 100vh;
-  }
+  /* Force hide original topbar and clean up content wrapper */
+  .topbar { display: none !important; }
+  .main-content { padding-top: 0 !important; height: 100vh !important; overflow: hidden !important; }
+  .page-content { padding: 0 !important; height: 100vh !important; overflow: hidden !important; }
+  body { height: 100vh !important; overflow: hidden !important; }
 
   :root {
-    --bg-dark: #08090f;
-    --card-bg: #11131c;
-    --border-color: rgba(255, 255, 255, 0.03);
-    --text-muted: rgba(255, 255, 255, 0.4);
-    --purple: #a855f7;
-    --blue: #3b82f6;
-    --pink: #ec4899;
-    --green: #10b981;
-    --orange: #f59e0b;
-    --red: #ef4444;
+    --bg: #060910;
+    --s1: #0B1220;
+    --s2: #101A2D;
+    --s3: #162033;
+    --b1: rgba(255, 255, 255, 0.055);
+    --b2: rgba(255, 255, 255, 0.10);
+    --b3: rgba(255, 255, 255, 0.16);
+    --ac: #00CFFF;
+    --ac-d: rgba(0, 207, 255, 0.10);
+    --ac-d2: rgba(0, 207, 255, 0.06);
+    --gr: #00E5A0;
+    --gr-d: rgba(0, 229, 160, 0.10);
+    --am: #FFB020;
+    --am-d: rgba(255, 176, 32, 0.10);
+    --rd: #FF5577;
+    --tx: #DCE5F0;
+    --tx2: #7A8FA8;
+    --tx3: #3A4D62;
+    --sw: 256px;
+    --r: 12px;
+    --rl: 16px;
+    --vi: #A855F7;
+    --vi-d: rgba(168, 85, 247, 0.10);
   }
 
-  .premium-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  .light-mode {
+    --bg: #F3F4F6;
+    --s1: #FFFFFF;
+    --s2: #F8FAFC;
+    --s3: #E2E8F0;
+    --b1: rgba(15, 23, 42, 0.05);
+    --b2: rgba(15, 23, 42, 0.08);
+    --b3: rgba(15, 23, 42, 0.12);
+    --tx: #0F172A;
+    --tx2: #475569;
+    --tx3: #94A3B8;
   }
 
-  /* Header */
-  .dashboard-header {
-    margin-bottom: 32px;
-  }
-  .dashboard-header h1 {
-    font-size: 28px;
-    font-weight: 800;
-    margin-bottom: 4px;
-    color: #fff;
-  }
-  .dashboard-header p {
-    color: var(--text-muted);
-    font-size: 14px;
+  /* High prominence card shadow & border rules for Light Mode */
+  .light-mode .hero,
+  .light-mode .scard,
+  .light-mode .card,
+  .light-mode .mcard {
+    box-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.045), 0 2px 6px -1px rgba(15, 23, 42, 0.015) !important;
+    border-color: rgba(15, 23, 42, 0.085) !important;
   }
 
-  /* KPIs */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-    margin-bottom: 32px;
+  .light-mode .hero {
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.02) !important;
   }
-  .kpi-card {
-    padding: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--card-bg);
+
+  .light-mode .scard:hover,
+  .light-mode .mcard:hover {
+    border-color: rgba(15, 23, 42, 0.16) !important;
+    box-shadow: 0 14px 32px -4px rgba(15, 23, 42, 0.09), 0 6px 14px -2px rgba(15, 23, 42, 0.04) !important;
   }
-  .kpi-left {
+
+  /* Soft and gorgeous light gradients for monthly cards */
+  .light-mode .mcard-gr {
+    border-color: rgba(0, 229, 160, 0.24) !important;
+    background: linear-gradient(160deg, rgba(0, 229, 160, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+  }
+  .light-mode .mcard-ac {
+    border-color: rgba(0, 207, 255, 0.28) !important;
+    background: linear-gradient(160deg, rgba(0, 207, 255, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+  }
+  .light-mode .mcard-am {
+    border-color: rgba(255, 176, 32, 0.24) !important;
+    background: linear-gradient(160deg, rgba(255, 176, 32, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+  }
+
+  .light-mode .latest-change-box {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  .light-mode .proj-row:hover,
+  .light-mode .act-row:hover {
+    background: rgba(15, 23, 42, 0.016) !important;
+  }
+
+  .light-mode .ring-track {
+    stroke: #0f172a !important;
+    opacity: 0.06 !important;
+  }
+
+  .light-mode .modal-ov {
+    background: rgba(15, 23, 42, 0.35) !important;
+  }
+
+  .light-mode .modal-box {
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.12) !important;
+  }
+
+  .light-mode .hero::before {
+    background: radial-gradient(circle, rgba(0, 207, 255, 0.14) 0%, transparent 65%) !important;
+  }
+
+  .light-mode .hero::after {
+    background: radial-gradient(circle, rgba(0, 229, 160, 0.10) 0%, transparent 65%) !important;
+  }
+
+  /* Reset & Container */
+  .db-wrapper {
+    background: var(--bg) !important;
+    color: var(--tx);
+    height: 100vh;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    overflow: hidden;
+    font-family: 'Outfit', sans-serif;
   }
-  .kpi-header {
+
+  /* ─── SCROLLBAR ─── */
+  .custom-scroll::-webkit-scrollbar { width: 4px; }
+  .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+  .custom-scroll::-webkit-scrollbar-thumb { background: var(--b3); border-radius: 4px; }
+
+  /* ─── TOPBAR ─── */
+  .topbar-custom {
+    padding: 18px 32px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--b1);
+    background: rgba(6, 9, 16, 0.85);
+    backdrop-filter: blur(12px);
+    flex-shrink: 0;
   }
-  .kpi-icon {
+  .tb-left .page-title { font-size: 20px; font-weight: 800; letter-spacing: -0.4px; color: var(--tx); }
+  .tb-left .breadcrumb { font-size: 11.5px; color: var(--tx2); margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+  .tb-right { display: flex; align-items: center; gap: 10px; }
+
+  .date-pill {
+    padding: 6px 14px;
+    background: var(--s2);
+    border: 1px solid var(--b2);
+    border-radius: 20px;
+    font-size: 11.5px;
+    color: var(--tx2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .icon-btn {
     width: 36px;
     height: 36px;
-    border-radius: 8px;
+    background: var(--s2);
+    border: 1px solid var(--b1);
+    border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    cursor: pointer;
+    color: var(--tx2);
+    transition: all 0.15s;
   }
-  .kpi-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-  }
-  .kpi-value {
-    font-size: 32px;
-    font-weight: 800;
-    color: #fff;
-    margin-top: 4px;
-  }
-  .kpi-trend {
-    font-size: 12px;
-    margin-top: 4px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-weight: 600;
-  }
+  .icon-btn:hover { color: var(--tx); border-color: var(--b2); }
+  .icon-btn svg { width: 16px; height: 16px; }
 
-  .sparkline {
-    width: 100px;
-    height: 40px;
-  }
-
-  /* Grid Principal */
-  .dash-grid {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 24px;
-    margin-bottom: 24px;
-  }
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-  }
-  .section-title { font-size: 15px; font-weight: 700; color: #fff; }
-  .section-action { color: var(--text-muted); font-size: 13px; text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 600; }
-  .section-action:hover { color: #fff; }
-
-  /* Projetos Ativos */
-  .project-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-  }
-  .project-row:last-child { border-bottom: none; }
-  
-  .project-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .project-icon {
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    background: #1a1d29;
-    color: rgba(255, 255, 255, 0.6);
-  }
-
-  .progress-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 200px;
-  }
-  .progress-bar-bg {
+  /* ─── CONTENT ─── */
+  .content-scrollable {
     flex: 1;
-    height: 6px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 3px;
+    overflow-y: auto;
+    padding: 32px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* ─── HERO STATUS ─── */
+  .hero {
+    background: var(--s1);
+    border: 1px solid var(--b2);
+    border-radius: var(--rl);
+    padding: 32px 40px;
+    display: grid;
+    grid-template-columns: 1fr 260px 1fr;
+    gap: 40px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 280px;
+    flex-shrink: 0;
+  }
+
+  /* glow effects */
+  .hero::before {
+    content: ''; position: absolute;
+    top: -100px; right: -60px;
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, rgba(0, 207, 255, 0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: ''; position: absolute;
+    bottom: -80px; left: 25%;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(0, 229, 160, 0.05) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  /* hero left */
+  .hero-eyebrow {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--ac);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 22px; height: 2px;
+    background: var(--ac); border-radius: 2px;
+  }
+  .hero-title {
+    font-size: 30px; font-weight: 800; letter-spacing: -0.6px;
+    line-height: 1.1; margin-bottom: 12px; color: var(--tx);
+  }
+  .hero-sub {
+    font-size: 12.5px; color: var(--tx2); line-height: 1.65;
+    max-width: 300px; margin-bottom: 26px;
+  }
+
+  .status-list { display: flex; flex-direction: column; gap: 13px; }
+  .status-item { display: flex; align-items: center; gap: 12px; }
+  .s-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .s-name { font-size: 13px; color: var(--tx2); flex: 1; }
+  .s-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px; font-weight: 600; color: var(--tx);
+  }
+
+  /* donut */
+  .donut-wrap {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .donut-center {
+    position: absolute; text-align: center; pointer-events: none;
+  }
+  .d-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 52px; font-weight: 600; color: var(--tx); line-height: 1;
+  }
+  .d-lbl {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--tx2); margin-top: 5px;
+  }
+
+  /* hero right */
+  .hero-right-lbl {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--tx3); margin-bottom: 18px;
+  }
+  .big-stat {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--b1);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .big-stat:last-child { border-bottom: none; }
+  .bs-left { display: flex; align-items: center; gap: 12px; }
+  .bs-bar { width: 4px; height: 36px; border-radius: 2px; flex-shrink: 0; }
+  .bs-name { font-size: 12.5px; color: var(--tx2); }
+  .bs-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 30px; font-weight: 600; line-height: 1;
+  }
+
+  /* ─── STATS ROW ─── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .scard {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--r);
+    padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.18s, transform 0.18s;
+    position: relative; overflow: hidden;
+  }
+  .scard:hover { border-color: var(--b2); transform: translateY(-2px); }
+
+  .scard-top { display: flex; align-items: flex-start; justify-content: space-between; }
+  .scard-lbl {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.9px;
+    text-transform: uppercase; color: var(--tx2);
+  }
+  .scard-ico {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scard-ico svg { width: 16px; height: 16px; }
+
+  .scard-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px; font-weight: 600; letter-spacing: -1px;
+    color: var(--tx); line-height: 1;
+  }
+  .scard-sub {
+    font-size: 11.5px; color: var(--tx2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tag {
+    font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 20px;
+  }
+  .tag-ac { background: var(--ac-d); color: var(--ac); }
+  .tag-gr { background: var(--gr-d); color: var(--gr); }
+  .tag-am { background: var(--am-d); color: var(--am); }
+  .tag-vi { background: var(--vi-d); color: var(--vi); }
+
+  /* ─── SCARD WAVES ANIMATION ─── */
+  .scard {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .scard-waves {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 52px;
+    opacity: 0.85;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+  }
+  .scard:hover .scard-waves {
+    transform: scaleY(1.22);
+  }
+  .scard-waves svg {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    height: 100%;
+  }
+  .wave-path {
+    /* Gradients are defined inline in HTML to use exact theme variables */
+  }
+  @keyframes flowWave1 {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes flowWave2 {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+  }
+  .wave1 {
+    animation: flowWave1 22s linear infinite;
+  }
+  .wave2 {
+    animation: flowWave2 15s linear infinite;
+  }
+
+  /* ─── BOTTOM GRID ─── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 18px;
+    flex-shrink: 0;
+  }
+
+  .card {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--r);
     overflow: hidden;
   }
-  .progress-bar-fill {
-    height: 100%;
-    border-radius: 3px;
+  .card-hdr {
+    padding: 18px 22px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--b1);
   }
-  .progress-text {
-    font-size: 13px;
-    font-weight: 700;
-    color: #fff;
-    min-width: 35px;
+  .card-ttl {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.2px;
+    display: flex; align-items: center; gap: 9px;
+    color: var(--tx);
   }
+  .card-ttl-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ac); }
+  .card-act { font-size: 11.5px; color: var(--ac); cursor: pointer; font-weight: 500; opacity: 0.85; text-decoration: none; }
+  .card-act:hover { opacity: 1; }
 
-  /* Donut Chart SVG */
-  .donut-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px;
+  /* project row */
+  .proj-row {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--b1);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px; align-items: center;
+    cursor: pointer; transition: background 0.15s;
   }
-  .donut-chart-wrapper {
-    position: relative;
-    width: 140px;
-    height: 140px;
-  }
-  .donut-center-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-  }
-  .donut-center-text h4 { font-size: 24px; font-weight: 800; color: #fff; margin: 0; }
-  .donut-center-text p { font-size: 11px; color: var(--text-muted); margin: 0; }
-
-  .donut-legend {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    font-size: 12px;
-  }
-  .legend-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 160px;
-  }
-  .legend-label { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
-  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .legend-value { color: #fff; font-weight: 600; }
-
-  /* Bar Chart SVG */
-  .bar-chart-container {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .bars-wrapper {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    height: 160px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-  .bar-item {
-    width: 20px;
-    border-radius: 4px 4px 0 0;
-    background: #a855f7;
-    transition: 0.3s;
-    position: relative;
-  }
-  .bar-item:hover { background: #c084fc; }
-  .bar-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-  .bar-label { width: 20px; text-align: center; }
-
-  /* Timeline / Logs */
-  .timeline {
-    padding: 24px;
-    position: relative;
-  }
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 40px;
-    top: 24px;
-    bottom: 24px;
-    width: 2px;
-    background: rgba(255,255,255,0.03);
-  }
-  .timeline-item {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 24px;
-    position: relative;
-  }
-  .timeline-item:last-child { margin-bottom: 0; }
-  .timeline-icon {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    background: #1a1d29;
+  .proj-row:hover { background: var(--s2); }
+  .proj-row:last-child { border-bottom: none; }
+  .proj-ico {
+    width: 40px; height: 40px;
+    background: var(--s3);
+    border: 1px solid var(--b2);
+    border-radius: 9px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    z-index: 1;
-    border: 2px solid #11131c;
+    color: var(--ac); flex-shrink: 0;
   }
-  .timeline-content {
+  .proj-ico svg { width: 18px; height: 18px; }
+  .proj-name { font-size: 13.5px; font-weight: 600; color: var(--tx); margin-bottom: 3px; }
+  .proj-desc { font-size: 11.5px; color: var(--tx2); }
+  .proj-date { text-align: right; }
+  .proj-date-lbl { font-size: 9.5px; color: var(--tx3); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.6px; }
+  .proj-date-val { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ac); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 10.5px; font-weight: 600;
+  }
+  .badge-ac { background: var(--ac-d); color: var(--ac); }
+  .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* activity row */
+  .act-row {
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--b1);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px; align-items: flex-start;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .act-row:hover { background: var(--s2); }
+  .act-row:last-child { border-bottom: none; }
+  .act-ico {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--gr-d);
+    border: 1px solid rgba(0,229,160,0.18);
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px; flex-shrink: 0;
+  }
+  .act-ico svg { width: 13px; height: 13px; stroke: var(--gr); }
+  .act-user { font-size: 12.5px; font-weight: 600; color: var(--tx); margin-bottom: 3px; }
+  .act-desc { font-size: 11.5px; color: var(--tx2); line-height: 1.5; }
+  .act-time { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--tx3); margin-top: 2px; }
+
+  /* ─── MONTHLY ─── */
+  .monthly {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .mcard {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--r);
+    padding: 30px 26px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; cursor: pointer; gap: 14px;
+    transition: border-color 0.18s, transform 0.18s;
+    position: relative; overflow: hidden;
+    min-height: 160px;
+  }
+  .mcard:hover { border-color: var(--b2); transform: translateY(-2px); }
+
+  .mcard::before {
+    content: ''; position: absolute;
+    top: -50px; left: 50%; transform: translateX(-50%);
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    opacity: 0.07;
+    pointer-events: none;
+  }
+  .mcard-ac::before { background: var(--ac); }
+  .mcard-gr::before { background: var(--gr); }
+  .mcard-am::before { background: var(--am); }
+
+  /* Default / Dark Mode Monthly Cards & latest-change-box border definitions */
+  .latest-change-box {
+    background: var(--s2);
+    border: 1px solid var(--b1);
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .mcard-gr {
+    border-color: rgba(0, 229, 160, 0.08) !important;
+  }
+  .mcard-ac {
+    border-color: rgba(0, 207, 255, 0.14) !important;
+    background: linear-gradient(160deg, #0d1a2e 0%, #0B1220 100%) !important;
+  }
+  .mcard-am {
+    border-color: rgba(255, 176, 32, 0.08) !important;
+  }
+
+  .mcard-lbl {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .mcard-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 52px; font-weight: 600; line-height: 1;
+  }
+  .mcard-sub { font-size: 11.5px; color: var(--tx2); }
+
+  /* ─── DONUT ANIMATION ─── */
+  .ring-track { opacity: 0.12; }
+  .ring-fill {
+    transform-origin: center;
+    transform: rotate(-90deg);
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* section divider label */
+  .section-lbl {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.3px;
+    text-transform: uppercase; color: var(--tx3);
+    flex-shrink: 0;
+  }
+  .section-lbl::after {
+    content: ''; flex: 1; height: 1px; background: var(--b1);
+  }
+
+  /* Modals Centered */
+  .modal-ov {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 6, 12, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-box {
+    width: 520px;
+    max-width: 90vw;
+    background: var(--s1);
+    border: 1px solid var(--b2);
+    border-radius: 16px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  }
+  .modal-head {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--b1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .modal-head h3 {
+    font-size: 15px;
+    color: var(--tx);
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--tx2);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    font-size: 18px;
+    line-height: 1;
+    transition: all 0.2s;
+  }
+  .modal-close:hover {
+    color: var(--tx);
+    background: var(--b1);
+  }
+  .modal-scroll {
+    overflow-y: auto;
     flex: 1;
-    padding-top: 4px;
   }
-  .timeline-text { font-size: 12px; color: #fff; margin-bottom: 4px; line-height: 1.4; }
-  .timeline-text strong { color: #fff; font-weight: 600; }
-  .timeline-meta { font-size: 11px; color: var(--text-muted); }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="page-content">
-  
-  <!-- Header -->
-  <div class="dashboard-header">
-    <h1>Dashboard</h1>
-    <p>Visão geral dos seus projetos e atividades</p>
-  </div>
+<div class="db-wrapper">
 
-  <!-- KPIs Row -->
-  <div class="kpi-grid">
-    <!-- Projetos Ativos -->
-    <div class="premium-card kpi-card">
-      <div class="kpi-left">
-        <div class="kpi-header">
-          <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
-            <i data-lucide="folder" style="width: 16px;"></i>
-          </div>
-          <span class="kpi-label">Projetos Ativos</span>
-        </div>
-        <div class="kpi-value">{{ total_projetos }}</div>
-        <div class="kpi-trend" style="color: #3b82f6;">
-          <i data-lucide="arrow-up-right" style="width: 12px;"></i>
-          1 novo este mês
-        </div>
-      </div>
-      <svg class="sparkline" viewBox="0 0 100 40">
-        <path d="M0,30 Q20,10 40,25 T80,5 T100,20" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </div>
+  <div class="content-scrollable custom-scroll">
 
-    <!-- Clientes -->
-    <div class="premium-card kpi-card">
-      <div class="kpi-left">
-        <div class="kpi-header">
-          <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
-            <i data-lucide="users" style="width: 16px;"></i>
-          </div>
-          <span class="kpi-label">Clientes</span>
-        </div>
-        <div class="kpi-value">{{ total_clientes }}</div>
-        <div class="kpi-trend" style="color: #10b981;">
-          <i data-lucide="arrow-up-right" style="width: 12px;"></i>
-          2 novos este mês
-        </div>
-      </div>
-      <svg class="sparkline" viewBox="0 0 100 40">
-        <path d="M0,35 Q20,20 40,30 T80,10 T100,5" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </div>
+    <!-- ═══ HERO: STATUS DE PROJETOS ═══ -->
+    <div class="hero">
 
-    <!-- Funcionários -->
-    <div class="premium-card kpi-card">
-      <div class="kpi-left">
-        <div class="kpi-header">
-          <div class="kpi-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
-            <i data-lucide="user-check" style="width: 16px;"></i>
-          </div>
-          <span class="kpi-label">Funcionários</span>
-        </div>
-        <div class="kpi-value">{{ total_equipe }}</div>
-        <div class="kpi-trend" style="color: #a855f7;">
-          <i data-lucide="arrow-up-right" style="width: 12px;"></i>
-          3 novos este mês
-        </div>
-      </div>
-      <svg class="sparkline" viewBox="0 0 100 40">
-        <path d="M0,25 Q20,35 40,15 T80,30 T100,10" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </div>
+      <!-- Left: labels & legend -->
+      <div class="hero-left">
+        <div class="hero-eyebrow">Status de Projetos</div>
+        <h1 class="hero-title">Visão Geral<br>do Painel</h1>
+        <p class="hero-sub">Acompanhe o progresso de todos os projetos ativos em tempo real.</p>
 
-    <!-- Budget Total -->
-    <div class="premium-card kpi-card">
-      <div class="kpi-left">
-        <div class="kpi-header">
-          <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
-            <i data-lucide="bar-chart-3" style="width: 16px;"></i>
-          </div>
-          <span class="kpi-label">Budget Total</span>
-        </div>
-        <div class="kpi-value">
-          R$
-          {% if budget_total >= 1000000 %}{{ "%.1f" | format(budget_total / 1000000) }}M
-          {% elif budget_total >= 1000 %}{{ "%.0f" | format(budget_total / 1000) }}k
-          {% else %}{{ budget_total }}{% endif %}
-        </div>
-        <div class="kpi-trend" style="color: #ef4444;">
-          <i data-lucide="arrow-up-right" style="width: 12px;"></i>
-          12% vs mês passado
-        </div>
-      </div>
-      <svg class="sparkline" viewBox="0 0 100 40">
-        <path d="M0,10 Q20,5 40,25 T80,15 T100,30" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </div>
-  </div>
-
-  <!-- Content Grid 1 -->
-  <div class="dash-grid">
-    <!-- Left Column: Projetos em Desenvolvimento -->
-    <div class="premium-card">
-      <div class="section-header">
-        <span class="section-title">Projetos em Desenvolvimento</span>
-        <a href="{{ url_for('admin.projetos') }}" class="section-action">Ver todos <i data-lucide="arrow-right" style="width:12px;"></i></a>
-      </div>
-      <div>
-        {% for proj in projetos_ativos %}
-          <div class="project-row" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=proj.id) }}'" style="cursor:pointer;">
-            <div class="project-info">
-              <div class="project-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;"><i data-lucide="folder" style="width: 16px;"></i></div>
-              <div>
-                <div style="font-weight: 600; font-size: 13px; color: #fff;">{{ proj.nome }}</div>
-                <div style="font-size: 11px; color: var(--text-muted);">{{ proj.descricao[:40] if proj.descricao else 'Sem descrição' }}...</div>
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px; width: 90%;">
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--tx3);">Última Alteração em Projeto</div>
+          
+          {% if logs %}
+            {% set last_log = logs[0] %}
+            <div class="latest-change-box">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11px; font-weight: 600; color: var(--ac); text-transform: uppercase; letter-spacing: 0.5px;">{{ last_log.acao }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--tx3);">{{ last_log.data.strftime('%d/%m/%Y') }}</span>
+              </div>
+              <p style="font-size: 12px; color: var(--tx2); margin: 0; line-height: 1.4; font-weight: 400;">{{ last_log.descricao }}</p>
+              
+              <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--b1); padding-top: 6px; margin-top: 4px; font-size: 11px; color: var(--tx3);">
+                <span>Equipe: <strong style="color: var(--tx2);">{{ last_log.equipe_nome }}</strong></span>
+                <span>Autor: <strong style="color: var(--gr);">{{ current_user.nome if current_user.is_authenticated else 'Administrador' }}</strong></span>
               </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 24px;">
-              <div class="progress-container">
-                <div class="progress-bar-bg">
-                  {% set pct = [30, 45, 60, 75]|random %}
-                  <div class="progress-bar-fill" style="width: {{ pct }}%; background: {% if loop.index % 3 == 1 %}#a855f7{% elif loop.index % 3 == 2 %}#3b82f6{% else %}#ec4899{% endif %};"></div>
-                </div>
-                <span class="progress-text">{{ pct }}%</span>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 10px; color: var(--text-muted);">Entrega</div>
-                <div style="font-size: 11px; color: #3b82f6; font-weight: 600;">{{ proj.prazo }}</div>
-              </div>
+          {% else %}
+            <div style="font-size: 12px; color: var(--tx3); font-style: italic;">Nenhuma alteração registrada.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Center: Donut -->
+      <div class="donut-wrap">
+        <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260">
+          <!-- Track rings -->
+          <circle class="ring-track" cx="130" cy="130" r="100"
+            fill="none" stroke="#ffffff" stroke-width="28"/>
+          <!-- Em andamento: cyan -->
+          <circle id="ringProgress" class="ring-fill" cx="130" cy="130" r="100"
+            fill="none" stroke="var(--ac)" stroke-width="28"
+            stroke-linecap="round"
+            stroke-dasharray="628.3 628.3"
+            stroke-dashoffset="628.3"/>
+          <!-- Concluído: green -->
+          <circle id="ringConcluido" class="ring-fill" cx="130" cy="130" r="68"
+            fill="none" stroke="var(--gr)" stroke-width="16"
+            stroke-linecap="round"
+            stroke-dasharray="427.3 427.3"
+            stroke-dashoffset="427.3"
+            opacity="0.7"/>
+        </svg>
+        <div class="donut-center">
+          <div class="d-num" id="totalCount">0</div>
+          <div class="d-lbl">Total</div>
+        </div>
+      </div>
+
+      <!-- Right: breakdown stats -->
+      <div class="hero-right">
+        <div class="hero-right-lbl">Detalhamento</div>
+
+        <div class="big-stat">
+          <div class="bs-left">
+            <div class="bs-bar" style="background:var(--ac);box-shadow:0 0 10px rgba(0,207,255,0.4);"></div>
+            <div>
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Em andamento</div>
+              <div class="bs-name">Projetos ativos</div>
             </div>
           </div>
-        {% else %}
-          <p style="color: var(--text-muted); font-size: 13px; padding: 24px;">Nenhum projeto em desenvolvimento.</p>
-        {% endfor %}
+          <div class="bs-num" style="color:var(--ac);" id="breakdownAndamento">0</div>
+        </div>
+
+        <div class="big-stat">
+          <div class="bs-left">
+            <div class="bs-bar" style="background:var(--gr);box-shadow:0 0 10px rgba(0,229,160,0.3);"></div>
+            <div>
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Concluído</div>
+              <div class="bs-name">Finalizados</div>
+            </div>
+          </div>
+          <div class="bs-num" style="color:var(--gr);" id="breakdownConcluido">0</div>
+        </div>
+
+        <div class="big-stat">
+          <div class="bs-left">
+            <div class="bs-bar" style="background:var(--am);box-shadow:0 0 10px rgba(255,176,32,0.3);"></div>
+            <div>
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Pendente</div>
+              <div class="bs-name">Aguardando</div>
+            </div>
+          </div>
+          <div class="bs-num" style="color:var(--am);" id="breakdownPendente">0</div>
+        </div>
       </div>
     </div>
 
-    <!-- Right Column: Status dos Projetos -->
-    <div class="premium-card">
-      <div class="section-header">
-        <span class="section-title">Status dos Projetos</span>
-      </div>
-      <div class="donut-container">
-        <!-- SVG Donut Chart -->
-        <div class="donut-chart-wrapper">
-          <svg width="140" height="140" viewBox="0 0 140 140">
-            <!-- Segmentos serão ajustados via JS para serem "condizentes" -->
-            <circle cx="70" cy="70" r="55" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="114 231" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
-            <circle cx="70" cy="70" r="55" fill="none" stroke="#3b82f6" stroke-width="12" stroke-dasharray="172 173" stroke-dashoffset="-114" transform="rotate(-90 70 70)"/>
-            <circle cx="70" cy="70" r="55" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12" stroke-dasharray="59 286" stroke-dashoffset="-286" transform="rotate(-90 70 70)"/>
+    <!-- ═══ STATS ROW ═══ -->
+    <div class="stats-row">
+
+      <div class="scard" onclick="location.href='{{ url_for('admin.projetos') }}'">
+        <div class="scard-top">
+          <div class="scard-lbl">Projetos</div>
+        </div>
+        <div class="scard-val" style="position: relative; z-index: 2;">{{ total_projetos }}</div>
+        <div class="scard-sub" style="position: relative; z-index: 2;">
+          <span class="tag tag-ac">Ativos</span>
+          no painel
+        </div>
+        <div class="scard-waves">
+          <svg viewBox="0 0 240 24" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad-ac" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--ac)" stop-opacity="0.22"></stop>
+                <stop offset="100%" stop-color="var(--ac)" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+            <path class="wave1" fill="url(#grad-ac)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave2" fill="url(#grad-ac)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
           </svg>
-          <div class="donut-center-text">
-            <h4 id="total-projetos-center">{{ total_projetos }}</h4>
-            <p>Projetos</p>
+        </div>
+      </div>
+
+      <div class="scard" onclick="location.href='{{ url_for('admin.clientes') }}'">
+        <div class="scard-top">
+          <div class="scard-lbl">Clientes</div>
+        </div>
+        <div class="scard-val" style="position: relative; z-index: 2;">{{ total_clientes }}</div>
+        <div class="scard-sub" style="position: relative; z-index: 2;">
+          <span class="tag tag-gr">Cadastrados</span>
+        </div>
+        <div class="scard-waves">
+          <svg viewBox="0 0 240 24" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad-gr" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--gr)" stop-opacity="0.22"></stop>
+                <stop offset="100%" stop-color="var(--gr)" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+            <path class="wave1" fill="url(#grad-gr)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave2" fill="url(#grad-gr)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="scard" onclick="location.href='{{ url_for('admin.funcionarios') }}'">
+        <div class="scard-top">
+          <div class="scard-lbl">Funcionários</div>
+        </div>
+        <div class="scard-val" style="position: relative; z-index: 2;">{{ funcionarios_dash|length }}</div>
+        <div class="scard-sub" style="position: relative; z-index: 2;">
+          <span class="tag tag-vi">Membros ativos</span>
+        </div>
+        <div class="scard-waves">
+          <svg viewBox="0 0 240 24" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad-vi" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--vi)" stop-opacity="0.22"></stop>
+                <stop offset="100%" stop-color="var(--vi)" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+            <path class="wave1" fill="url(#grad-vi)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave2" fill="url(#grad-vi)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="scard">
+        <div class="scard-top">
+          <div class="scard-lbl">Budget Total</div>
+        </div>
+        <div class="scard-val" style="font-size:22px;letter-spacing:-0.5px;position: relative; z-index: 2;">R${{ "%.0f"|format(budget_total) if budget_total % 1 == 0 else "%.2f"|format(budget_total) }}</div>
+        <div class="scard-sub" style="position: relative; z-index: 2;">
+          <span class="tag tag-am">Consolidado</span>
+        </div>
+        <div class="scard-waves">
+          <svg viewBox="0 0 240 24" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad-am" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--am)" stop-opacity="0.22"></stop>
+                <stop offset="100%" stop-color="var(--am)" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+            <path class="wave1" fill="url(#grad-am)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave2" fill="url(#grad-am)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ BOTTOM GRID ═══ -->
+    <div class="section-lbl">Projetos & Atividade</div>
+
+    <div class="bottom-grid">
+
+      <!-- Projetos Recentes -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-ttl">
+            <div class="card-ttl-dot"></div>
+            Projetos Recentes
+          </div>
+          <a href="{{ url_for('admin.projetos') }}" class="card-act">Todos os projetos →</a>
+        </div>
+
+        {% for proj in projetos_recentes %}
+        <div class="proj-row" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=proj.id) }}'">
+          <div class="proj-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <div class="proj-name">{{ proj.nome }}</div>
+            <div class="proj-desc" style="margin-bottom:6px;">{{ proj.descricao[:40] if proj.descricao else 'Sem descrição' }}...</div>
+            <span class="badge badge-ac"><span class="badge-dot"></span>{{ proj.status or 'Pendente' }}</span>
+          </div>
+          <div class="proj-date">
+            <div class="proj-date-lbl">Prazo</div>
+            <div class="proj-date-val">{{ proj.prazo }}</div>
           </div>
         </div>
-        <!-- Legend (Atualizada via JS) -->
-        <div class="donut-legend" id="donut-legend-list">
-          <!-- Preenchido via JS -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Content Grid 2 -->
-  <div class="dash-grid">
-    <!-- Left Column: Volume de Projetos -->
-    <div class="premium-card">
-      <div class="section-header">
-        <span class="section-title">Volume de Projetos</span>
-        <div style="display: flex; align-items: center; gap: 8px; background: #1a1d29; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.05);">
-          <i data-lucide="calendar" style="width: 12px;"></i>
-          2025
-          <i data-lucide="chevron-down" style="width: 12px;"></i>
-        </div>
-      </div>
-      <div class="bar-chart-container">
-        <div class="bars-wrapper" id="bars-wrapper-container">
-          <!-- Preenchido via JS -->
-        </div>
-        <div class="bar-labels">
-          <span class="bar-label">Jan</span>
-          <span class="bar-label">Fev</span>
-          <span class="bar-label">Mar</span>
-          <span class="bar-label">Abr</span>
-          <span class="bar-label">Mai</span>
-          <span class="bar-label">Jun</span>
-          <span class="bar-label">Jul</span>
-          <span class="bar-label">Ago</span>
-          <span class="bar-label">Set</span>
-          <span class="bar-label">Out</span>
-          <span class="bar-label">Nov</span>
-          <span class="bar-label">Dez</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px; font-size:11px; color:var(--text-muted); margin-top:16px;">
-          <div style="width:10px; height:10px; border-radius:2px; background: #a855f7;"></div>
-          Total de projetos
-        </div>
-      </div>
-    </div>
-
-    <!-- Right Column: Logs das Equipes -->
-    <div class="premium-card">
-      <div class="section-header">
-        <span class="section-title">Logs das Equipes</span>
-        <a class="section-action">Ver todos <i data-lucide="arrow-right" style="width:12px;"></i></a>
-      </div>
-      <div class="timeline">
-        {% for log in logs[:5] %}
-          <div class="timeline-item">
-            <div class="timeline-icon" style="
-              {% if loop.index % 5 == 1 %}color: #a855f7; background: rgba(168, 85, 247, 0.1);
-              {% elif loop.index % 5 == 2 %}color: #10b981; background: rgba(16, 185, 129, 0.1);
-              {% elif loop.index % 5 == 3 %}color: #3b82f6; background: rgba(59, 130, 246, 0.1);
-              {% elif loop.index % 5 == 4 %}color: #f59e0b; background: rgba(245, 158, 11, 0.1);
-              {% else %}color: #ef4444; background: rgba(239, 68, 68, 0.1);{% endif %}">
-              <i data-lucide="{% if loop.index % 5 == 1 %}folder{% elif loop.index % 5 == 2 %}check{% elif loop.index % 5 == 3 %}code{% elif loop.index % 5 == 4 %}user{% else %}trash{% endif %}" style="width: 14px;"></i>
-            </div>
-            <div class="timeline-content">
-              <div class="timeline-text">
-                <strong>{{ log.equipe_nome }}</strong>: {{ log.acao }}<br>
-                {{ log.descricao }}
-              </div>
-              <div class="timeline-meta">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
-            </div>
-          </div>
         {% else %}
-          <p style="color: var(--text-muted); font-size: 13px; padding: 24px; text-align: center;">Nenhum log registrado.</p>
+        <div style="padding:24px 22px;text-align:center;color:var(--tx3);font-size:12px;">
+          Nenhum projeto em andamento.
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Atividade Recente -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-ttl">
+            <div class="card-ttl-dot" style="background:var(--gr);"></div>
+            Atividade Recente
+          </div>
+          <div class="card-act" onclick="document.getElementById('logs-modal').style.display='flex';">Ver todas →</div>
+        </div>
+
+        {% for log in logs[:3] %}
+        <div class="act-row" onclick="document.getElementById('logs-modal').style.display='flex';">
+          <div class="act-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div>
+            <div class="act-user">{{ log.equipe_nome }}</div>
+            <div class="act-desc">{{ log.acao }} · {{ log.descricao }}</div>
+            <div class="act-time">{{ log.data.strftime('%d/%m · %H:%M') }}</div>
+          </div>
+        </div>
+        {% else %}
+        <div style="padding:24px 22px;text-align:center;color:var(--tx3);font-size:12px;">
+          Nenhuma atividade recente registrada.
+        </div>
         {% endfor %}
       </div>
     </div>
-  </div>
 
+    <!-- ═══ ATIVIDADE DO MÊS ═══ -->
+    <div class="section-lbl">Atividade de {{ current_month_name }}</div>
+
+    <div class="monthly">
+
+      <div class="mcard mcard-gr" onclick="openProjectsModal('concluido')">
+        <div class="mcard-lbl" style="color:var(--gr);">Concluídos</div>
+        <div class="mcard-num" style="color:var(--gr);">{{ current_month_projects.concluido|length }}</div>
+        <div class="mcard-sub">projetos finalizados</div>
+      </div>
+
+      <div class="mcard mcard-ac" onclick="openProjectsModal('em_andamento')">
+        <div class="mcard-lbl" style="color:var(--ac);">Desenvolvimento</div>
+        <div class="mcard-num" style="color:var(--ac);">{{ current_month_projects.em_andamento|length }}</div>
+        <div class="mcard-sub">projeto em andamento</div>
+      </div>
+
+      <div class="mcard mcard-am" onclick="openProjectsModal('pendente')">
+        <div class="mcard-lbl" style="color:var(--am);">Pendente</div>
+        <div class="mcard-num" style="color:var(--am);">+{{ current_month_projects.pendente|length }}</div>
+        <div class="mcard-sub">aguardando início</div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
+</div>
+
+<!-- Logs Modal -->
+<div id="logs-modal" class="modal-ov" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Histórico de Atividades do Sistema</h3>
+      <button class="modal-close" onclick="document.getElementById('logs-modal').style.display='none';">✕</button>
+    </div>
+    <div class="modal-scroll custom-scroll" style="padding: 20px;">
+      {% set log_colors = ['#A855F7', '#22C55E', '#3B82F6', '#F59E0B'] %}
+      {% for log in todos_logs %}
+      <div class="log-item-row" style="display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--b1);">
+        <div class="log-icon-wrap" style="background: {{ log_colors[loop.index0 % 4] }}15; color: {{ log_colors[loop.index0 % 4] }}; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <i data-lucide="check" style="width: 12px;"></i>
+        </div>
+        <div class="log-details" style="flex: 1;">
+          <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);"><strong>{{ log.equipe_nome }}</strong> · {{ log.acao }}</div>
+          <div class="log-description" style="font-size: 11px; color: var(--tx2); margin-top: 2px;">{{ log.descricao }}</div>
+        </div>
+        <div class="log-timestamp" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--tx3);">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
+      </div>
+      {% else %}
+      <div style="padding: 24px; text-align: center; color: var(--tx2); font-size: 13px;">Nenhum registro encontrado.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Projects Status Centralized Modal -->
+<div id="projects-status-modal" class="modal-ov" style="display:none;">
+  <div class="modal-box" style="width: 520px;">
+    <div class="modal-head">
+      <h3 id="modal-status-title">Projetos</h3>
+      <button class="modal-close" onclick="closeProjectsModal()">✕</button>
+    </div>
+    <div class="modal-scroll custom-scroll" style="padding: 20px;">
+      <div id="modal-projects-list" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Filled dynamically by JS -->
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+  // Initialize lucide icons
   lucide.createIcons();
   
-  /* Dados injetados pelo servidor */
   const statusData = {{ status_data_json | safe }};
   const volumes = {{ volumes_json | safe }};
-  
-  // Atualizar Legenda do Donut de forma "condizente"
-  const legendContainer = document.getElementById('donut-legend-list');
-  if (legendContainer && statusData) {
-    legendContainer.innerHTML = '';
-    statusData.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'legend-item';
-      div.innerHTML = `
-        <div class="legend-label"><div class="legend-dot" style="background: ${item.color};"></div>${item.label}</div>
-        <span class="legend-value">${item.val}</span>
+
+  // Donut Chart logic
+  window.addEventListener('load', () => {
+    // Parse dynamic values
+    const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
+    const concluidoVal = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
+    const pendenteVal = parseInt(statusData.find(d => d.label === 'Pendente')?.val || 0);
+    const totalVal = emAndamentoVal + concluidoVal + pendenteVal;
+
+    // Set text elements
+    if (document.getElementById('legendAndamento')) document.getElementById('legendAndamento').textContent = emAndamentoVal;
+    if (document.getElementById('legendConcluido')) document.getElementById('legendConcluido').textContent = concluidoVal;
+    if (document.getElementById('legendPendente')) document.getElementById('legendPendente').textContent = pendenteVal;
+
+    document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
+    document.getElementById('breakdownConcluido').textContent = concluidoVal;
+    document.getElementById('breakdownPendente').textContent = pendenteVal;
+
+    // Calculate and animate Completion Rate
+    const completionRate = totalVal > 0 ? Math.round((concluidoVal / totalVal) * 100) : 0;
+    const rateText = document.getElementById('completionRateText');
+    const rateBar = document.getElementById('completionRateBar');
+    if (rateText) rateText.textContent = completionRate + '%';
+    if (rateBar) {
+      setTimeout(() => {
+        rateBar.style.width = completionRate + '%';
+      }, 500);
+    }
+
+    // SVG elements
+    const ringProgress = document.getElementById('ringProgress');
+    const ringConcluido = document.getElementById('ringConcluido');
+
+    // Outer circle (Em andamento)
+    const circOuter = 628.3;
+    const pctOuter = totalVal > 0 ? (emAndamentoVal / totalVal) : 0;
+    const offsetOuter = circOuter * (1 - pctOuter);
+
+    // Inner circle (Concluído)
+    const circInner = 427.3;
+    const pctInner = totalVal > 0 ? (concluidoVal / totalVal) : 0;
+    const offsetInner = circInner * (1 - pctInner);
+
+    // Animate rings
+    setTimeout(() => {
+      if (ringProgress) {
+        ringProgress.style.strokeDashoffset = offsetOuter.toFixed(1);
+      }
+      if (ringConcluido) {
+        ringConcluido.style.strokeDashoffset = offsetInner.toFixed(1);
+      }
+    }, 300);
+
+    // Animate total counter
+    const el = document.getElementById('totalCount');
+    let count = 0;
+    const target = totalVal;
+    
+    if (target === 0) {
+      el.textContent = '0';
+    } else {
+      const step = () => {
+        if (count < target) {
+          count++;
+          el.textContent = count;
+          setTimeout(step, Math.max(30, 200 / target));
+        }
+      };
+      setTimeout(step, 400);
+    }
+  });
+
+  // Monthly Activity Modal logic & project data serialization
+  const monthlyProjectsData = {
+    concluido: [
+      {% for p in current_month_projects.concluido %}
+        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('admin.projeto_detalhe', id=p.id) }}" },
+      {% endfor %}
+    ],
+    em_andamento: [
+      {% for p in current_month_projects.em_andamento %}
+        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('admin.projeto_detalhe', id=p.id) }}" },
+      {% endfor %}
+    ],
+    pendente: [
+      {% for p in current_month_projects.pendente %}
+        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('admin.projeto_detalhe', id=p.id) }}" },
+      {% endfor %}
+    ]
+  };
+
+  window.openProjectsModal = function(statusKey) {
+    const modal = document.getElementById('projects-status-modal');
+    const titleEl = document.getElementById('modal-status-title');
+    const listEl = document.getElementById('modal-projects-list');
+    if (!modal || !titleEl || !listEl) return;
+    
+    let title = 'Projetos';
+    let themeColor = 'var(--ac)';
+    
+    if (statusKey === 'concluido') {
+      title = 'Projetos Concluídos em {{ current_month_name }}';
+      themeColor = 'var(--gr)';
+    } else if (statusKey === 'em_andamento') {
+      title = 'Projetos em Desenvolvimento em {{ current_month_name }}';
+      themeColor = 'var(--ac)';
+    } else if (statusKey === 'pendente') {
+      title = 'Projetos Pendentes em {{ current_month_name }}';
+      themeColor = 'var(--am)';
+    }
+    
+    titleEl.innerHTML = `<span style="color: ${themeColor}; font-weight: 800; font-size: 14.5px;">${title}</span>`;
+    
+    const projs = monthlyProjectsData[statusKey] || [];
+    if (projs.length === 0) {
+      listEl.innerHTML = `
+        <div style="padding: 40px 24px; text-align: center; color: var(--tx2); font-size: 12.5px; font-style: italic;">
+          Nenhum projeto registrado com este status para o mês de {{ current_month_name }}.
+        </div>
       `;
-      legendContainer.appendChild(div);
-    });
-  }
+    } else {
+      listEl.innerHTML = projs.map(p => {
+        return `
+          <div onclick="location.href='${p.url}'" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--s2); border: 1px solid var(--b1); border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--s3)'; this.style.borderColor='${themeColor}'" onmouseout="this.style.background='var(--s2)'; this.style.borderColor='var(--b1)'">
+            <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0; padding-right: 12px;">
+              <span style="font-size: 13px; font-weight: 700; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.nome}</span>
+              <span style="font-size: 10.5px; color: var(--tx2);">Clique para gerenciar</span>
+            </div>
+            <div style="text-align: right; flex-shrink: 0;">
+              <span style="font-size: 8.5px; color: var(--tx2); text-transform: uppercase; display: block; letter-spacing: 0.3px;">Prazo</span>
+              <span style="font-size: 11.5px; font-weight: 700; color: ${themeColor};">${p.prazo}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    modal.style.display = 'flex';
+  };
+
+  window.closeProjectsModal = function() {
+    const modal = document.getElementById('projects-status-modal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  // Close modals when clicking outside
+  document.getElementById('logs-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
   
-  // Atualizar Gráfico de Barras de forma "condizente"
-  const barsContainer = document.getElementById('bars-wrapper-container');
-  if (barsContainer && volumes) {
-    barsContainer.innerHTML = '';
-    const maxVal = Math.max(...volumes, 1); // evita divisão por zero
-    volumes.forEach(val => {
-      const heightPct = (val / maxVal) * 100;
-      const bar = document.createElement('div');
-      bar.className = 'bar-item';
-      bar.style.height = `${Math.max(heightPct, 5)}%`; // altura mínima de 5% para visibilidade
-      barsContainer.appendChild(bar);
-    });
+  document.getElementById('projects-status-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+
+  // Display the current formatted system date in the pill
+  const datePill = document.querySelector('.date-pill');
+  if (datePill) {
+    const d = new Date();
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    datePill.textContent = `${day} / ${month} / ${year}`;
   }
 </script>
 {% endblock %}

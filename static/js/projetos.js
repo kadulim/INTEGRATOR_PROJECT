@@ -23,15 +23,17 @@ function onFilter(status) {
   const rows = document.querySelectorAll('.data-table tbody tr');
 
   cards.forEach(card => {
-    const cardStatus = card.querySelector('.badge:not(.badge-red):not(.badge-yellow):not(.badge-green):not(.badge-purple)').textContent.trim();
+    const cardStatus = card.getAttribute('data-status');
     const matches = status === 'Todos' || cardStatus === status;
     card.style.display = matches ? 'flex' : 'none';
   });
 
   rows.forEach(row => {
-    const rowStatus = row.querySelector('td:nth-child(3) .badge').textContent.trim();
-    const matches = status === 'Todos' || rowStatus === status;
-    row.style.display = matches ? '' : 'none';
+    const rowStatus = row.getAttribute('data-status');
+    if (rowStatus) {
+      const matches = status === 'Todos' || rowStatus === status;
+      row.style.display = matches ? '' : 'none';
+    }
   });
 }
 

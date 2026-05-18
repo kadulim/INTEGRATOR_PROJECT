@@ -1,98 +1,1054 @@
 {% extends 'funcionario/base.html' %}
 {% set active_page = 'dashboard' %}
-
 {% block title %}Meu Painel — CoByte{% endblock %}
-{% block topbar_title %}Painel do Funcionário{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Force hide original topbar and clean up content wrapper */
+  .topbar { display: none !important; }
+  .main-content { padding-top: 0 !important; height: 100vh !important; overflow: hidden !important; }
+  .page-content { padding: 0 !important; height: 100vh !important; overflow: hidden !important; }
+  body { height: 100vh !important; overflow: hidden !important; }
+
+  :root {
+    --bg: #060910;
+    --s1: #0B1220;
+    --s2: #101A2D;
+    --s3: #162033;
+    --b1: rgba(255, 255, 255, 0.055);
+    --b2: rgba(255, 255, 255, 0.10);
+    --b3: rgba(255, 255, 255, 0.16);
+    --ac: #00CFFF;
+    --ac-d: rgba(0, 207, 255, 0.10);
+    --ac-d2: rgba(0, 207, 255, 0.06);
+    --gr: #00E5A0;
+    --gr-d: rgba(0, 229, 160, 0.10);
+    --am: #FFB020;
+    --am-d: rgba(255, 176, 32, 0.10);
+    --rd: #FF5577;
+    --tx: #DCE5F0;
+    --tx2: #7A8FA8;
+    --tx3: #3A4D62;
+    --sw: 256px;
+    --r: 12px;
+    --rl: 16px;
+    --vi: #A855F7;
+    --vi-d: rgba(168, 85, 247, 0.10);
+  }
+
+  .light-mode {
+    --bg: #F3F4F6;
+    --s1: #FFFFFF;
+    --s2: #F8FAFC;
+    --s3: #E2E8F0;
+    --b1: rgba(15, 23, 42, 0.05);
+    --b2: rgba(15, 23, 42, 0.08);
+    --b3: rgba(15, 23, 42, 0.12);
+    --tx: #0F172A;
+    --tx2: #475569;
+    --tx3: #94A3B8;
+  }
+
+  /* High prominence card shadow & border rules for Light Mode */
+  .light-mode .hero,
+  .light-mode .scard,
+  .light-mode .card,
+  .light-mode .mcard {
+    box-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.045), 0 2px 6px -1px rgba(15, 23, 42, 0.015) !important;
+    border-color: rgba(15, 23, 42, 0.085) !important;
+  }
+
+  .light-mode .hero {
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.02) !important;
+  }
+
+  .light-mode .scard:hover,
+  .light-mode .mcard:hover {
+    border-color: rgba(15, 23, 42, 0.16) !important;
+    box-shadow: 0 14px 32px -4px rgba(15, 23, 42, 0.09), 0 6px 14px -2px rgba(15, 23, 42, 0.04) !important;
+  }
+
+  /* Soft and gorgeous light gradients for monthly cards */
+  .light-mode .mcard-gr {
+    border-color: rgba(0, 229, 160, 0.24) !important;
+    background: linear-gradient(160deg, rgba(0, 229, 160, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+  }
+  .light-mode .mcard-ac {
+    border-color: rgba(0, 207, 255, 0.28) !important;
+    background: linear-gradient(160deg, rgba(0, 207, 255, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+  }
+  .light-mode .mcard-am {
+    border-color: rgba(255, 176, 32, 0.24) !important;
+    background: linear-gradient(160deg, rgba(255, 176, 32, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+  }
+
+  .light-mode .latest-change-box {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  .light-mode .proj-row:hover,
+  .light-mode .act-row:hover {
+    background: rgba(15, 23, 42, 0.016) !important;
+  }
+
+  .light-mode .ring-track {
+    stroke: #0f172a !important;
+    opacity: 0.06 !important;
+  }
+
+  .light-mode .modal-ov {
+    background: rgba(15, 23, 42, 0.35) !important;
+  }
+
+  .light-mode .modal-box {
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.12) !important;
+  }
+
+  .light-mode .hero::before {
+    background: radial-gradient(circle, rgba(0, 207, 255, 0.14) 0%, transparent 65%) !important;
+  }
+
+  .light-mode .hero::after {
+    background: radial-gradient(circle, rgba(0, 229, 160, 0.10) 0%, transparent 65%) !important;
+  }
+
+  /* Reset & Container */
+  .db-wrapper {
+    background: var(--bg) !important;
+    color: var(--tx);
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  .custom-scroll::-webkit-scrollbar { width: 4px; }
+  .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+  .custom-scroll::-webkit-scrollbar-thumb { background: var(--b3); border-radius: 4px; }
+
+  /* ─── TOPBAR ─── */
+  .topbar-custom {
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--b1);
+    background: rgba(6, 9, 16, 0.85);
+    backdrop-filter: blur(12px);
+    flex-shrink: 0;
+  }
+  .tb-left .page-title { font-size: 20px; font-weight: 800; letter-spacing: -0.4px; color: var(--tx); }
+  .tb-left .breadcrumb { font-size: 11.5px; color: var(--tx2); margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+  .tb-right { display: flex; align-items: center; gap: 10px; }
+
+  .date-pill {
+    padding: 6px 14px;
+    background: var(--s2);
+    border: 1px solid var(--b2);
+    border-radius: 20px;
+    font-size: 11.5px;
+    color: var(--tx2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--s2);
+    border: 1px solid var(--b1);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--tx2);
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { color: var(--tx); border-color: var(--b2); }
+  .icon-btn svg { width: 16px; height: 16px; }
+
+  /* ─── CONTENT ─── */
+  .content-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* ─── HERO STATUS ─── */
+  .hero {
+    background: var(--s1);
+    border: 1px solid var(--b2);
+    border-radius: var(--rl);
+    padding: 32px 40px;
+    display: grid;
+    grid-template-columns: 1fr 260px 1fr;
+    gap: 40px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 280px;
+    flex-shrink: 0;
+  }
+
+  /* glow effects */
+  .hero::before {
+    content: ''; position: absolute; top: -30%; left: -10%;
+    width: 50%; height: 160%;
+    background: radial-gradient(circle, rgba(0, 207, 255, 0.08) 0%, transparent 60%);
+    pointer-events: none; z-index: 1;
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -40%; right: -10%;
+    width: 50%; height: 160%;
+    background: radial-gradient(circle, rgba(0, 229, 160, 0.05) 0%, transparent 60%);
+    pointer-events: none; z-index: 1;
+  }
+
+  .hero-left { position: relative; z-index: 2; }
+  .hero-eyebrow {
+    font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--ac); margin-bottom: 12px;
+  }
+  .hero-title { font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 12px; color: #fff; }
+  .light-mode .hero-title { color: var(--tx); }
+  .hero-sub { font-size: 13.5px; color: var(--tx2); line-height: 1.5; font-weight: 400; }
+
+  /* donut */
+  .donut-wrap {
+    position: relative; width: 260px; height: 260px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2; margin: 0 auto;
+  }
+  .donut-center {
+    position: absolute; text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .donut-center .d-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 46px; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 2px;
+  }
+  .light-mode .donut-center .d-num { color: var(--tx); }
+  .donut-center .d-lbl {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--tx2);
+  }
+
+  /* breakdown */
+  .hero-right { display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 2; }
+  .hero-right-lbl {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--tx3); margin-bottom: 4px;
+  }
+  .big-stat {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px; border-bottom: 1px solid var(--b1);
+  }
+  .big-stat:last-child { border-bottom: none; padding-bottom: 0; }
+  .bs-left { display: flex; align-items: center; gap: 12px; }
+  .bs-bar { width: 4px; height: 32px; border-radius: 2px; }
+  .bs-name { font-size: 12px; color: var(--tx2); font-weight: 500; }
+  .bs-num { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; }
+
+  /* ─── STATS ROW ─── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .scard {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--r);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    height: 140px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .scard:hover { border-color: var(--b2); transform: translateY(-2px); }
+
+  .scard-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .scard-lbl { font-size: 10.5px; font-weight: 700; color: var(--tx2); letter-spacing: 0.8px; text-transform: uppercase; }
+  .scard-val { font-family: 'JetBrains Mono', monospace; font-size: 34px; font-weight: 700; color: #fff; margin: 10px 0 2px; line-height: 1; }
+  .light-mode .scard-val { color: var(--tx); }
+  .scard-sub { font-size: 11.5px; color: var(--tx3); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+
+  .tag { padding: 2px 7px; border-radius: 10px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; }
+  .tag-ac { background: var(--ac-d); color: var(--ac); }
+  .tag-gr { background: var(--gr-d); color: var(--gr); }
+  .tag-am { background: var(--am-d); color: var(--am); }
+  .tag-vi { background: var(--vi-d); color: var(--vi); }
+
+  /* waves integration */
+  .scard-waves {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 24px; overflow: hidden;
+    pointer-events: none; opacity: 0.7;
+    border-bottom-left-radius: var(--r);
+    border-bottom-right-radius: var(--r);
+  }
+  .scard-waves svg { width: 100%; height: 100%; display: block; }
+  
+  .wave1 {
+    animation: waveMotion1 12s linear infinite;
+  }
+  .wave2 {
+    animation: waveMotion2 8s linear infinite;
+    opacity: 0.5;
+  }
+
+  @keyframes waveMotion1 {
+    0% { d: path("M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"); }
+    50% { d: path("M0,12 Q30,18 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"); }
+    100% { d: path("M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"); }
+  }
+  @keyframes waveMotion2 {
+    0% { d: path("M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"); }
+    50% { d: path("M0,8 Q30,0 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"); }
+    100% { d: path("M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"); }
+  }
+
+  /* ─── BOTTOM GRID ─── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex-shrink: 0;
+  }
+  .card {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--r);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .card-hdr {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--b1);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .card-ttl { font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #fff; }
+  .light-mode .card-ttl { color: var(--tx); }
+  .card-ttl-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ac); }
+  .card-act { font-size: 11.5px; color: var(--ac); cursor: pointer; font-weight: 600; text-decoration: none; }
+  .card-act:hover { text-decoration: underline; }
+
+  /* project row */
+  .proj-row {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--b1);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px; align-items: center;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .proj-row:hover { background: var(--s2); }
+  .proj-row:last-child { border-bottom: none; }
+  .proj-ico {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--ac-d2);
+    border: 1px solid rgba(0,207,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ac);
+  }
+  .proj-ico svg { width: 18px; height: 18px; }
+  .proj-name { font-size: 13.5px; font-weight: 700; color: var(--tx); margin-bottom: 2px; }
+  .proj-desc { font-size: 11.5px; color: var(--tx2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
+  
+  .proj-date { text-align: right; }
+  .proj-date-lbl { font-size: 9px; color: var(--tx3); text-transform: uppercase; margin-bottom: 2px; }
+  .proj-date-val { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 700; color: var(--tx2); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 10.5px; font-weight: 600;
+  }
+  .badge-ac { background: var(--ac-d); color: var(--ac); }
+  .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* activity row */
+  .act-row {
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--b1);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px; align-items: flex-start;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .act-row:hover { background: var(--s2); }
+  .act-row:last-child { border-bottom: none; }
+  .act-ico {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--gr-d);
+    border: 1px solid rgba(0,229,160,0.18);
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px; flex-shrink: 0;
+  }
+  .act-ico svg { width: 13px; height: 13px; stroke: var(--gr); }
+  .act-user { font-size: 12.5px; font-weight: 600; color: var(--tx); margin-bottom: 3px; }
+  .act-desc { font-size: 11.5px; color: var(--tx2); line-height: 1.5; }
+  .act-time { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--tx3); margin-top: 2px; }
+
+  /* ─── MONTHLY ─── */
+  .monthly {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .mcard {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--r);
+    padding: 30px 26px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; cursor: pointer; gap: 14px;
+    transition: border-color 0.18s, transform 0.18s;
+    position: relative; overflow: hidden;
+    min-height: 160px;
+  }
+  .mcard:hover { border-color: var(--b2); transform: translateY(-2px); }
+
+  .mcard::before {
+    content: ''; position: absolute;
+    top: -50px; left: 50%; transform: translateX(-50%);
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    opacity: 0.07;
+    pointer-events: none;
+  }
+  .mcard-ac::before { background: var(--ac); }
+  .mcard-gr::before { background: var(--gr); }
+  .mcard-am::before { background: var(--am); }
+
+  /* Default / Dark Mode Monthly Cards & latest-change-box border definitions */
+  .latest-change-box {
+    background: var(--s2);
+    border: 1px solid var(--b1);
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .mcard-gr {
+    border-color: rgba(0, 229, 160, 0.08) !important;
+  }
+  .mcard-ac {
+    border-color: rgba(0, 207, 255, 0.14) !important;
+    background: linear-gradient(160deg, #0d1a2e 0%, #0B1220 100%) !important;
+  }
+  .mcard-am {
+    border-color: rgba(255, 176, 32, 0.08) !important;
+  }
+
+  .mcard-lbl {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .mcard-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 52px; font-weight: 600; line-height: 1;
+  }
+  .mcard-sub { font-size: 11.5px; color: var(--tx2); }
+
+  /* ─── DONUT ANIMATION ─── */
+  .ring-track { opacity: 0.12; }
+  .ring-fill {
+    transform-origin: center;
+    transform: rotate(-90deg);
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* section divider label */
+  .section-lbl {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.3px;
+    text-transform: uppercase; color: var(--tx3);
+    flex-shrink: 0;
+  }
+  .section-lbl::after {
+    content: ''; flex: 1; height: 1px; background: var(--b1);
+  }
+
+  /* Modals Centered */
+  .modal-ov {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 6, 12, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-box {
+    width: 520px;
+    max-width: 90vw;
+    background: var(--s1);
+    border: 1px solid var(--b2);
+    border-radius: 16px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  }
+  .modal-head {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--b1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .modal-head h3 {
+    font-size: 15px;
+    color: var(--tx);
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--tx2);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    font-size: 18px;
+    line-height: 1;
+    transition: all 0.2s;
+  }
+  .modal-close:hover {
+    color: var(--tx);
+    background: var(--b1);
+  }
+  .modal-scroll {
+    overflow-y: auto;
+    flex: 1;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="welcome-section" style="margin-bottom: 32px;">
-    <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Olá, {{ current_user.nome.split(' ')[0] }}! 👋</h2>
-    <p style="color: var(--text-muted); font-size: 15px;">Acompanhe seus projetos e o progresso das suas tarefas de hoje.</p>
-</div>
+<div class="db-wrapper">
 
-<div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px;">
-    <div class="card" style="padding: 24px;">
-        <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">Projetos Ativos</div>
-        <div style="font-size: 32px; font-weight: 800; color: var(--blue);">{{ stats.projetos_ativos }}</div>
+  <!-- TOPBAR -->
+  <div class="topbar-custom">
+    <div class="tb-left">
+      <div class="breadcrumb">CoByte / Meu Painel</div>
+      <h2 class="page-title">Painel do Funcionário</h2>
     </div>
-    <div class="card" style="padding: 24px;">
-        <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">Minhas Equipes</div>
-        <div style="font-size: 32px; font-weight: 800; color: var(--purple);">{{ stats.equipes_count }}</div>
+    <div class="tb-right">
+      <div class="date-pill">18 / 05 / 2026</div>
+      <div class="icon-btn" onclick="setAppTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light')" title="Alternar tema">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </div>
     </div>
-    <div class="card" style="padding: 24px;">
-        <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">Requisitos Pendentes</div>
-        <div style="font-size: 32px; font-weight: 800; color: var(--accent);">{{ stats.requisitos_pendentes }}</div>
-    </div>
-</div>
+  </div>
 
-<div class="dashboard-layout" style="display: grid; grid-template-columns: 1fr 340px; gap: 24px;">
-    <div class="main-col">
-        <div class="card" style="height: 100%;">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border);">
-                <h3 style="font-size: 16px; font-weight: 700;">Meus Projetos Recentes</h3>
-                <a href="{{ url_for('funcionario.projetos') }}" style="font-size: 12px; color: var(--accent); text-decoration: none; font-weight: 600;">Ver todos</a>
+  <div class="content-scrollable custom-scroll">
+
+    <!-- ═══ HERO: STATUS DE PROJETOS ═══ -->
+    <div class="hero">
+
+      <!-- Left: labels & legend -->
+      <div class="hero-left">
+        <div class="hero-eyebrow">Status de Projetos</div>
+        <h1 class="hero-title">Visão Geral<br>do Painel</h1>
+        <p class="hero-sub">Acompanhe o progresso de todos os seus projetos ativos em tempo real.</p>
+
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px; width: 90%;">
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--tx3);">Última Alteração em Projeto</div>
+          
+          {% if logs %}
+            {% set last_log = logs[0] %}
+            <div class="latest-change-box">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11px; font-weight: 600; color: var(--ac); text-transform: uppercase; letter-spacing: 0.5px;">{{ last_log.acao }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--tx3);">{{ last_log.data.strftime('%d/%m/%Y') }}</span>
+              </div>
+              <p style="font-size: 12px; color: var(--tx2); margin: 0; line-height: 1.4; font-weight: 400;">{{ last_log.descricao }}</p>
+              
+              <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--b1); padding-top: 6px; margin-top: 4px; font-size: 11px; color: var(--tx3);">
+                <span>Equipe: <strong style="color: var(--tx2);">{{ last_log.equipe_nome }}</strong></span>
+                <span>Autor: <strong style="color: var(--gr);">{{ current_user.nome if current_user.is_authenticated else 'Funcionário' }}</strong></span>
+              </div>
             </div>
-            <div class="card-body" style="padding: 12px;">
-                {% if projetos %}
-                    {% for p in projetos[:5] %}
-                    <a href="#" style="text-decoration: none; color: inherit;">
-                        <div class="project-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: 12px; transition: 0.2s;">
-                            <div style="width: 44px; height: 44px; background: rgba(255, 51, 102, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent);">
-                                <i data-lucide="folder" style="width: 20px;"></i>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; font-size: 15px; margin-bottom: 2px;">{{ p.nome }}</div>
-                                <div style="font-size: 12px; color: var(--text-muted);">Status: {{ p.status }}</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Prazo</div>
-                                <div style="font-size: 12px; color: var(--text-muted);">{{ p.prazo }}</div>
-                            </div>
-                        </div>
-                    </a>
-                    {% endfor %}
-                {% else %}
-                    <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
-                        <i data-lucide="folder-x" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
-                        <p>Você ainda não foi atribuído a nenhum projeto.</p>
-                    </div>
-                {% endif %}
-            </div>
+          {% else %}
+            <div style="font-size: 12px; color: var(--tx3); font-style: italic;">Nenhuma alteração registrada.</div>
+          {% endif %}
         </div>
+      </div>
+
+      <!-- Center: Donut -->
+      <div class="donut-wrap">
+        <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260">
+          <!-- Track rings -->
+          <circle class="ring-track" cx="130" cy="130" r="100"
+            fill="none" stroke="#ffffff" stroke-width="28"/>
+          <!-- Em andamento: cyan -->
+          <circle id="ringProgress" class="ring-fill" cx="130" cy="130" r="100"
+            fill="none" stroke="var(--ac)" stroke-width="28"
+            stroke-linecap="round"
+            stroke-dasharray="628.3 628.3"
+            stroke-dashoffset="628.3"/>
+          <!-- Concluído: green -->
+          <circle id="ringConcluido" class="ring-fill" cx="130" cy="130" r="68"
+            fill="none" stroke="var(--gr)" stroke-width="16"
+            stroke-linecap="round"
+            stroke-dasharray="427.3 427.3"
+            stroke-dashoffset="427.3"
+            opacity="0.7"/>
+        </svg>
+        <div class="donut-center">
+          <div class="d-num" id="totalCount">0</div>
+          <div class="d-lbl">Total</div>
+        </div>
+      </div>
+
+      <!-- Right: breakdown stats -->
+      <div class="hero-right">
+        <div class="hero-right-lbl">Detalhamento</div>
+
+        <div class="big-stat">
+          <div class="bs-left">
+            <div class="bs-bar" style="background:var(--ac);box-shadow:0 0 10px rgba(0,207,255,0.4);"></div>
+            <div>
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Em andamento</div>
+              <div class="bs-name">Projetos ativos</div>
+            </div>
+          </div>
+          <div class="bs-num" style="color:var(--ac);" id="breakdownAndamento">0</div>
+        </div>
+
+        <div class="big-stat">
+          <div class="bs-left">
+            <div class="bs-bar" style="background:var(--gr);box-shadow:0 0 10px rgba(0,229,160,0.3);"></div>
+            <div>
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Concluído</div>
+              <div class="bs-name">Finalizados</div>
+            </div>
+          </div>
+          <div class="bs-num" style="color:var(--gr);" id="breakdownConcluido">0</div>
+        </div>
+
+        <div class="big-stat">
+          <div class="bs-left">
+            <div class="bs-bar" style="background:var(--am);box-shadow:0 0 10px rgba(255,176,32,0.3);"></div>
+            <div>
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Pendente</div>
+              <div class="bs-name">Aguardando</div>
+            </div>
+          </div>
+          <div class="bs-num" style="color:var(--am);" id="breakdownPendente">0</div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="side-col">
-        <div class="card">
-            <div class="card-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
-                <h3 style="font-size: 16px; font-weight: 700;">Minha Equipe</h3>
-            </div>
-            <div class="card-body" style="padding: 20px;">
-                {% if equipes %}
-                    {% for eq in equipes %}
-                    <div style="margin-bottom: 24px;">
-                        <div style="font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">{{ eq.nome }}</div>
-                        <div class="team-members" style="display: flex; flex-direction: column; gap: 12px;">
-                            {% for m in eq.membros_da_equipe[:4] %}
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div class="avatar xs avatar-blue">{{ m.usuario_rel.nome[:2].upper() }}</div>
-                                <div style="font-size: 13px; font-weight: 500;">{{ m.usuario_rel.nome }}</div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center;">Nenhuma equipe vinculada.</p>
-                {% endif %}
-            </div>
+    <!-- ═══ STATS ROW ═══ -->
+    <div class="stats-row">
+
+      <div class="scard" onclick="location.href='{{ url_for('funcionario.projetos') }}'">
+        <div class="scard-top">
+          <div class="scard-lbl">Projetos</div>
         </div>
+        <div class="scard-val" style="position: relative; z-index: 2;">{{ total_projetos }}</div>
+        <div class="scard-sub" style="position: relative; z-index: 2;">
+          <span class="tag tag-ac">Ativos</span>
+          no painel
+        </div>
+        <div class="scard-waves">
+          <svg viewBox="0 0 240 24" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad-ac" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--ac)" stop-opacity="0.22"></stop>
+                <stop offset="100%" stop-color="var(--ac)" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+            <path class="wave1" fill="url(#grad-ac)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave2" fill="url(#grad-ac)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="scard">
+        <div class="scard-top">
+          <div class="scard-lbl">Clientes</div>
+        </div>
+        <div class="scard-val" style="position: relative; z-index: 2;">{{ total_clientes }}</div>
+        <div class="scard-sub" style="position: relative; z-index: 2;">
+          <span class="tag tag-gr">Atendidos</span>
+        </div>
+        <div class="scard-waves">
+          <svg viewBox="0 0 240 24" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad-gr" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--gr)" stop-opacity="0.22"></stop>
+                <stop offset="100%" stop-color="var(--gr)" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+            <path class="wave1" fill="url(#grad-gr)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave2" fill="url(#grad-gr)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="scard" onclick="location.href='{{ url_for('funcionario.equipe') }}'">
+        <div class="scard-top">
+          <div class="scard-lbl">Equipe</div>
+        </div>
+        <div class="scard-val" style="position: relative; z-index: 2;">{{ total_equipe }}</div>
+        <div class="scard-sub" style="position: relative; z-index: 2;">
+          <span class="tag tag-vi">Membros ativos</span>
+        </div>
+        <div class="scard-waves">
+          <svg viewBox="0 0 240 24" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad-vi" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--vi)" stop-opacity="0.22"></stop>
+                <stop offset="100%" stop-color="var(--vi)" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+            <path class="wave1" fill="url(#grad-vi)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave2" fill="url(#grad-vi)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="scard">
+        <div class="scard-top">
+          <div class="scard-lbl">Budget Total</div>
+        </div>
+        <div class="scard-val" style="font-size:22px;letter-spacing:-0.5px;position: relative; z-index: 2;">R${{ "%.0f"|format(budget_total) if budget_total % 1 == 0 else "%.2f"|format(budget_total) }}</div>
+        <div class="scard-sub" style="position: relative; z-index: 2;">
+          <span class="tag tag-am">Consolidado</span>
+        </div>
+        <div class="scard-waves">
+          <svg viewBox="0 0 240 24" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad-am" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--am)" stop-opacity="0.22"></stop>
+                <stop offset="100%" stop-color="var(--am)" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+            <path class="wave1" fill="url(#grad-am)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave2" fill="url(#grad-am)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
+          </svg>
+        </div>
+      </div>
+
     </div>
+
+    <!-- ═══ BOTTOM GRID ═══ -->
+    <div class="section-lbl">Projetos & Atividade</div>
+
+    <div class="bottom-grid">
+
+      <!-- Projetos Recentes -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-ttl">
+            <div class="card-ttl-dot"></div>
+            Meus Projetos Recentes
+          </div>
+          <a href="{{ url_for('funcionario.projetos') }}" class="card-act">Todos os projetos →</a>
+        </div>
+
+        {% for proj in projetos_recentes %}
+        <div class="proj-row" onclick="location.href='{{ url_for('funcionario.projeto_detalhe', projeto_id=proj.id) }}'">
+          <div class="proj-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <div class="proj-name">{{ proj.nome }}</div>
+            <div class="proj-desc" style="margin-bottom:6px;">{{ proj.descricao[:40] if proj.descricao else 'Sem descrição' }}...</div>
+            <span class="badge badge-ac"><span class="badge-dot"></span>{{ proj.status or 'Pendente' }}</span>
+          </div>
+          <div class="proj-date">
+            <div class="proj-date-lbl">Prazo</div>
+            <div class="proj-date-val">{{ proj.prazo }}</div>
+          </div>
+        </div>
+        {% else %}
+        <div style="padding:24px 22px;text-align:center;color:var(--tx3);font-size:12px;">
+          Você não está vinculado a nenhum projeto.
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Atividade Recente -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-ttl">
+            <div class="card-ttl-dot" style="background:var(--gr);"></div>
+            Atividade Recente
+          </div>
+          <div class="card-act" onclick="document.getElementById('logs-modal').style.display='flex';">Ver todas →</div>
+        </div>
+
+        {% for log in logs[:3] %}
+        <div class="act-row" onclick="document.getElementById('logs-modal').style.display='flex';">
+          <div class="act-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div>
+            <div class="act-user">{{ log.equipe_nome }}</div>
+            <div class="act-desc">{{ log.acao }} · {{ log.descricao }}</div>
+            <div class="act-time">{{ log.data.strftime('%d/%m · %H:%M') }}</div>
+          </div>
+        </div>
+        {% else %}
+        <div style="padding:24px 22px;text-align:center;color:var(--tx3);font-size:12px;">
+          Nenhuma atividade recente registrada em seus projetos.
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ═══ ATIVIDADE DO MÊS ═══ -->
+    <div class="section-lbl">Atividade de {{ current_month_name }}</div>
+
+    <div class="monthly">
+
+      <div class="mcard mcard-gr" onclick="openProjectsModal('concluido')">
+        <div class="mcard-lbl" style="color:var(--gr);">Concluídos</div>
+        <div class="mcard-num" style="color:var(--gr);">{{ current_month_projects.concluido|length }}</div>
+        <div class="mcard-sub">projetos finalizados</div>
+      </div>
+
+      <div class="mcard mcard-ac" onclick="openProjectsModal('em_andamento')">
+        <div class="mcard-lbl" style="color:var(--ac);">Desenvolvimento</div>
+        <div class="mcard-num" style="color:var(--ac);">{{ current_month_projects.em_andamento|length }}</div>
+        <div class="mcard-sub">projetos em andamento</div>
+      </div>
+
+      <div class="mcard mcard-am" onclick="openProjectsModal('pendente')">
+        <div class="mcard-lbl" style="color:var(--am);">Pendente</div>
+        <div class="mcard-num" style="color:var(--am);">+{{ current_month_projects.pendente|length }}</div>
+        <div class="mcard-sub">aguardando início</div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
 </div>
 
-<style>
-    .project-item:hover {
-        background: rgba(255, 255, 255, 0.03);
-        transform: translateX(4px);
+<!-- Logs Modal -->
+<div id="logs-modal" class="modal-ov" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Histórico de Atividades dos meus Projetos</h3>
+      <button class="modal-close" onclick="document.getElementById('logs-modal').style.display='none';">✕</button>
+    </div>
+    <div class="modal-scroll custom-scroll" style="padding: 20px;">
+      {% set log_colors = ['#A855F7', '#22C55E', '#3B82F6', '#F59E0B'] %}
+      {% for log in todos_logs %}
+      <div class="log-item-row" style="display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--b1);">
+        <div class="log-icon-wrap" style="background: {{ log_colors[loop.index0 % 4] }}15; color: {{ log_colors[loop.index0 % 4] }}; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <i data-lucide="check" style="width: 12px;"></i>
+        </div>
+        <div class="log-details" style="flex: 1;">
+          <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);"><strong>{{ log.equipe_nome }}</strong> · {{ log.acao }}</div>
+          <div class="log-description" style="font-size: 11px; color: var(--tx2); margin-top: 2px;">{{ log.descricao }}</div>
+        </div>
+        <div class="log-timestamp" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--tx3);">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
+      </div>
+      {% else %}
+      <div style="padding: 24px; text-align: center; color: var(--tx2); font-size: 13px;">Nenhum registro encontrado.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Projects Status Centralized Modal -->
+<div id="projects-status-modal" class="modal-ov" style="display:none;">
+  <div class="modal-box" style="width: 520px;">
+    <div class="modal-head">
+      <h3 id="modal-status-title">Projetos</h3>
+      <button class="modal-close" onclick="closeProjectsModal()">✕</button>
+    </div>
+    <div class="modal-scroll custom-scroll" style="padding: 20px;">
+      <div id="modal-projects-list" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Filled dynamically by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Donut Chart logic
+  window.addEventListener('load', () => {
+    const statusData = {{ status_data_json | safe }};
+
+    // Parse dynamic values
+    const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
+    const concluidoVal = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
+    const pendenteVal = parseInt(statusData.find(d => d.label === 'Pendente')?.val || 0);
+    const totalVal = emAndamentoVal + concluidoVal + pendenteVal;
+
+    document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
+    document.getElementById('breakdownConcluido').textContent = concluidoVal;
+    document.getElementById('breakdownPendente').textContent = pendenteVal;
+
+    // SVG elements
+    const ringProgress = document.getElementById('ringProgress');
+    const ringConcluido = document.getElementById('ringConcluido');
+
+    // Outer circle (Em andamento)
+    const circOuter = 628.3;
+    const pctOuter = totalVal > 0 ? (emAndamentoVal / totalVal) : 0;
+    const offsetOuter = circOuter * (1 - pctOuter);
+
+    // Inner circle (Concluído)
+    const circInner = 427.3;
+    const pctInner = totalVal > 0 ? (concluidoVal / totalVal) : 0;
+    const offsetInner = circInner * (1 - pctInner);
+
+    // Animate rings
+    setTimeout(() => {
+      if (ringProgress) {
+        ringProgress.style.strokeDashoffset = offsetOuter.toFixed(1);
+      }
+      if (ringConcluido) {
+        ringConcluido.style.strokeDashoffset = offsetInner.toFixed(1);
+      }
+    }, 300);
+
+    // Animate total counter
+    const el = document.getElementById('totalCount');
+    let count = 0;
+    const target = totalVal;
+    
+    if (target === 0) {
+      el.textContent = '0';
+    } else {
+      const step = () => {
+        if (count < target) {
+          count++;
+          el.textContent = count;
+          setTimeout(step, Math.max(30, 200 / target));
+        }
+      };
+      setTimeout(step, 400);
     }
-</style>
+  });
+
+  // Monthly Activity Modal logic & project data serialization
+  const monthlyProjectsData = {
+    concluido: [
+      {% for p in current_month_projects.concluido %}
+        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.id) }}" },
+      {% endfor %}
+    ],
+    em_andamento: [
+      {% for p in current_month_projects.em_andamento %}
+        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.id) }}" },
+      {% endfor %}
+    ],
+    pendente: [
+      {% for p in current_month_projects.pendente %}
+        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.id) }}" },
+      {% endfor %}
+    ]
+  };
+
+  window.openProjectsModal = function(statusKey) {
+    const modal = document.getElementById('projects-status-modal');
+    const titleEl = document.getElementById('modal-status-title');
+    const listEl = document.getElementById('modal-projects-list');
+    if (!modal || !titleEl || !listEl) return;
+    
+    let title = 'Projetos';
+    let themeColor = 'var(--ac)';
+    
+    if (statusKey === 'concluido') {
+      title = 'Projetos Concluídos em {{ current_month_name }}';
+      themeColor = 'var(--gr)';
+    } else if (statusKey === 'em_andamento') {
+      title = 'Projetos em Desenvolvimento em {{ current_month_name }}';
+      themeColor = 'var(--ac)';
+    } else if (statusKey === 'pendente') {
+      title = 'Projetos Pendentes em {{ current_month_name }}';
+      themeColor = 'var(--am)';
+    }
+    
+    titleEl.innerHTML = `<span style="color: ${themeColor}; font-weight: 800; font-size: 14.5px;">${title}</span>`;
+    
+    const projs = monthlyProjectsData[statusKey] || [];
+    if (projs.length === 0) {
+      listEl.innerHTML = `
+        <div style="padding: 40px 24px; text-align: center; color: var(--tx2); font-size: 12.5px; font-style: italic;">
+          Nenhum projeto registrado com este status para o mês de {{ current_month_name }}.
+        </div>
+      `;
+    } else {
+      listEl.innerHTML = projs.map(p => {
+        return `
+          <div onclick="location.href='${p.url}'" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--s2); border: 1px solid var(--b1); border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--s3)'; this.style.borderColor='${themeColor}'" onmouseout="this.style.background='var(--s2)'; this.style.borderColor='var(--b1)'">
+            <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0; padding-right: 12px;">
+              <span style="font-size: 13px; font-weight: 700; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.nome}</span>
+              <span style="font-size: 10.5px; color: var(--tx2);">Clique para gerenciar</span>
+            </div>
+            <div style="text-align: right; flex-shrink: 0;">
+              <span style="font-size: 8.5px; color: var(--tx2); text-transform: uppercase; display: block; letter-spacing: 0.3px;">Prazo</span>
+              <span style="font-size: 11.5px; font-weight: 700; color: ${themeColor};">${p.prazo}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    modal.style.display = 'flex';
+  };
+
+  window.closeProjectsModal = function() {
+    const modal = document.getElementById('projects-status-modal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  // Close modals when clicking outside
+  document.getElementById('logs-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+  
+  document.getElementById('projects-status-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+
+  // Display the current formatted system date in the pill
+  const datePill = document.querySelector('.date-pill');
+  if (datePill) {
+    const d = new Date();
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    datePill.textContent = `${day} / ${month} / ${year}`;
+  }
+</script>
 {% endblock %}

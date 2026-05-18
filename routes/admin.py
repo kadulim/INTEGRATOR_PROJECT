@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, abort, request, redirect, url_for,
 from flask_login import login_required, current_user
 from database import database
 from models import Usuario, Cliente, Funcionario, Projeto, Equipes, Skill, membros_equipe, Log, Requisito
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import functools
 import json
 
@@ -35,7 +35,11 @@ def dashboard():
     total_projetos   = Projeto.query.count()
     total_equipe     = Funcionario.query.count()
     total_clientes   = Cliente.query.count()
-    projetos_ativos  = Projeto.query.filter_by(status='Em andamento').all()
+    projetos_recentes = Projeto.query.filter_by(status='Em andamento').all()
+    for proj in projetos_recentes:
+        latest_log = Log.query.filter_by(projeto_id=proj.id).order_by(Log.data.desc()).first()
+        proj.ultimo_log = latest_log.descricao if latest_log else "Sem alterações recentes"
+
     budget_total     = database.session.query(
         database.func.sum(Projeto.budget)
     ).scalar() or 0
@@ -51,7 +55,7 @@ def dashboard():
     status_cores = {
         'Em andamento': '#3b82f6',
         'Concluído':    '#22c55e',
-        'Pausado':      '#f59e0b',
+        'Pendente':     '#6b7280',
     }
     status_rows = database.session.query(
         Projeto.status, database.func.count(Projeto.id)
@@ -70,26 +74,38 @@ def dashboard():
         for s, c in status_counts.items()
     ]
 
-    # ── Volume por Mês (barras) ──────────────────────────────────
-    # Extrai o mês do campo prazo ('YYYY-MM-DD'). 
-    # Usamos substring para garantir compatibilidade se o campo for string.
+    # ── Atividade Mensal (barras por status por mês) ─────────────────────
     mes_expr = database.func.substring(Projeto.prazo, 6, 2)
-    monthly_rows = database.session.query(
+    monthly_status_rows = database.session.query(
         mes_expr.label('mes'),
+        Projeto.status,
         database.func.count(Projeto.id).label('total')
-    ).filter(Projeto.prazo.like('____-__-__')).group_by(mes_expr).all()
+    ).filter(Projeto.prazo.like('____-__-__')).group_by(mes_expr, Projeto.status).all()
 
-
-    monthly_map = {}
-    for r in monthly_rows:
+    # Estrutura: monthly_map[mes] = {'Em andamento': X, 'Concluído': Y, 'Pendente': Z}
+    monthly_map = {m: {'Em andamento': 0, 'Concluído': 0, 'Pendente': 0} for m in range(1, 13)}
+    
+    for r in monthly_status_rows:
         try:
             if r.mes and r.mes.isdigit():
                 m_int = int(r.mes)
-                monthly_map[m_int] = r.total
+                status_str = r.status or 'Pendente'
+                # Normaliza o status caso venha fora do padrão
+                if status_str not in ['Em andamento', 'Concluído', 'Pendente']:
+                    status_str = 'Pendente'
+                if m_int in monthly_map:
+                    monthly_map[m_int][status_str] = r.total
         except:
             continue
             
-    volumes = [monthly_map.get(m, 0) for m in range(1, 13)]
+    volumes = [
+        {
+            'em_andamento': monthly_map[m]['Em andamento'],
+            'concluido': monthly_map[m]['Concluído'],
+            'pendente': monthly_map[m]['Pendente']
+        }
+        for m in range(1, 13)
+    ]
 
     # ── Logs com Equipe ──────────────────────────────────────────
     logs_query = database.session.query(Log, Projeto, Equipes).outerjoin(Projeto, Log.projeto_id == Projeto.id).outerjoin(Equipes, Projeto.equipe_id == Equipes.id).order_by(Log.data.desc()).limit(10).all()
@@ -113,18 +129,61 @@ def dashboard():
             'equipe_nome': equipe.nome if equipe else (projeto.nome if projeto else 'Geral')
         })
 
+    # ── Atividade Mensal do Mês Atual ──────────────────
+    import datetime
+    now = datetime.datetime.now()
+    current_month_num = now.month
+    meses_nomes = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    current_month_name = meses_nomes[current_month_num]
+
+    current_month_projects = {
+        'em_andamento': [],
+        'concluido': [],
+        'pendente': []
+    }
+    
+    current_year = now.year
+    prefix_current_month = f"{current_year}-{current_month_num:02d}"
+    month_infix = f"-{current_month_num:02d}-"
+    
+    todos_projetos_lista = database.session.query(Projeto).all()
+    for proj in todos_projetos_lista:
+        if proj.prazo:
+            # Match if matches current year-month OR matches the month infix (e.g. -05-)
+            is_match = proj.prazo.startswith(prefix_current_month) or month_infix in proj.prazo
+            
+            # Additional fallback check for format parsing
+            if not is_match and len(proj.prazo) >= 7:
+                try:
+                    parts = proj.prazo.split('-')
+                    if len(parts) >= 2 and int(parts[1]) == current_month_num:
+                        is_match = True
+                except ValueError:
+                    pass
+            
+            if is_match:
+                status_str = proj.status or 'Pendente'
+                if status_str == 'Em andamento':
+                    current_month_projects['em_andamento'].append(proj)
+                elif status_str == 'Concluído':
+                    current_month_projects['concluido'].append(proj)
+                else:
+                    current_month_projects['pendente'].append(proj)
+
     return render_template(
         'admin/dashboard.html',
         total_projetos    = total_projetos,
         total_equipe      = total_equipe,
         total_clientes    = total_clientes,
-        projetos_ativos   = projetos_ativos,
+        projetos_recentes = projetos_recentes,
         budget_total      = budget_total,
         funcionarios_dash = funcionarios_dash,
         status_data_json  = json.dumps(status_data),
         volumes_json      = json.dumps(volumes),
         logs              = logs_data,
-        todos_logs        = todos_logs_data
+        todos_logs        = todos_logs_data,
+        current_month_name = current_month_name,
+        current_month_projects = current_month_projects
     )
 
 @admin_bp.route('/projetos')
@@ -520,6 +579,29 @@ def add_funcionario():
 @admin_bp.route('/configuracoes')
 def configuracoes():
     return render_template('admin/configuracoes.html')
+
+@admin_bp.route('/configuracoes/senha', methods=['POST'])
+def salvar_senha():
+    senha_atual = request.form.get('senha_atual')
+    nova_senha = request.form.get('nova_senha')
+    confirmar_senha = request.form.get('confirmar_senha')
+    
+    if not senha_atual or not nova_senha or not confirmar_senha:
+        flash('Preencha todos os campos!', 'danger')
+        return redirect(url_for('admin.configuracoes') + '#seguranca')
+        
+    if nova_senha != confirmar_senha:
+        flash('As senhas não coincidem!', 'danger')
+        return redirect(url_for('admin.configuracoes') + '#seguranca')
+        
+    if not check_password_hash(current_user.senha, senha_atual):
+        flash('Senha atual incorreta!', 'danger')
+        return redirect(url_for('admin.configuracoes') + '#seguranca')
+        
+    current_user.senha = generate_password_hash(nova_senha)
+    database.session.commit()
+    flash('Senha atualizada com sucesso!', 'success')
+    return redirect(url_for('admin.configuracoes') + '#seguranca')
 
 
 

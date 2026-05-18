@@ -3,95 +3,643 @@
 
 {% block title %}Equipes — CoByte{% endblock %}
 
-{% block topbar_title %}Equipes{% endblock %}
-{% block topbar_actions %}
-<button class="btn btn-primary btn-sm" onclick="openModal('modal-nova-equipe')">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
-  </svg>
-  Nova Equipe
-</button>
+{% block extra_css %}
+<style>
+  /* Force hide original topbar and clean up content wrapper */
+  .topbar { display: none !important; }
+  .main-content { padding-top: 0 !important; height: 100vh !important; overflow: hidden !important; }
+  .page-content { padding: 0 !important; height: 100vh !important; overflow: hidden !important; }
+  body { height: 100vh !important; overflow: hidden !important; }
+
+  :root {
+    --bg: #060910;
+    --s1: #0B1220;
+    --s2: #101A2D;
+    --s3: #162033;
+    --b1: rgba(255, 255, 255, 0.055);
+    --b2: rgba(255, 255, 255, 0.10);
+    --b3: rgba(255, 255, 255, 0.16);
+    --ac: #00CFFF;
+    --ac-d: rgba(0, 207, 255, 0.10);
+    --ac-d2: rgba(0, 207, 255, 0.06);
+    --gr: #00E5A0;
+    --gr-d: rgba(0, 229, 160, 0.10);
+    --am: #FFB020;
+    --am-d: rgba(255, 176, 32, 0.10);
+    --rd: #FF5577;
+    --rd-d: rgba(255, 85, 119, 0.10);
+    --pu: #A78BFA;
+    --pu-d: rgba(167, 139, 250, 0.10);
+    --tx: #DCE5F0;
+    --tx2: #7A8FA8;
+    --tx3: #3A4D62;
+    --r: 12px;
+    --rl: 16px;
+  }
+
+  .light-mode {
+    --bg: #F3F4F6;
+    --s1: #FFFFFF;
+    --s2: #F8FAFC;
+    --s3: #E2E8F0;
+    --b1: rgba(15, 23, 42, 0.05);
+    --b2: rgba(15, 23, 42, 0.08);
+    --b3: rgba(15, 23, 42, 0.12);
+    --tx: #0F172A;
+    --tx2: #475569;
+    --tx3: #94A3B8;
+  }
+
+  /* Reset & Container */
+  .db-wrapper {
+    background: var(--bg) !important;
+    color: var(--tx);
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .content-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 32px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* Custom Scrollbar */
+  .content-scrollable::-webkit-scrollbar { width: 6px; }
+  .content-scrollable::-webkit-scrollbar-track { background: transparent; }
+  .content-scrollable::-webkit-scrollbar-thumb { background: var(--b3); border-radius: 3px; }
+  .light-mode .content-scrollable::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); }
+
+  /* ─── CUSTOM TOPBAR ─── */
+  .topbar-custom {
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--b1);
+    background: rgba(6, 9, 16, 0.88);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .light-mode .topbar-custom {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-bottom-color: var(--b1);
+  }
+  .tb-left .page-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: var(--tx);
+  }
+  .tb-left .breadcrumb {
+    font-size: 11.5px;
+    color: var(--tx2);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .tb-right { display: flex; align-items: center; gap: 10px; }
+  .date-pill {
+    padding: 6px 14px;
+    background: var(--s2);
+    border: 1px solid var(--b2);
+    border-radius: 20px;
+    font-size: 11.5px;
+    color: var(--tx2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .icon-btn-custom {
+    width: 36px;
+    height: 36px;
+    background: var(--s2);
+    border: 1px solid var(--b1);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--tx2);
+    transition: all 0.15s;
+  }
+  .icon-btn-custom:hover { color: var(--tx); border-color: var(--b2); }
+  .icon-btn-custom svg { width: 16px; height: 16px; }
+
+  /* ─── STAT CARDS ─── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .scard {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--rl);
+    padding: 24px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    cursor: pointer;
+    transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .scard:hover { border-color: var(--b2); transform: translateY(-2px); }
+
+  /* High prominence card shadow & border rules for Light Mode */
+  .light-mode .scard,
+  .light-mode .pcard {
+    box-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.045), 0 2px 6px -1px rgba(15, 23, 42, 0.015) !important;
+    border-color: rgba(15, 23, 42, 0.085) !important;
+  }
+  .light-mode .scard:hover,
+  .light-mode .pcard:hover {
+    border-color: rgba(15, 23, 42, 0.16) !important;
+    box-shadow: 0 14px 32px -4px rgba(15, 23, 42, 0.09), 0 6px 14px -2px rgba(15, 23, 42, 0.04) !important;
+  }
+
+  /* Accent top border */
+  .scard::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: var(--rl) var(--rl) 0 0;
+  }
+  .scard-total::before { background: var(--pu); }
+  .scard-andamento::before { background: var(--ac); }
+  .scard-concluido::before { background: var(--gr); }
+
+  .scard-top { display: flex; align-items: center; justify-content: space-between; }
+  .scard-ico {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .scard-ico svg { width: 19px; height: 19px; }
+
+  .scard-lbl {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--tx2);
+    margin-bottom: 8px;
+  }
+  .scard-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 42px; font-weight: 600; letter-spacing: -2px;
+    line-height: 1;
+  }
+  .scard-sub {
+    font-size: 11.5px; color: var(--tx2);
+    display: flex; align-items: center; gap: 6px; margin-top: 4px;
+  }
+  .tag { font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 20px; }
+  .tag-ac { background: var(--ac-d); color: var(--ac); }
+  .tag-am { background: var(--am-d); color: var(--am); }
+  .tag-gr { background: var(--gr-d); color: var(--gr); }
+  .tag-pu { background: var(--pu-d); color: var(--pu); }
+
+  /* ─── TOOLBAR ─── */
+  .toolbar {
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap; flex-shrink: 0;
+  }
+  .search-wrap {
+    flex: 1; min-width: 240px;
+    position: relative; display: flex; align-items: center;
+  }
+  .search-wrap svg {
+    position: absolute; left: 14px; width: 15px; height: 15px;
+    color: var(--tx3); pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    padding: 10px 14px 10px 40px;
+    background: var(--s1);
+    border: 1px solid var(--b2);
+    border-radius: 10px;
+    color: var(--tx); font-size: 13.5px; font-family: 'Outfit', sans-serif;
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .search-input::placeholder { color: var(--tx3); }
+  .search-input:focus { border-color: rgba(0, 207, 255, 0.35); box-shadow: 0 0 10px rgba(0,207,255,0.05); }
+
+  .btn-new {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px;
+    background: var(--ac); border: none; border-radius: 10px;
+    color: #020c14; font-size: 13px; font-weight: 700;
+    font-family: 'Outfit', sans-serif; cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s; white-space: nowrap;
+    letter-spacing: 0.2px; margin-left: auto;
+  }
+  .btn-new:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-new svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  /* ─── PROJECT GRID ─── */
+  .proj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ─── PROJECT CARD ─── */
+  .pcard {
+    background: var(--s1);
+    border: 1px solid var(--b1);
+    border-radius: var(--rl);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+    display: flex; flex-direction: column;
+  }
+  .pcard:hover {
+    border-color: var(--b2);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .light-mode .pcard:hover {
+    box-shadow: 0 14px 32px -4px rgba(15, 23, 42, 0.09) !important;
+  }
+
+  /* card accent strip */
+  .pcard-strip { height: 3px; width: 100%; background: var(--pu); }
+
+  .pcard-body { padding: 22px 22px 0; }
+  .pcard-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 14px; gap: 12px;
+  }
+  .pcard-ico-wrap {
+    width: 44px; height: 44px; border-radius: 11px;
+    background: var(--pu-d); border: 1px solid rgba(167,139,250,0.25);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 18px; font-weight: 700; color: var(--pu);
+  }
+
+  .pcard-actions { display: flex; gap: 6px; }
+  .pcard-menu {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--tx3); cursor: pointer; flex-shrink: 0;
+    transition: all 0.15s; margin-top: 2px;
+  }
+  .pcard-menu:hover { background: var(--s2); color: var(--tx2); }
+  .pcard-menu-edit:hover { color: var(--ac); }
+  .pcard-menu-delete:hover { color: var(--rd); }
+  .pcard-menu svg { width: 15px; height: 15px; }
+
+  .pcard-name {
+    font-size: 16.5px; font-weight: 700; color: var(--tx);
+    letter-spacing: -0.2px; margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .pcard-client {
+    font-size: 12px; color: var(--tx2);
+    display: flex; align-items: center; gap: 5px; margin-bottom: 16px;
+  }
+  .pcard-client svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+  .pcard-tags { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 18px; }
+  .ptag {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 11px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .ptag-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .ptag-ac { background: var(--ac-d); color: var(--ac); }
+  .ptag-am { background: var(--am-d); color: var(--am); }
+  .ptag-gr { background: var(--gr-d); color: var(--gr); }
+  .ptag-rd { background: var(--rd-d); color: var(--rd); }
+  .ptag-pu { background: var(--pu-d); color: var(--pu); }
+  .ptag-user { background: var(--s3); color: var(--tx2); border: 1px solid var(--b2); }
+
+  /* Modal Backdrop Centered and Premium */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 6, 12, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .light-mode .modal-backdrop {
+    background: rgba(15, 23, 42, 0.35) !important;
+  }
+  .modal-backdrop.open {
+    display: flex !important;
+  }
+  .modal {
+    background: var(--s1);
+    border: 1px solid var(--b2);
+    border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+    padding: 24px;
+    width: 500px !important;
+    max-width: 90vw;
+    animation: modalAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .light-mode .modal {
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.12) !important;
+  }
+  @keyframes modalAppear {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--b1);
+  }
+  .modal-title { font-size: 16px; font-weight: 700; color: var(--tx); }
+  .modal-close {
+    font-size: 24px; cursor: pointer; color: var(--tx3); line-height: 1;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--rd); }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .form-label { font-size: 11.5px; font-weight: 600; color: var(--tx2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input {
+    background: var(--s2); border: 1px solid var(--b2); border-radius: 8px;
+    padding: 10px 14px; color: var(--tx); font-family: 'Outfit', sans-serif;
+    font-size: 13.5px; outline: none; transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--ac); }
+  .light-mode .form-input { background: #ffffff; }
+
+  .modal-footer {
+    display: flex; justify-content: flex-end; gap: 12px;
+    margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--b1);
+  }
+
+  .btn-outline {
+    background: transparent; border: 1px solid var(--b2); border-radius: 8px;
+    padding: 10px 20px; color: var(--tx2); font-family: 'Outfit', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-outline:hover { border-color: var(--b3); color: var(--tx); }
+
+  .btn-primary {
+    background: var(--ac); border: none; border-radius: 8px;
+    padding: 10px 20px; color: #020c14; font-family: 'Outfit', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-danger {
+    background: var(--rd); border: none; border-radius: 8px;
+    padding: 10px 20px; color: #ffffff; font-family: 'Outfit', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-danger:hover { opacity: 0.9; }
+
+  /* Checkboxes layout */
+  .members-checkbox-list {
+    display: flex; flex-direction: column; gap: 8px;
+    max-height: 180px; overflow-y: auto;
+    border: 1px solid var(--b1); padding: 12px; border-radius: 8px;
+    background: var(--s2);
+  }
+  .light-mode .members-checkbox-list { background: #ffffff; }
+  .members-checkbox-list::-webkit-scrollbar { width: 4px; }
+  .members-checkbox-list::-webkit-scrollbar-thumb { background: var(--b3); border-radius: 2px; }
+
+  .check-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--tx); cursor: pointer;
+  }
+  .check-label input { accent-color: var(--ac); cursor: pointer; }
+
+  /* Premium Card Footer and Actions Styles */
+  .pcard-actions { display: flex; gap: 6px; }
+  .pcard-menu {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--tx3); cursor: pointer; flex-shrink: 0;
+    transition: all 0.15s; margin-top: 2px;
+  }
+  .pcard-menu:hover { background: var(--s2); color: var(--tx2); }
+  .pcard-menu-edit:hover { color: var(--ac); }
+  .pcard-menu-delete:hover { color: var(--rd); }
+  .pcard-menu svg { width: 15px; height: 15px; }
+
+  .pcard-footer {
+    padding: 14px 22px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--b1);
+    margin-top: auto;
+  }
+  .pcard-date {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px; color: var(--tx3);
+  }
+  .pcard-date svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+  .pcard-team { display: flex; align-items: center; gap: -4px; }
+  .team-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--pu-d); border: 2px solid var(--s1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--pu);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .light-mode .team-avatar {
+    border-color: #ffffff !important;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Toolbar -->
-<div class="proj-toolbar fade-up">
-  <div class="search-box">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-    <input type="text" placeholder="Buscar equipes…" id="search-input" oninput="onSearch(this.value)">
-  </div>
-</div>
+<div class="db-wrapper">
 
-<!-- Teams Grid -->
-<div class="members-grid fade-up fade-up-1">
-  {% if equipes %}
-    {% for equipe in equipes %}
-    <div class="member-card team-card" onclick="location.href='{{ url_for('admin.equipe_detalhe', id=equipe.id) }}'" style="cursor: pointer;">
-      <div class="member-actions">
-        <button class="action-btn edit" title="Editar" 
-          data-id="{{ equipe.id }}"
-          data-nome="{{ equipe.nome }}"
-          data-membros="{% for m in equipe.membros_da_equipe %}{{ m.id }}{% if not loop.last %},{% endif %}{% endfor %}"
-          onclick="event.stopPropagation(); handleEditEquipeClick(this)">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-        <button class="action-btn delete" title="Excluir" 
-          data-id="{{ equipe.id }}"
-          data-nome="{{ equipe.nome }}"
-          onclick="event.stopPropagation(); handleDeleteEquipeClick(this)">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-        </button>
+  <div class="content-scrollable">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+      <h2 style="font-size:24px; font-weight:800; color:var(--tx); letter-spacing:-0.5px;">Equipes</h2>
+    </div>
+
+    <!-- ═══ STATS ═══ -->
+    <div class="stats-row">
+      <div class="scard scard-total">
+        <div class="scard-top">
+          <div>
+            <div class="scard-lbl">Total de Equipes</div>
+            <div class="scard-val" style="color:var(--pu);">{{ equipes|length }}</div>
+            <div class="scard-sub">
+              <span class="tag tag-pu">Cadastradas</span> no painel
+            </div>
+          </div>
+          <div class="scard-ico" style="background:var(--pu-d);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--pu)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-3-3.87"/><path d="M9 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/>
+            </svg>
+          </div>
+        </div>
       </div>
-      <div class="member-avatar" style="background: var(--brand); font-size: 28px;">
-        {{ equipe.nome[0] | upper }}
+
+      <div class="scard scard-andamento">
+        <div class="scard-top">
+          <div>
+            <div class="scard-lbl">Profissionais Ativos</div>
+            <div class="scard-val" style="color:var(--ac);">{{ funcionarios|length }}</div>
+            <div class="scard-sub">
+              <span class="tag tag-ac">Integrados</span> ao CoByte
+            </div>
+          </div>
+          <div class="scard-ico" style="background:var(--ac-d);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8" cy="7" r="4"/>
+            </svg>
+          </div>
+        </div>
       </div>
-      <div class="member-name">{{ equipe.nome }}</div>
-      <div class="member-role" style="margin-top: 4px;">{{ equipe.membros_da_equipe|length }} Membros • {{ equipe.projetos|length }} Projetos</div>
-      
-      <div class="member-skills" style="margin-top: 12px;">
-        {% for membro in equipe.membros_da_equipe[:3] %}
-        <span class="skill-tag" style="background: var(--surface); border: 1px solid var(--border-md);" title="{{ membro.usuario_rel.nome }}">{{ membro.usuario_rel.nome.split()[0] }}</span>
-        {% endfor %}
-        {% if equipe.membros_da_equipe|length > 3 %}
-        <span class="skill-tag" style="background: var(--surface); border: 1px solid var(--border-md);">+{{ equipe.membros_da_equipe|length - 3 }}</span>
-        {% endif %}
+
+      <div class="scard scard-concluido">
+        <div class="scard-top">
+          <div>
+            <div class="scard-lbl">Membros por Equipe</div>
+            <div class="scard-val" style="color:var(--gr);">{% if equipes|length > 0 %}{{ (funcionarios|length / equipes|length)|round(1) }}{% else %}0{% endif %}</div>
+            <div class="scard-sub">
+              <span class="tag tag-gr">Média de Membros</span>
+            </div>
+          </div>
+          <div class="scard-ico" style="background:var(--gr-d);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
-    {% endfor %}
-  {% else %}
-    <p style="color:var(--text-muted);font-size:14px;grid-column:1/-1;text-align:center;">Nenhuma equipe cadastrada.</p>
-  {% endif %}
+
+    <!-- ═══ TOOLBAR ═══ -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="search-input" type="text" placeholder="Buscar equipes por nome..." id="search-input" oninput="onSearch(this.value)">
+      </div>
+
+      <button class="btn-new" onclick="openModal('modal-nova-equipe')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Nova Equipe
+      </button>
+    </div>
+
+    <!-- results count -->
+    <div class="results-info">
+      <div class="results-count">Mostrando <strong id="team-count">{{ equipes|length }}</strong> equipe(s) encontrada(s)</div>
+    </div>
+
+    <!-- ═══ TEAMS GRID VIEW ═══ -->
+    <div class="proj-grid">
+      {% if equipes %}
+        {% for equipe in equipes %}
+        <div class="pcard team-card" onclick="location.href='{{ url_for('admin.equipe_detalhe', id=equipe.id) }}'">
+          <div class="pcard-strip"></div>
+          <div class="pcard-body">
+
+            <div class="pcard-top">
+              <div class="pcard-ico-wrap">
+                {{ equipe.nome[0] | upper }}
+              </div>
+              <div class="pcard-actions">
+                <button class="pcard-menu pcard-menu-edit" title="Editar Equipe" 
+                  data-id="{{ equipe.id }}"
+                  data-nome="{{ equipe.nome }}"
+                  data-membros="{% for m in equipe.membros_da_equipe %}{{ m.id }}{% if not loop.last %},{% endif %}{% endfor %}"
+                  onclick="event.stopPropagation(); handleEditEquipeClick(this)">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="pcard-menu pcard-menu-delete" title="Excluir Equipe" 
+                  data-id="{{ equipe.id }}"
+                  data-nome="{{ equipe.nome }}"
+                  onclick="event.stopPropagation(); handleDeleteEquipeClick(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="pcard-name">{{ equipe.nome }}</div>
+            
+            <div class="pcard-client" style="margin-bottom: 20px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 7a2 2 0 012-2h3.5l2 2H19a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+              </svg>
+              {{ equipe.projetos|length }} projeto(s) associado(s)
+            </div>
+
+            <div class="pcard-tags" style="margin-bottom: 20px;">
+              {% for membro in equipe.membros_da_equipe[:3] %}
+              <span class="ptag ptag-user" title="{{ membro.usuario_rel.nome }}">{{ membro.usuario_rel.nome.split()[0] }}</span>
+              {% endfor %}
+              {% if equipe.membros_da_equipe|length > 3 %}
+              <span class="ptag ptag-pu">+{{ equipe.membros_da_equipe|length - 3 }}</span>
+              {% endif %}
+            </div>
+
+          </div>
+
+          <div class="pcard-footer">
+            <div class="pcard-date" style="color: var(--tx2); font-weight: 500;">
+              Membros Totais: <strong style="color:var(--ac); margin-left: 2px;">{{ equipe.membros_da_equipe|length }}</strong>
+            </div>
+            <div class="pcard-team">
+              <div class="team-avatar">{{ equipe.nome[:2].upper() }}</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="grid-column:1/-1; padding: 64px 32px; text-align: center; color: var(--tx3);">
+          Nenhuma equipe cadastrada no sistema.
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
 </div>
 
 <!-- Modal Nova Equipe -->
 <div class="modal-backdrop" id="modal-nova-equipe">
-  <div class="modal modal-sm">
+  <div class="modal">
     <div class="modal-header">
-      <h2 class="modal-title">Nova Equipe</h2>
+      <h2 class="modal-title">Cadastrar Nova Equipe</h2>
       <div class="modal-close" onclick="closeModal('modal-nova-equipe')">&times;</div>
     </div>
     <form action="{{ url_for('admin.add_equipe') }}" method="POST">
-      <div class="modal-body">
-        <div class="form-group" style="margin-bottom: 0;">
-          <label class="form-label">Nome da Equipe</label>
-          <input type="text" name="nome" class="form-input" placeholder="Ex: Frontend Ninjas" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Funcionários</label>
-          {%for membro in funcionarios %} 
-            <label>
-              <input type="checkbox" name="check_funcionarios" value="{{ membro.id }}">{{ membro.usuario_rel.nome }}
+      <div class="form-group">
+        <label class="form-label">Nome da Equipe</label>
+        <input type="text" name="nome" class="form-input" placeholder="Ex: Frontend Ninjas" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="margin-bottom: 8px;">Selecionar Funcionários</label>
+        <div class="members-checkbox-list">
+          {% for membro in funcionarios %} 
+            <label class="check-label">
+              <input type="checkbox" name="check_funcionarios" value="{{ membro.id }}"> {{ membro.usuario_rel.nome }}
             </label>
           {% endfor %}
         </div>
       </div>
-      <div class="modal-footer" style="margin-top: 20px;">
-        <button type="button" class="btn btn-outline" onclick="closeModal('modal-nova-equipe')">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Criar Equipe</button>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" onclick="closeModal('modal-nova-equipe')">Cancelar</button>
+        <button type="submit" class="btn-primary">Criar Equipe</button>
       </div>
     </form>
   </div>
@@ -99,29 +647,29 @@
 
 <!-- Modal Editar Equipe -->
 <div class="modal-backdrop" id="modal-editar-equipe">
-  <div class="modal modal-sm">
+  <div class="modal">
     <div class="modal-header">
       <h2 class="modal-title">Editar Equipe</h2>
       <div class="modal-close" onclick="closeModal('modal-editar-equipe')">&times;</div>
     </div>
     <form id="form-editar-equipe" method="POST">
-      <div class="modal-body">
-        <div class="form-group" style="margin-bottom: 0;">
-          <label class="form-label">Nome da Equipe</label>
-          <input type="text" name="nome" id="edit-equipe-nome" class="form-input" required>
-        </div>
-        <div class="form-group" style="margin-top: 15px;">
-          <label class="form-label">Funcionários</label>
-          {%for membro in funcionarios %} 
-            <label style="display: block; margin-bottom: 5px;">
+      <div class="form-group">
+        <label class="form-label">Nome da Equipe</label>
+        <input type="text" name="nome" id="edit-equipe-nome" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="margin-bottom: 8px;">Selecionar Funcionários</label>
+        <div class="members-checkbox-list">
+          {% for membro in funcionarios %} 
+            <label class="check-label">
               <input type="checkbox" name="check_funcionarios" class="edit-equipe-check" value="{{ membro.id }}"> {{ membro.usuario_rel.nome }}
             </label>
           {% endfor %}
         </div>
       </div>
-      <div class="modal-footer" style="margin-top: 20px;">
-        <button type="button" class="btn btn-outline" onclick="closeModal('modal-editar-equipe')">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Atualizar Equipe</button>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" onclick="closeModal('modal-editar-equipe')">Cancelar</button>
+        <button type="submit" class="btn-primary">Salvar Alterações</button>
       </div>
     </form>
   </div>
@@ -129,43 +677,25 @@
 
 <!-- Modal Deletar Equipe -->
 <div class="modal-backdrop" id="modal-deletar-equipe">
-  <div class="modal modal-sm">
+  <div class="modal">
     <div class="modal-header">
       <h2 class="modal-title">Confirmar Exclusão</h2>
       <div class="modal-close" onclick="closeModal('modal-deletar-equipe')">&times;</div>
     </div>
-    <div class="modal-body">
-      <p style="color: var(--text-secondary); line-height: 1.6;">
-        Tem certeza que deseja excluir a equipe <strong id="delete-equipe-nome" style="color: var(--text-primary);"></strong>? 
-        Esta ação não pode ser desfeita.
+    <div style="padding: 4px 0 16px;">
+      <p style="color: var(--tx2); line-height: 1.6; font-size: 14px;">
+        Tem certeza que deseja excluir permanentemente a equipe <strong id="delete-equipe-nome" style="color: var(--tx);"></strong>? 
+        Todos os vínculos do banco de dados serão removidos. Esta ação não poderá ser desfeita.
       </p>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-outline" onclick="closeModal('modal-deletar-equipe')">Cancelar</button>
+      <button type="button" class="btn-outline" onclick="closeModal('modal-deletar-equipe')">Cancelar</button>
       <form id="form-deletar-equipe" method="POST" style="margin:0;">
-        <button type="submit" class="btn btn-danger">Excluir Permanentemente</button>
+        <button type="submit" class="btn-danger">Confirmar Exclusão</button>
       </form>
     </div>
   </div>
 </div>
-
-{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/equipes.css') }}">
-<style>
-  .team-card {
-    min-height: 240px;
-    justify-content: space-between;
-  }
-  .w-100 {
-    width: 100%;
-  }
-  .team-card .member-avatar {
-    width: 72px;
-    height: 72px;
-  }
-</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -174,11 +704,18 @@
   function closeModal(id) { document.getElementById(id).classList.remove('open'); }
   
   function onSearch(val) {
-    val = val.toLowerCase();
+    const q = val.toLowerCase().trim();
+    let visible = 0;
     document.querySelectorAll('.team-card').forEach(card => {
-      let text = card.textContent.toLowerCase();
-      card.style.display = text.includes(val) ? 'flex' : 'none';
+      const text = card.textContent.toLowerCase();
+      if (text.includes(q)) {
+        card.style.display = 'flex';
+        visible++;
+      } else {
+        card.style.display = 'none';
+      }
     });
+    document.getElementById('team-count').textContent = visible;
   }
 
   function handleEditEquipeClick(btn) {
@@ -205,5 +742,14 @@
     document.getElementById('form-deletar-equipe').action = `/admin/equipes/excluir/${id}`;
     openModal('modal-deletar-equipe');
   }
+
+  // Set the current date dynamic pill
+  document.addEventListener('DOMContentLoaded', () => {
+    const d = new Date();
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    document.getElementById('live-date').textContent = `${day} / ${month} / ${year}`;
+  });
 </script>
 {% endblock %}

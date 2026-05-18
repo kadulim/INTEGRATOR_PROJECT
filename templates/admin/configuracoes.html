@@ -10,6 +10,22 @@
 {% block topbar_title %}Configurações{% endblock %}
 
 {% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-messages" style="max-width: 800px; margin: 0 auto 24px auto;">
+      {% for category, msg in messages %}
+        <div class="flash-alert flash-{{ category }}" style="padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; font-weight: 500; border: 1px solid;
+          {% if category == 'success' %}
+            background: rgba(34, 197, 94, 0.1); color: #22c55e; border-color: rgba(34, 197, 94, 0.2);
+          {% else %}
+            background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2);
+          {% endif %}">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
 <div class="settings-layout">
   <!-- Sidebar tabs -->
   <div class="settings-tabs fade-up">
@@ -22,9 +38,7 @@
     <div class="stab" id="tab-seguranca" onclick="switchTab('seguranca')">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Segurança
     </div>
-    <div class="stab" id="tab-aparencia" onclick="switchTab('aparencia')">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Aparência
-    </div>
+
     <div class="stab" id="tab-integracoes" onclick="switchTab('integracoes')">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Integrações
     </div>
@@ -88,40 +102,42 @@
       </div>
     </div>
 
-    <!-- Outros Painéis Ocultos para simplicidade -->
+    <!-- Painel Segurança -->
     <div id="panel-seguranca" class="panel-section" style="display:none;">
-      <div><div class="settings-panel-title">Segurança</div></div>
-      <div class="settings-section">
-        <div class="settings-section-title">Alterar Senha</div>
-        <div class="form-group"><label class="form-label">Nova Senha</label><input class="form-input" type="password"></div>
-      </div>
-    </div>
-    
-    <div id="panel-aparencia" class="panel-section" style="display:none;">
       <div>
-        <div class="settings-panel-title">Aparência</div>
-        <div class="settings-panel-desc">Customize como o sistema se parece para você</div>
+        <div class="settings-panel-title">Segurança</div>
+        <div class="settings-panel-desc">Gerencie a segurança da sua conta e altere sua senha</div>
       </div>
-      <div class="settings-section">
-        <div class="settings-section-title">Tema do Sistema</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="theme-card" onclick="setAppTheme('dark'); toast('Tema Escuro ativado')">
-            <div class="theme-preview dark"></div>
-            <div class="theme-label">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-              Escuro (Padrão)
-            </div>
+      
+      <form action="{{ url_for('admin.salvar_senha') }}" method="POST" class="settings-section">
+        <div class="settings-section-title" style="margin-bottom: 20px;">Alterar Senha</div>
+        
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="form-group">
+            <label class="form-label">Senha Atual</label>
+            <input class="form-input" type="password" name="senha_atual" placeholder="Sua senha atual" required>
           </div>
-          <div class="theme-card" onclick="setAppTheme('light'); toast('Tema Claro ativado')">
-            <div class="theme-preview light"></div>
-            <div class="theme-label">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-              Claro
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-group">
+              <label class="form-label">Nova Senha</label>
+              <input class="form-input" type="password" name="nova_senha" placeholder="Mínimo 6 caracteres" required minlength="6">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Confirmar Nova Senha</label>
+              <input class="form-input" type="password" name="confirmar_senha" placeholder="Repita a nova senha" required minlength="6">
             </div>
           </div>
         </div>
-      </div>
+        
+        <div style="display:flex;justify-content:flex-end;margin-top:24px;">
+          <button class="btn btn-primary" type="submit">Atualizar Senha</button>
+        </div>
+      </form>
     </div>
+    
+
     
     <div id="panel-integracoes" class="panel-section" style="display:none;">
       <div><div class="settings-panel-title">Integrações</div></div>
@@ -142,7 +158,17 @@
     document.querySelectorAll('.stab').forEach(el => el.classList.remove('active'));
     document.getElementById('panel-' + tabId).style.display = 'block';
     document.getElementById('tab-' + tabId).classList.add('active');
+    // Save active tab in URL hash to allow seamless navigation
+    window.location.hash = tabId;
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Automatically restore active tab based on URL hash if provided
+    const hash = window.location.hash.substring(1);
+    if (hash && document.getElementById('tab-' + hash)) {
+      switchTab(hash);
+    }
+  });
 </script>
 <script src="{{ url_for('static', filename='js/configuracoes.js') }}"></script>
 {% endblock %}

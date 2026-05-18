@@ -32,10 +32,10 @@
 <div class="app-shell">
   <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="sidebar-logo" style="padding: 32px 24px; display: flex; align-items: center; gap: 0;">
-      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 32px; width: auto; object-fit: contain;">
-      <span style="font-size: 24px; font-weight: 800; letter-spacing: -1px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-1px); margin-left: -4px; display: inline-block; white-space: nowrap;">
-        <span style="color: #fff;">Co</span><span style="background: linear-gradient(90deg, #f72585, #4361ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
+    <div class="sidebar-logo" style="display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 44px; width: auto; object-fit: contain; transition: all 0.35s ease;">
+      <span class="sidebar-logo-text" style="font-size: 24px; font-weight: 800; letter-spacing: -1.2px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-1px); margin-left: 8px; display: inline-block; white-space: nowrap; transition: all 0.35s ease;">
+        <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
       </span>
     </div>
     <nav class="sidebar-nav">
@@ -84,9 +84,6 @@
           <div class="user-name">{{ current_user.nome if current_user.is_authenticated else 'Usuário Logado' }}</div>
           <div class="user-role">{{ 'Administrador' if current_user.is_authenticated and current_user.tipo == 'admin' else 'Usuário' }}</div>
         </div>
-        <a href="{{ url_for('logout') }}" title="Sair" style="color:rgba(255,255,255,0.35);margin-left:auto;text-decoration:none;">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        </a>
       </div>
     </div>
   </aside>
@@ -129,6 +126,10 @@
       </div>
       <span>Tema</span>
     </button>
+    <a href="{{ url_for('logout') }}" class="dock-btn">
+      <div class="btn-icon"><i data-lucide="log-out"></i></div>
+      <span>Sair</span>
+    </a>
   </div>
 </div>
 
@@ -169,12 +170,12 @@
 
   .ios-dock:hover {
     height: 90px; /* Expands to show content */
-    background: rgba(17, 19, 28, 0.95);
+    background: rgba(15, 23, 42, 0.95);
   }
 
   .ios-dock:hover .ios-handle {
-    background: #f72585; /* Glow color */
-    box-shadow: 0 0 10px #f72585;
+    background: var(--accent); /* Glow color */
+    box-shadow: 0 0 10px var(--accent);
     width: 70px;
   }
 
@@ -224,15 +225,39 @@
   }
 
   .dock-btn:hover .btn-icon {
-    background: rgba(247, 37, 133, 0.1);
-    border-color: rgba(247, 37, 133, 0.3);
-    color: #f72585;
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: var(--accent);
     transform: translateY(-2px);
   }
 
   .dock-btn i {
     width: 16px;
     height: 16px;
+  }
+
+  /* iOS Dock Light Mode overrides */
+  .light-mode .ios-dock {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.06);
+  }
+  .light-mode .ios-dock:hover {
+    background: rgba(255, 255, 255, 0.98);
+  }
+  .light-mode .ios-handle {
+    background: rgba(0, 0, 0, 0.15);
+  }
+  .light-mode .dock-btn {
+    color: rgba(0, 0, 0, 0.6);
+  }
+  .light-mode .dock-btn:hover {
+    color: #000;
+  }
+  .light-mode .btn-icon {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.6);
   }
 </style>
 

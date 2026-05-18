@@ -7,25 +7,25 @@
 /* ── Roberto's Premium Design Tokens ── */
 :root {
   color-scheme: dark;
-  --bg:          #0a0a0c;
-  --surface:     rgba(255, 255, 255, 0.03);
-  --surface-solid:#121216;
-  --surface-2:   rgba(255, 255, 255, 0.05);
-  --border:      rgba(255, 255, 255, 0.08);
-  --border-md:   rgba(255, 255, 255, 0.12);
+  --bg:          #070B14;
+  --surface:     #0F172A;
+  --surface-solid:#0F172A;
+  --surface-2:   rgba(255, 255, 255, 0.04);
+  --border:      rgba(255, 255, 255, 0.05);
+  --border-md:   rgba(255, 255, 255, 0.1);
 
   --text-primary:   #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.85); /* Aumentado de 0.7 para 0.85 */
-  --text-muted:     rgba(255, 255, 255, 0.6);  /* Aumentado de 0.4 para 0.6 */
+  --text-secondary: #E5E7EB;
+  --text-muted:     #94A3B8;
 
-  --brand:        #0f172a;
+  --brand:        #0F172A;
   --brand-mid:    #1e293b;
-  --brand-accent: #6366f1; /* Indigo vibrante */
-  --accent:       #e94560; /* Magenta/Red vibrante */
-  --accent-soft:  rgba(233, 69, 96, 0.1);
+  --brand-accent: #3B82F6; /* Azul modernizado */
+  --accent:       #3B82F6; /* Azul modernizado */
+  --accent-soft:  rgba(59, 130, 246, 0.1);
 
-  --green:        #10b981;
-  --green-soft:   rgba(16, 185, 129, 0.15);
+  --green:        #22C55E;
+  --green-soft:   rgba(34, 197, 94, 0.15);
   --yellow:       #f59e0b;
   --yellow-soft:  rgba(245, 158, 11, 0.15);
   --blue:         #3b82f6;
@@ -79,12 +79,41 @@
 
   --brand:        #0f172a;
   --brand-mid:    #f8fafc;
-  --brand-accent: #6366f1;
+  --brand-accent: #3B82F6;
 }
-.light-mode .sidebar { background: #111827; }
-.light-mode .sidebar .nav-item { color: rgba(255,255,255,0.7) !important; }
-.light-mode .sidebar .nav-item:hover { color: #ffffff !important; }
-.light-mode .sidebar .nav-item.active { color: #ffffff !important; }
+.light-mode .sidebar { 
+  background: #ffffff; 
+  border-right: 1px solid var(--border-md);
+}
+.light-mode .sidebar .nav-label {
+  color: rgba(0, 0, 0, 0.4);
+}
+.light-mode .sidebar .nav-item { 
+  color: #4b5563 !important; 
+}
+.light-mode .sidebar .nav-item:hover { 
+  color: #111827 !important; 
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+.light-mode .sidebar .nav-item.active { 
+  color: var(--accent) !important; 
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.01) 100%) !important;
+}
+.light-mode .user-name {
+  color: #111827;
+}
+.light-mode .user-role {
+  color: #6b7280;
+}
+.light-mode .user-chip:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.light-mode .sidebar-footer {
+  border-top: 1px solid var(--border-md);
+}
+.light-mode .sidebar-logo {
+  border-bottom: 1px solid var(--border-md);
+}
 
 .light-mode .topbar { background: rgba(255, 255, 255, 0.9); border-bottom: 1px solid var(--border-md); color: #000; }
 .light-mode .topbar-title { color: #000; }
@@ -143,12 +172,7 @@ img { max-width: 100%; display: block; }
 }
 
 .sidebar::after {
-  content: '';
-  position: absolute;
-  top: -80px; right: -80px;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(233,69,96,0.15) 0%, transparent 70%);
-  pointer-events: none;
+  display: none;
 }
 
 /* ── Sidebar Toggle Button ── */
@@ -219,6 +243,13 @@ img { max-width: 100%; display: block; }
 /* ── Collapsed Sidebar State ── */
 .sidebar-collapsed {
   width: var(--sidebar-collapsed-w);
+}
+.sidebar-collapsed .sidebar-logo-text {
+  display: none !important;
+}
+.sidebar-collapsed .sidebar-logo img {
+  height: 44px !important;
+  margin: 0 auto !important;
 }
 .sidebar-collapsed .sidebar-logo-text,
 .sidebar-collapsed .nav-label,
@@ -319,14 +350,13 @@ img { max-width: 100%; display: block; }
 
 .sidebar-logo-icon {
   width: 42px; height: 42px;
-  background: #e94560;
+  background: var(--accent);
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   font-weight: 800;
   font-size: 20px;
   color: #fff;
   flex-shrink: 0;
-  box-shadow: 0 4px 15px rgba(233,69,96,0.3);
 }
 
 .sidebar-logo-text {
@@ -336,7 +366,7 @@ img { max-width: 100%; display: block; }
   letter-spacing: -0.5px;
 }
 .sidebar-logo-text span {
-  color: #e94560;
+  color: var(--accent);
 }
 
 .sidebar-nav { 
@@ -379,7 +409,7 @@ img { max-width: 100%; display: block; }
 .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
 .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; transform: translateX(4px); }
 .nav-item.active {
-  background: linear-gradient(90deg, rgba(233, 69, 96, 0.2) 0%, rgba(233, 69, 96, 0.05) 100%);
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.02) 100%);
   color: #fff;
 }
 .nav-item.active::before {
@@ -780,3 +810,39 @@ select option {
 .font-bold { font-weight: 700; }
 .w-full { width: 100%; }
 .truncate { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* Filter Select Dropdown styling */
+.filter-select {
+  height: 42px;
+  padding: 0 16px;
+  border: 1.5px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 13.5px;
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+  min-width: 160px;
+  box-sizing: border-box;
+  
+  /* Custom modern chevron arrow replacement */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  padding-right: 36px;
+}
+
+.filter-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.15);
+}
+
+.light-mode .filter-select {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
