@@ -306,14 +306,7 @@ def excluir_projeto(id):
     projeto = Projeto.query.get_or_404(id)
     nome_projeto = projeto.nome
     try:
-<<<<<<< HEAD
-        # Desvincular logs associados para evitar violação de FK no PostgreSQL
-        Log.query.filter_by(projeto_id=id).update({Log.projeto_id: None})
-        
-        # Primeiro exclui requisitos associados (cascade manual se não definido)
-=======
         Log.query.filter_by(projeto_id=id).delete()
->>>>>>> aa54f6c (foi feito alteraçaoes estruturais no codigo)
         Requisito.query.filter_by(projeto_id=id).delete()
         
         database.session.delete(projeto)
@@ -404,17 +397,6 @@ def add_cliente():
 @admin_bp.route('/cliente/excluir/<int:id>', methods=['POST'])
 def excluir_cliente(id):
     cliente = Cliente.query.get_or_404(id)
-<<<<<<< HEAD
-    user = Usuario.query.get(cliente.usuario_id)
-    try:
-        # Desvincular cliente de todos os seus projetos para evitar violação de FK no PostgreSQL
-        Projeto.query.filter_by(cliente_id=id).update({Projeto.cliente_id: None})
-        
-        database.session.delete(cliente)
-        if user:
-            database.session.delete(user)
-            
-=======
     usuario = Usuario.query.get(cliente.usuario_id)
     nome = usuario.nome if usuario else "Cliente"
     
@@ -423,7 +405,6 @@ def excluir_cliente(id):
         database.session.delete(cliente)
         if usuario:
             database.session.delete(usuario)
->>>>>>> aa54f6c (foi feito alteraçaoes estruturais no codigo)
         database.session.commit()
         registrar_log('cliente', 'Cliente excluído', f"O cliente '{nome}' foi removido do sistema.")
         flash("Cliente excluído com sucesso.", "sucesso")
@@ -500,16 +481,8 @@ def excluir_equipe(id):
     equipe = Equipes.query.get_or_404(id)
     nome = equipe.nome
     try:
-<<<<<<< HEAD
-        # Desvincular todos os projetos desta equipe para evitar violação de FK
         Projeto.query.filter_by(equipe_id=id).update({Projeto.equipe_id: None})
-        
-        # Limpar associação de membros
         equipe.membros_da_equipe = []
-        
-=======
-        Projeto.query.filter_by(equipe_id=id).update({Projeto.equipe_id: None})
->>>>>>> aa54f6c (foi feito alteraçaoes estruturais no codigo)
         database.session.delete(equipe)
         database.session.commit()
         registrar_log('equipe', 'Equipe excluída', f"A equipe '{nome}' foi removida do sistema.")
