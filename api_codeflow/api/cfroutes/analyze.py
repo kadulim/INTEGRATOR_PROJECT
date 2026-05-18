@@ -159,16 +159,18 @@ def analyze_upload():
     files = []
 
     for f in uploaded:
-        filename = secure_filename(f.filename)
-        if not filename:
+        raw_name = f.filename.replace("\\", "/")
+        dir_part, leaf = os.path.split(raw_name)
+        safe_leaf = secure_filename(leaf) or secure_filename(raw_name)
+        if not safe_leaf:
             continue
-        if not is_included(filename):
+        if not is_included(safe_leaf):
             continue
         try:
             content = f.read().decode("utf-8", errors="replace")
-            entry = build_file_entry(filename, content)
+            entry = build_file_entry(os.path.join(dir_part, safe_leaf), content)
             files.append(entry)
-        except Exception as e:
+        except Exception:
             pass
 
     if not files:

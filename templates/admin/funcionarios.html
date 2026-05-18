@@ -658,6 +658,7 @@
       <div class="modal-close" onclick="closeModal('modal-novo-funcionario')">&times;</div>
     </div>
     <form action="{{ url_for('admin.add_funcionario') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="form-group" style="grid-column: span 2;">
           <label class="form-label">Nome Completo</label>
@@ -696,6 +697,7 @@
       <div class="modal-close" onclick="closeModal('modal-editar-funcionario')">&times;</div>
     </div>
     <form id="form-editar-funcionario" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="form-group" style="grid-column: span 2;">
           <label class="form-label">Nome Completo</label>
@@ -738,6 +740,7 @@
     <div class="modal-footer">
       <button type="button" class="btn-outline" onclick="closeModal('modal-deletar-funcionario')">Cancelar</button>
       <form id="form-deletar-funcionario" method="POST" style="margin:0;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn-danger">Confirmar Exclusão</button>
       </form>
     </div>

@@ -136,6 +136,7 @@
                 <p class="auth-subtitle">Faça login para acessar sua conta</p>
 
                 <form action="/" method="POST" class="auth-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     {% if error %}
                     <div class="auth-error">{{ error }}</div>
                     {% endif %}

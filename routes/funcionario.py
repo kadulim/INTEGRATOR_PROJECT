@@ -64,12 +64,16 @@ def dashboard():
     # ── Status dos Projetos (Donut) ──────────────────
     status_cores = {
         'Em andamento': '#3b82f6',
-        'Concluído':    '#22c55e',
-        'Pendente':     '#6b7280',
+        'Concluído':    '#10b981',
+        'Pausado':      '#f59e0b',
     }
     status_counts = {s: 0 for s in status_cores.keys()}
     for p in projetos:
-        s = p.status or 'Pendente'
+        s = p.status or 'Pausado'
+        if s == 'Pendente':
+            s = 'Pausado'
+        if s == 'Cancelado':
+            continue
         if s in status_counts:
             status_counts[s] += 1
             
@@ -79,15 +83,20 @@ def dashboard():
     ]
     
     # ── Atividade Mensal (barras por status por mês dos projetos associados) ──────────────────
-    monthly_map = {m: {'Em andamento': 0, 'Concluído': 0, 'Pendente': 0} for m in range(1, 13)}
+    monthly_map = {m: {'Em andamento': 0, 'Concluído': 0, 'Pausado': 0} for m in range(1, 13)}
     for p in projetos:
         if p.prazo and len(p.prazo) >= 7:
             try:
                 parts = p.prazo.split('-')
                 m = int(parts[1])
-                st = p.status or 'Pendente'
-                if st in monthly_map[m]:
-                    monthly_map[m][st] += 1
+                st = p.status or 'Pausado'
+                if st == 'Pendente':
+                    st = 'Pausado'
+                if st == 'Cancelado':
+                    continue
+                if st not in monthly_map[m]:
+                    st = 'Pausado'
+                monthly_map[m][st] += 1
             except (ValueError, IndexError):
                 pass
                 
@@ -95,7 +104,7 @@ def dashboard():
         {
             'em_andamento': monthly_map[m]['Em andamento'],
             'concluido': monthly_map[m]['Concluído'],
-            'pendente': monthly_map[m]['Pendente']
+            'pendente': monthly_map[m]['Pausado']
         }
         for m in range(1, 13)
     ]
@@ -152,7 +161,7 @@ def dashboard():
     current_month_projects = {
         'em_andamento': [],
         'concluido': [],
-        'pendente': []
+        'pausado': []
     }
     
     current_year = now.year
@@ -170,13 +179,17 @@ def dashboard():
                 except ValueError:
                     pass
             if is_match:
-                status_str = proj.status or 'Pendente'
+                status_str = proj.status or 'Pausado'
+                if status_str == 'Pendente':
+                    status_str = 'Pausado'
+                if status_str == 'Cancelado':
+                    continue
                 if status_str == 'Em andamento':
                     current_month_projects['em_andamento'].append(proj)
                 elif status_str == 'Concluído':
                     current_month_projects['concluido'].append(proj)
                 else:
-                    current_month_projects['pendente'].append(proj)
+                    current_month_projects['pausado'].append(proj)
                     
     # Funcionários da equipe para o widget
     funcionarios_dash = (

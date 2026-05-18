@@ -1,5 +1,6 @@
 from flask import Flask, render_template, abort, request, redirect, url_for
 from flask_login import LoginManager, login_required, current_user, logout_user
+from flask_wtf.csrf import CSRFProtect
 import functools
 import os
 import sys
@@ -22,6 +23,9 @@ app = Flask(__name__)
 # CONFIGURAÇÕES DE SEGURANÇA
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'cobyte_chave_padrao')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # 1 hora
+
+csrf = CSRFProtect(app)
 
 # Lógica de conexão para o Render
 uri = os.getenv("DATABASE_URL")
@@ -57,6 +61,7 @@ def login_required_nivel(nivel_minimo):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
 
 # CARREGADOR DE USUÁRIO PARA FLASK-LOGIN
 @lm.user_loader
@@ -168,10 +173,15 @@ if _api_codeflow_path not in sys.path:
     sys.path.insert(0, _api_codeflow_path)
 from cfroutes.health import health_bp
 from cfroutes.analyze import analyze_bp
+csrf.exempt(health_bp)
+csrf.exempt(analyze_bp)
 app.register_blueprint(health_bp)
 app.register_blueprint(analyze_bp)
 
-app.config['CODEFLOW_API_URL'] = os.getenv('CODEFLOW_API_URL', '')
+if os.environ.get('RENDER') == 'true':
+    app.config['CODEFLOW_API_URL'] = os.getenv('CODEFLOW_API_URL', 'https://api-codeflow.onrender.com')
+else:
+    app.config['CODEFLOW_API_URL'] = os.getenv('CODEFLOW_API_URL', '')
 
 if __name__ == '__main__':
     app.run(debug=True)

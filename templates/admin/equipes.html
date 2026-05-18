@@ -623,6 +623,7 @@
       <div class="modal-close" onclick="closeModal('modal-nova-equipe')">&times;</div>
     </div>
     <form action="{{ url_for('admin.add_equipe') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="form-group">
         <label class="form-label">Nome da Equipe</label>
         <input type="text" name="nome" class="form-input" placeholder="Ex: Frontend Ninjas" required>
@@ -653,6 +654,7 @@
       <div class="modal-close" onclick="closeModal('modal-editar-equipe')">&times;</div>
     </div>
     <form id="form-editar-equipe" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="form-group">
         <label class="form-label">Nome da Equipe</label>
         <input type="text" name="nome" id="edit-equipe-nome" class="form-input" required>
@@ -691,6 +693,7 @@
     <div class="modal-footer">
       <button type="button" class="btn-outline" onclick="closeModal('modal-deletar-equipe')">Cancelar</button>
       <form id="form-deletar-equipe" method="POST" style="margin:0;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn-danger">Confirmar Exclusão</button>
       </form>
     </div>

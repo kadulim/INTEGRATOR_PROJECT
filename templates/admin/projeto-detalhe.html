@@ -15,7 +15,7 @@
     <div class="proj-header-info">
       <div class="proj-header-name">{{ projeto.nome }}</div>
       <div class="proj-header-meta">
-        {% set badge_status = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow', 'Planejamento': 'badge-purple'} %}
+        {% set badge_status = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow', 'Cancelado': 'badge-red'} %}
         {% set badge_prioridade = {'Alta': 'badge-red', 'Média': 'badge-yellow', 'Baixa': 'badge-green'} %}
         <span class="badge {{ badge_status.get(projeto.status, 'badge-blue') }}">{{ projeto.status }}</span>
         {% if projeto.prioridade %}
@@ -29,6 +29,7 @@
       Voltar
     </a>
     <form action="{{ url_for('admin.excluir_projeto', id=projeto.id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.');" style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" class="btn btn-outline btn-sm" style="color:var(--accent); border-color:var(--accent);">
         <i data-lucide="trash-2" style="width:14px; margin-right:6px;"></i>
         Excluir Projeto
@@ -231,6 +232,7 @@
         </div>
 
         <form action="{{ url_for('admin.editar_projeto') }}" method="POST" id="form-editar-projeto">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
           
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
@@ -241,7 +243,7 @@
             <div class="form-group">
               <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Status</label>
               <select name="status" class="form-input">
-                <option value="Pendente" {% if projeto.status == 'Pendente' %}selected{% endif %}>Pendente</option>
+                <option value="Pausado" {% if projeto.status == 'Pausado' %}selected{% endif %}>Pausado</option>
                 <option value="Em andamento" {% if projeto.status == 'Em andamento' %}selected{% endif %}>Em andamento</option>
                 <option value="Concluído" {% if projeto.status == 'Concluído' %}selected{% endif %}>Concluído</option>
                 <option value="Cancelado" {% if projeto.status == 'Cancelado' %}selected{% endif %}>Cancelado</option>
@@ -332,6 +334,7 @@
       <button class="close-btn" onclick="closeModal('modal-vincular-equipe')"><i data-lucide="x"></i></button>
     </div>
     <form action="{{ url_for('admin.vincular_equipe_projeto') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
       <div style="padding: 32px;">
         <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">
@@ -365,6 +368,7 @@
       <button class="close-btn" onclick="closeModal('modal-add-requisito')"><i data-lucide="x"></i></button>
     </div>
     <form action="{{ url_for('admin.add_requisito') }}" method="POST" style="padding:32px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
       <div class="form-group" style="margin-bottom:20px;">
         <label style="display:block; font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Título</label>
@@ -467,6 +471,7 @@
         Tem certeza que deseja excluir este requisito? Esta ação não pode ser desfeita.
       </p>
       <form id="form-excluir-requisito" action="" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div style="display: flex; gap: 12px; justify-content: center;">
           <button type="button" class="btn btn-ghost" onclick="closeModal('modal-confirmar-exclusao-requisito')" style="font-weight:600; color:var(--text-muted);">Cancelar</button>
           <button type="submit" class="btn btn-primary" style="background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 16px rgba(233,69,96,0.2);">Excluir Agora</button>

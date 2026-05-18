@@ -18,7 +18,8 @@
         <div>
             <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">{{ projeto.nome }}</h2>
             <div style="display: flex; gap: 12px; align-items: center;">
-                <span class="badge badge-blue">{{ projeto.status }}</span>
+                {% set badge_status = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow', 'Cancelado': 'badge-red'} %}
+                <span class="badge {{ badge_status.get(projeto.status, 'badge-blue') }}">{{ projeto.status }}</span>
                 <span style="font-size: 13px; color: var(--text-muted);">Prazo: <strong>{{ projeto.prazo }}</strong></span>
             </div>
         </div>
@@ -115,6 +116,7 @@
             </button>
         </div>
         <form action="{{ url_for('funcionario.add_requisito') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
             <div style="padding: 32px;">
                 <div class="form-group-modern" style="margin-bottom: 24px;">

@@ -81,6 +81,10 @@
     border-color: rgba(255, 176, 32, 0.24) !important;
     background: linear-gradient(160deg, rgba(255, 176, 32, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
   }
+  .light-mode .mcard-rd {
+    border-color: rgba(239, 68, 68, 0.24) !important;
+    background: linear-gradient(160deg, rgba(239, 68, 68, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+  }
 
   .light-mode .latest-change-box {
     background: rgba(255, 255, 255, 0.85) !important;
@@ -435,6 +439,7 @@
   .mcard-ac::before { background: var(--ac); }
   .mcard-gr::before { background: var(--gr); }
   .mcard-am::before { background: var(--am); }
+  .mcard-rd::before { background: #ef4444; }
 
   /* Default / Dark Mode Monthly Cards & latest-change-box border definitions */
   .latest-change-box {
@@ -456,6 +461,9 @@
   }
   .mcard-am {
     border-color: rgba(255, 176, 32, 0.08) !important;
+  }
+  .mcard-rd {
+    border-color: rgba(239, 68, 68, 0.08) !important;
   }
 
   .mcard-lbl {
@@ -584,21 +592,24 @@
       <div class="donut-wrap">
         <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260">
           <!-- Track rings -->
-          <circle class="ring-track" cx="130" cy="130" r="100"
-            fill="none" stroke="#ffffff" stroke-width="28"/>
-          <!-- Em andamento: cyan -->
-          <circle id="ringProgress" class="ring-fill" cx="130" cy="130" r="100"
-            fill="none" stroke="var(--ac)" stroke-width="28"
-            stroke-linecap="round"
-            stroke-dasharray="628.3 628.3"
-            stroke-dashoffset="628.3"/>
-          <!-- Concluído: green -->
-          <circle id="ringConcluido" class="ring-fill" cx="130" cy="130" r="68"
-            fill="none" stroke="var(--gr)" stroke-width="16"
-            stroke-linecap="round"
-            stroke-dasharray="427.3 427.3"
-            stroke-dashoffset="427.3"
-            opacity="0.7"/>
+          <circle class="ring-track" cx="130" cy="130" r="104" fill="none" stroke="#ffffff" stroke-width="16"/>
+          <circle class="ring-track" cx="130" cy="130" r="80" fill="none" stroke="#ffffff" stroke-width="16"/>
+          <circle class="ring-track" cx="130" cy="130" r="56" fill="none" stroke="#ffffff" stroke-width="16"/>
+
+          <!-- Em andamento (Azul/Cyan) r=104 -> circ=653.45 -->
+          <circle id="ringProgress" class="ring-fill-seg" cx="130" cy="130" r="104"
+            fill="none" stroke="var(--ac)" stroke-width="16" stroke-linecap="round"
+            stroke-dasharray="653.45 653.45" stroke-dashoffset="653.45"/>
+            
+          <!-- Concluído (Verde) r=80 -> circ=502.65 -->
+          <circle id="ringConcluido" class="ring-fill-seg" cx="130" cy="130" r="80"
+            fill="none" stroke="var(--gr)" stroke-width="16" stroke-linecap="round"
+            stroke-dasharray="502.65 502.65" stroke-dashoffset="502.65"/>
+            
+          <!-- Pausado (Amarelo/Laranja) r=56 -> circ=351.85 -->
+          <circle id="ringPausado" class="ring-fill-seg" cx="130" cy="130" r="56"
+            fill="none" stroke="var(--am)" stroke-width="16" stroke-linecap="round"
+            stroke-dasharray="351.85 351.85" stroke-dashoffset="351.85"/>
         </svg>
         <div class="donut-center">
           <div class="d-num" id="totalCount">0</div>
@@ -610,7 +621,7 @@
       <div class="hero-right">
         <div class="hero-right-lbl">Detalhamento</div>
 
-        <div class="big-stat">
+        <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('em_andamento')">
           <div class="bs-left">
             <div class="bs-bar" style="background:var(--ac);box-shadow:0 0 10px rgba(0,207,255,0.4);"></div>
             <div>
@@ -621,7 +632,7 @@
           <div class="bs-num" style="color:var(--ac);" id="breakdownAndamento">0</div>
         </div>
 
-        <div class="big-stat">
+        <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('concluido')">
           <div class="bs-left">
             <div class="bs-bar" style="background:var(--gr);box-shadow:0 0 10px rgba(0,229,160,0.3);"></div>
             <div>
@@ -632,12 +643,12 @@
           <div class="bs-num" style="color:var(--gr);" id="breakdownConcluido">0</div>
         </div>
 
-        <div class="big-stat">
+        <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('pausado')">
           <div class="bs-left">
             <div class="bs-bar" style="background:var(--am);box-shadow:0 0 10px rgba(255,176,32,0.3);"></div>
             <div>
-              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Pendente</div>
-              <div class="bs-name">Aguardando</div>
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Pausado</div>
+              <div class="bs-name">Parados</div>
             </div>
           </div>
           <div class="bs-num" style="color:var(--am);" id="breakdownPendente">0</div>
@@ -830,10 +841,10 @@
         <div class="mcard-sub">projetos em andamento</div>
       </div>
 
-      <div class="mcard mcard-am" onclick="openProjectsModal('pendente')">
-        <div class="mcard-lbl" style="color:var(--am);">Pendente</div>
-        <div class="mcard-num" style="color:var(--am);">+{{ current_month_projects.pendente|length }}</div>
-        <div class="mcard-sub">aguardando início</div>
+      <div class="mcard mcard-am" onclick="openProjectsModal('pausado')">
+        <div class="mcard-lbl" style="color:var(--am);">Pausado</div>
+        <div class="mcard-num" style="color:var(--am);">{{ current_month_projects.pausado|length }}</div>
+        <div class="mcard-sub">parados</div>
       </div>
 
     </div>
@@ -893,36 +904,55 @@
     // Parse dynamic values
     const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
     const concluidoVal = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
-    const pendenteVal = parseInt(statusData.find(d => d.label === 'Pendente')?.val || 0);
-    const totalVal = emAndamentoVal + concluidoVal + pendenteVal;
+    const pausadoVal = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
+    const totalVal = emAndamentoVal + concluidoVal + pausadoVal;
 
     document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
     document.getElementById('breakdownConcluido').textContent = concluidoVal;
-    document.getElementById('breakdownPendente').textContent = pendenteVal;
+    document.getElementById('breakdownPendente').textContent = pausadoVal;
 
     // SVG elements
     const ringProgress = document.getElementById('ringProgress');
     const ringConcluido = document.getElementById('ringConcluido');
+    const ringPausado = document.getElementById('ringPausado');
 
-    // Outer circle (Em andamento)
-    const circOuter = 628.3;
-    const pctOuter = totalVal > 0 ? (emAndamentoVal / totalVal) : 0;
-    const offsetOuter = circOuter * (1 - pctOuter);
+    const circProgress = 653.45;
+    const circConcluido = 502.65;
+    const circPausado = 351.85;
 
-    // Inner circle (Concluído)
-    const circInner = 427.3;
-    const pctInner = totalVal > 0 ? (concluidoVal / totalVal) : 0;
-    const offsetInner = circInner * (1 - pctInner);
+    ringProgress.style.transform = 'rotate(-90deg)';
+    ringConcluido.style.transform = 'rotate(-90deg)';
+    ringPausado.style.transform = 'rotate(-90deg)';
 
-    // Animate rings
-    setTimeout(() => {
-      if (ringProgress) {
-        ringProgress.style.strokeDashoffset = offsetOuter.toFixed(1);
+    function animarAnel(el, pct, circ, atraso) {
+      if (!el) return;
+      if (pct <= 0) {
+        el.style.opacity = '0'; 
+        return;
       }
-      if (ringConcluido) {
-        ringConcluido.style.strokeDashoffset = offsetInner.toFixed(1);
-      }
-    }, 300);
+      el.style.opacity = '1';
+      setTimeout(() => {
+        const inicio = performance.now();
+        const duracao = 1000;
+        function passo(agora) {
+          const t = Math.min((agora - inicio) / duracao, 1);
+          const ease = 1 - Math.pow(1 - t, 4);
+          const targetOffset = circ - (circ * pct);
+          const atualOffset = circ - ((circ - targetOffset) * ease);
+          el.style.strokeDashoffset = atualOffset.toFixed(1);
+          if (t < 1) requestAnimationFrame(passo);
+        }
+        requestAnimationFrame(passo);
+      }, atraso);
+    }
+
+    const pctAndamento = totalVal > 0 ? (emAndamentoVal / totalVal) : 0;
+    const pctConcluido = totalVal > 0 ? (concluidoVal / totalVal) : 0;
+    const pctPausado   = totalVal > 0 ? (pausadoVal / totalVal) : 0;
+
+    animarAnel(ringProgress, pctAndamento, circProgress, 300);
+    animarAnel(ringConcluido, pctConcluido, circConcluido, 600);
+    animarAnel(ringPausado, pctPausado, circPausado, 900);
 
     // Animate total counter
     const el = document.getElementById('totalCount');
@@ -955,8 +985,8 @@
         { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.id) }}" },
       {% endfor %}
     ],
-    pendente: [
-      {% for p in current_month_projects.pendente %}
+    pausado: [
+      {% for p in current_month_projects.pausado %}
         { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.id) }}" },
       {% endfor %}
     ]
@@ -977,8 +1007,8 @@
     } else if (statusKey === 'em_andamento') {
       title = 'Projetos em Desenvolvimento em {{ current_month_name }}';
       themeColor = 'var(--ac)';
-    } else if (statusKey === 'pendente') {
-      title = 'Projetos Pendentes em {{ current_month_name }}';
+    } else if (statusKey === 'pausado') {
+      title = 'Projetos Pausados em {{ current_month_name }}';
       themeColor = 'var(--am)';
     }
     

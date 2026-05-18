@@ -81,11 +81,11 @@ function renderModernChartBars() {
 // ── Status dos Projetos (Donut Moderno) ──────────────────────────────────
 function renderModernDonut() {
     const data = (window.DASHBOARD_STATUS && window.DASHBOARD_STATUS.length > 0)
-        ? window.DASHBOARD_STATUS.filter(d => d.val > 0)
+        ? window.DASHBOARD_STATUS.filter(d => d.val > 0 && d.label !== 'Cancelado' && d.label !== 'Cancelados')
         : [
             { label: 'Em andamento', val: 1, color: '#3b82f6' },
             { label: 'Concluídos', val: 0, color: '#10b981' },
-            { label: 'Em pausa', val: 0, color: '#f59e0b' },
+            { label: 'Pausado', val: 0, color: '#f59e0b' },
             { label: 'Cancelados', val: 0, color: '#ef4444' }
         ];
 
