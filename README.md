@@ -1,7 +1,7 @@
 # 🚀 INTEGRATOR PROJECT - CoByte
 
 Este repositório contém o sistema de gerenciamento interno da CoByte, desenvolvido com **Flask**, **SQLAlchemy** e um design focado em experiência premium.
-
+integração banco de dados
 ---
 
 ## 📋 Pré-requisitos
