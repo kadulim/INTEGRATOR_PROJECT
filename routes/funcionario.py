@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from database import database
 import json
 import datetime
-from models import Usuario, Funcionario, Projeto, Equipes, Requisito, Log, Cliente
+from models import Usuario, Funcionario, Projeto, Equipes, Requisito, Log, Cliente, equipes_projeto, Documento, Diagrama, Galeria, Comentario
 
 funcionario_bp = Blueprint('funcionario', __name__, url_prefix='/funcionario')
 
@@ -22,11 +22,11 @@ def dashboard():
     # Busca as equipes do funcionário
     equipes = funcionario.lista_equipes
     
-    # Busca os projetos associados a essas equipes
+    # Busca os projetos associados a essas equipes via pivot
     projetos = []
     equipes_ids = [eq.id for eq in equipes]
     if equipes_ids:
-        projetos = Projeto.query.filter(Projeto.equipe_id.in_(equipes_ids)).all()
+        projetos = Projeto.query.join(equipes_projeto, Projeto.id == equipes_projeto.c.projeto_id).filter(equipes_projeto.c.equipe_id.in_(equipes_ids)).all()
     
     # Cálculo das métricas premium
     total_projetos = len(projetos)
@@ -115,36 +115,40 @@ def dashboard():
     if projetos:
         proj_ids = [p.id for p in projetos]
         logs_query = (
-            database.session.query(Log, Projeto, Equipes)
+            database.session.query(Log, Projeto)
             .outerjoin(Projeto, Log.projeto_id == Projeto.id)
-            .outerjoin(Equipes, Projeto.equipe_id == Equipes.id)
             .filter(Log.projeto_id.in_(proj_ids))
             .order_by(Log.data.desc())
             .limit(10)
             .all()
         )
-        for log, proj_obj, eq_obj in logs_query:
+        for log, proj_obj in logs_query:
+            equipe_nome = proj_obj.nome if proj_obj else 'Geral'
+            if proj_obj and proj_obj.lista_equipes:
+                equipe_nome = ', '.join([eq.nome for eq in proj_obj.lista_equipes])
             logs_data.append({
                 'acao': log.acao,
                 'descricao': log.descricao,
                 'data': log.data,
-                'equipe_nome': eq_obj.nome if eq_obj else (proj_obj.nome if proj_obj else 'Geral')
+                'equipe_nome': equipe_nome
             })
             
         todos_logs_query = (
-            database.session.query(Log, Projeto, Equipes)
+            database.session.query(Log, Projeto)
             .outerjoin(Projeto, Log.projeto_id == Projeto.id)
-            .outerjoin(Equipes, Projeto.equipe_id == Equipes.id)
             .filter(Log.projeto_id.in_(proj_ids))
             .order_by(Log.data.desc())
             .all()
         )
-        for log, proj_obj, eq_obj in todos_logs_query:
+        for log, proj_obj in todos_logs_query:
+            equipe_nome = proj_obj.nome if proj_obj else 'Geral'
+            if proj_obj and proj_obj.lista_equipes:
+                equipe_nome = ', '.join([eq.nome for eq in proj_obj.lista_equipes])
             todos_logs_data.append({
                 'acao': log.acao,
                 'descricao': log.descricao,
                 'data': log.data,
-                'equipe_nome': eq_obj.nome if eq_obj else (proj_obj.nome if proj_obj else 'Geral')
+                'equipe_nome': equipe_nome
             })
             
     # Para o painel de atividades recentes no rodapé do dashboard, vamos associar o último log a cada projeto
@@ -229,7 +233,7 @@ def projetos():
     
     projetos = []
     if equipes_ids:
-        projetos = Projeto.query.filter(Projeto.equipe_id.in_(equipes_ids)).all()
+        projetos = Projeto.query.join(equipes_projeto, Projeto.id == equipes_projeto.c.projeto_id).filter(equipes_projeto.c.equipe_id.in_(equipes_ids)).all()
         
     return render_template('funcionario/projetos.html', projetos=projetos)
 
@@ -238,23 +242,34 @@ def projetos():
 def projeto_detalhe(projeto_id):
     projeto = Projeto.query.get_or_404(projeto_id)
     
-    # Verifica se o funcionário pertence à equipe do projeto
+    # Verifica se o funcionário pertence a alguma equipe do projeto
     funcionario = Funcionario.query.filter_by(usuario_id=current_user.id).first()
-    if projeto.equipe_id not in [eq.id for eq in funcionario.lista_equipes]:
+    equipes_ids = [eq.id for eq in funcionario.lista_equipes]
+    projeto_equipes_ids = [eq.id for eq in projeto.lista_equipes]
+    if not any(eq_id in projeto_equipes_ids for eq_id in equipes_ids):
         return "Acesso negado", 403
     
     membros = (
         Funcionario.query
         .join(Funcionario.lista_equipes)
-        .filter(Equipes.id == projeto.equipe_id)
+        .filter(Equipes.id.in_(projeto_equipes_ids))
         .all()
     )
+    
+    documentos = Documento.query.filter_by(projeto_id=projeto_id).all()
+    diagramas = Diagrama.query.filter_by(projeto_id=projeto_id).all()
+    galeria = Galeria.query.filter_by(projeto_id=projeto_id).all()
+    comentarios = Comentario.query.filter_by(projeto_id=projeto_id).order_by(Comentario.data.asc()).all()
     
     return render_template(
         'funcionario/projeto-detalhe.html',
         projeto=projeto,
         membros=membros,
-        requisitos=projeto.requisitos
+        requisitos=projeto.requisitos,
+        documentos=documentos,
+        diagramas=diagramas,
+        galeria=galeria,
+        comentarios=comentarios
     )
 
 @funcionario_bp.route('/add-requisito', methods=['POST'])

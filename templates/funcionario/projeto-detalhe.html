@@ -9,6 +9,23 @@
 <style>
     .tab-pane { display: none; }
     .tab-pane.active { display: block; animation: fadeIn 0.3s; }
+    .status-indicator {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .status-indicator.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .status-indicator.error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
 </style>
 {% endblock %}
 
@@ -31,6 +48,10 @@
     <button class="proj-tab active" onclick="switchTab('visao-geral', this)">Visão Geral</button>
     <button class="proj-tab" onclick="switchTab('requisitos', this)">Requisitos</button>
     <button class="proj-tab" onclick="switchTab('equipe', this)">Equipe</button>
+    <button class="proj-tab" onclick="switchTab('documentacao', this)">Documentação</button>
+    <button class="proj-tab" onclick="switchTab('diagramas', this)">Diagramas</button>
+    <button class="proj-tab" onclick="switchTab('galeria', this)">Galeria</button>
+    <button class="proj-tab" onclick="switchTab('comentarios', this)">Comentários</button>
 </div>
 
 <div class="proj-tab-content" style="background: var(--surface); border: 1px solid var(--border); border-radius: 0 0 12px 12px; padding: 32px;">
@@ -97,6 +118,275 @@
                 </div>
             </div>
             {% endfor %}
+        </div>
+    </div>
+
+    <!-- Aba Documentação -->
+    <div id="tab-documentacao" class="tab-pane">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+            <div>
+                <h3 style="font-size: 18px; font-weight: 700; margin-bottom:4px;">Documentação do Projeto</h3>
+                <p style="color:var(--text-muted); font-size:13px;">Upload e gerenciamento de especificações, manuais e outros arquivos em formato PDF ou DOCX.</p>
+            </div>
+            <div>
+                <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+                    <i data-lucide="upload" style="width:16px;"></i>
+                    Enviar Documento
+                    <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.id }}/upload-documento')">
+                </label>
+            </div>
+        </div>
+
+        <div id="document-status" class="status-indicator" style="display:none;"></div>
+        <div id="document-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
+            <div id="document-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
+        </div>
+
+        {% if documentos %}
+        <div class="docs-grid">
+            {% for doc in documentos %}
+            <div class="doc-card" onclick="window.open('/static/{{ doc.caminho }}', '_blank')">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div class="doc-icon" style="background:{% if doc.tipo_arquivo == 'pdf' %}rgba(239, 68, 68, 0.1);color:#ef4444;{% else %}rgba(59, 130, 246, 0.1);color:#3b82f6;{% endif %}">
+                        {% if doc.tipo_arquivo == 'pdf' %}
+                        <i data-lucide="file-text"></i>
+                        {% else %}
+                        <i data-lucide="file-down"></i>
+                        {% endif %}
+                    </div>
+                    <form action="/projeto/delete-documento/{{ doc.id }}" method="POST" onclick="event.stopPropagation();" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir arquivo">
+                            <i data-lucide="trash-2" style="width:16px;"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="doc-title" style="word-break: break-all;">{{ doc.nome }}</div>
+                <div class="doc-cat">{{ doc.tipo_arquivo.upper() }}</div>
+                <div class="doc-footer">
+                    <div class="doc-meta">
+                        <i data-lucide="calendar" style="width:12px;"></i>
+                        <span>{{ doc.data_upload.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                    <a href="/static/{{ doc.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px;">
+                        <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:60px 40px; background:rgba(255,255,255,0.01); border-radius:16px; border:1px dashed var(--border);">
+            <div style="width:56px; height:56px; background:rgba(59, 130, 246, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--blue);">
+                <i data-lucide="file" style="width:24px; height:24px;"></i>
+            </div>
+            <h4 style="margin-bottom:6px;">Nenhum Documento</h4>
+            <p style="color:var(--text-muted); font-size:13px; max-width:320px; margin:0 auto 16px;">Upload de relatórios de requisitos, propostas comerciais ou manuais de integração.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Aba Diagramas -->
+    <div id="tab-diagramas" class="tab-pane">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+            <div>
+                <h3 style="font-size: 18px; font-weight: 700; margin-bottom:4px;">Diagramas do Projeto</h3>
+                <p style="color:var(--text-muted); font-size:13px;">Upload de diagramas de arquitetura, UML, fluxogramas de processos, etc.</p>
+            </div>
+            <div>
+                <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+                    <i data-lucide="upload" style="width:16px;"></i>
+                    Enviar Diagrama
+                    <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.id }}/upload-diagrama')">
+                </label>
+            </div>
+        </div>
+
+        <div id="diagram-status" class="status-indicator" style="display:none;"></div>
+        <div id="diagram-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
+            <div id="diagram-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
+        </div>
+
+        {% if diagramas %}
+        <div class="diagrams-grid">
+            {% for diag in diagramas %}
+            <div class="diagram-card">
+                <div class="diagram-preview" onclick="window.open('/static/{{ diag.caminho }}', '_blank')" style="position:relative;">
+                    <img src="/static/{{ diag.caminho }}" alt="{{ diag.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+                    <form action="/projeto/delete-diagrama/{{ diag.id }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="close-btn" style="background:rgba(0,0,0,0.6); color:#fff; border:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Excluir diagrama">
+                            <i data-lucide="trash-2" style="width:14px;"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="diagram-info">
+                    <div>
+                        <div class="diagram-name">{{ diag.nome }}</div>
+                        <div class="diagram-type">Upload em {{ diag.data_upload.strftime('%d/%m/%Y') }}</div>
+                    </div>
+                    <a href="/static/{{ diag.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
+                        <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:60px 40px; background:rgba(255,255,255,0.01); border-radius:16px; border:1px dashed var(--border);">
+            <div style="width:56px; height:56px; background:rgba(168, 85, 247, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--purple);">
+                <i data-lucide="image" style="width:24px; height:24px;"></i>
+            </div>
+            <h4 style="margin-bottom:6px;">Nenhum Diagrama</h4>
+            <p style="color:var(--text-muted); font-size:13px; max-width:320px; margin:0 auto 16px;">Adicione diagramas técnicos para orientar o desenvolvimento da equipe.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Aba Galeria -->
+    <div id="tab-galeria" class="tab-pane">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+            <div>
+                <h3 style="font-size: 18px; font-weight: 700; margin-bottom:4px;">Galeria do Projeto</h3>
+                <p style="color:var(--text-muted); font-size:13px;">Imagens do projeto, capturas de tela das interfaces, mockups e inspirações visuais.</p>
+            </div>
+            <div>
+                <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+                    <i data-lucide="upload" style="width:16px;"></i>
+                    Enviar Imagem
+                    <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.id }}/upload-galeria')">
+                </label>
+            </div>
+        </div>
+
+        <div id="gallery-status" class="status-indicator" style="display:none;"></div>
+        <div id="gallery-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
+            <div id="gallery-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
+        </div>
+
+        {% if galeria %}
+        <div class="diagrams-grid">
+            {% for item in galeria %}
+            <div class="diagram-card">
+                <div class="diagram-preview" onclick="window.open('/static/{{ item.caminho }}', '_blank')" style="position:relative;">
+                    <img src="/static/{{ item.caminho }}" alt="{{ item.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+                    <form action="/projeto/delete-galeria/{{ item.id }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="close-btn" style="background:rgba(0,0,0,0.6); color:#fff; border:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Excluir imagem">
+                            <i data-lucide="trash-2" style="width:14px;"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="diagram-info">
+                    <div>
+                        <div class="diagram-name">{{ item.nome }}</div>
+                        <div class="diagram-type">Upload em {{ item.data_upload.strftime('%d/%m/%Y') }}</div>
+                    </div>
+                    <a href="/static/{{ item.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
+                        <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:60px 40px; background:rgba(255,255,255,0.01); border-radius:16px; border:1px dashed var(--border);">
+            <div style="width:56px; height:56px; background:rgba(16, 185, 129, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--green);">
+                <i data-lucide="gallery-thumbnails" style="width:24px; height:24px;"></i>
+            </div>
+            <h4 style="margin-bottom:6px;">Nenhuma Imagem</h4>
+            <p style="color:var(--text-muted); font-size:13px; max-width:320px; margin:0 auto 16px;">Faça upload de mockups de telas ou capturas de progresso do sistema.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Aba Comentários -->
+    <div id="tab-comentarios" class="tab-pane">
+        <div class="comments-layout">
+            <div class="comment-thread">
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="card-body" style="padding:24px;">
+                        <h4 style="margin-bottom:16px;">Novo Comentário</h4>
+                        <form action="/projeto/{{ projeto.id }}/add-comentario" method="POST" class="comment-input-area">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <textarea name="conteudo" required class="comment-textarea" placeholder="Deixe um comentário para a equipe ou para o cliente..."></textarea>
+                            <div style="display:flex; justify-content:flex-end;">
+                                <button type="submit" class="btn btn-primary" style="display:flex; align-items:center; gap:8px;">
+                                    <i data-lucide="send" style="width:14px;"></i> Enviar Comentário
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if comentarios %}
+                    {% for com in comentarios %}
+                    <div class="comment-card" style="margin-bottom:16px;">
+                        <div class="comment-header">
+                            <div class="comment-meta">
+                                {% set avatar_colors = {'admin': 'avatar-red', 'funcionario': 'avatar-purple', 'cliente': 'avatar-blue'} %}
+                                <div class="avatar sm {{ avatar_colors.get(com.usuario_rel.tipo, 'avatar-gray') }}">
+                                    {{ com.usuario_rel.nome[:2].upper() }}
+                                </div>
+                                <div>
+                                    <span class="comment-author">{{ com.usuario_rel.nome }}</span>
+                                    <span class="badge {% if com.usuario_rel.tipo == 'admin' %}badge-red{% elif com.usuario_rel.tipo == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size:10px; margin-left:6px; padding:2px 6px;">
+                                        {{ com.usuario_rel.tipo.upper() }}
+                                    </span>
+                                    <div class="comment-time">{{ com.data.strftime('%d/%m/%Y %H:%M') }}</div>
+                                </div>
+                            </div>
+                            {% if current_user.nivel == 1 or com.usuario_id == current_user.id %}
+                            <form action="/projeto/delete-comentario/{{ com.id }}" method="POST" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent; cursor:pointer;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir comentário">
+                                    <i data-lucide="trash-2" style="width:16px;"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        <div class="comment-body">
+                            {{ com.conteudo }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div style="text-align:center; padding:60px 40px; background:rgba(255,255,255,0.01); border-radius:16px; border:1px dashed var(--border);">
+                    <div style="width:56px; height:56px; background:rgba(59, 130, 246, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--blue);">
+                        <i data-lucide="message-square" style="width:24px; height:24px;"></i>
+                    </div>
+                    <h4 style="margin-bottom:6px;">Nenhum Comentário</h4>
+                    <p style="color:var(--text-muted); font-size:13px; max-width:320px; margin:0 auto 16px;">Inicie a conversa! Deixe um comentário ou feedback sobre o andamento do projeto.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="comment-sidebar">
+                <div class="comment-filter-card">
+                    <div class="csf-title">Informações de Contato</div>
+                    <div style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-top:12px;">
+                        {% set cliente = projeto.cliente_rel %}
+                        {% if cliente %}
+                        <strong>Cliente:</strong> {{ cliente.usuario_rel.nome }}<br>
+                        <strong>Empresa:</strong> {{ cliente.empresa }}<br>
+                        <strong>Email:</strong> {{ cliente.usuario_rel.email }}<br>
+                        {% else %}
+                        Sem cliente associado.
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="comment-stats-card" style="margin-top:16px; background:var(--surface-2); padding:16px; border-radius:12px; border:1px solid var(--border);">
+                    <div class="csf-title">Métricas de Comunicação</div>
+                    <div style="display:flex; justify-content:space-between; margin-top:12px; margin-bottom:8px; font-size:13px;">
+                        <span style="color:var(--text-muted);">Total de Comentários</span>
+                        <span style="font-weight:700; color:var(--accent);">{{ comentarios|length }}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:13px;">
+                        <span style="color:var(--text-muted);">Membros Ativos</span>
+                        <span style="font-weight:700; color:var(--blue);">{{ membros|length }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -170,9 +460,100 @@
     function switchTab(tabId, btn) {
         document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.proj-tab').forEach(el => el.classList.remove('active'));
-        document.getElementById('tab-' + tabId).classList.add('active');
-        btn.classList.add('active');
+        const target = document.getElementById('tab-' + tabId);
+        if (target) {
+            target.classList.add('active');
+            if (btn) {
+                btn.classList.add('active');
+            } else {
+                const buttons = document.querySelectorAll('.proj-tab');
+                buttons.forEach(b => {
+                    if (b.getAttribute('onclick').includes(tabId)) b.classList.add('active');
+                });
+            }
+            localStorage.setItem('activeProjectTab', tabId);
+        }
     }
+
+    function uploadFile(inputElement, fileType, uploadUrl) {
+        const file = inputElement.files[0];
+        if (!file) return;
+
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (fileType === 'document' && !['pdf', 'docx'].includes(ext)) {
+            showStatus('document-status', 'Tipo de arquivo inválido. Apenas PDF e DOCX são aceitos.', 'error');
+            return;
+        }
+        if ((fileType === 'diagram' || fileType === 'gallery') && !['png', 'jpg', 'jpeg', 'gif', 'svg'].includes(ext)) {
+            showStatus(fileType + '-status', 'Tipo de arquivo inválido. Apenas imagens (PNG, JPG, JPEG, GIF, SVG) são aceitas.', 'error');
+            return;
+        }
+
+        const progressContainer = document.getElementById(fileType + '-progress-container');
+        const progressBar = document.getElementById(fileType + '-progress-bar');
+        if (progressContainer && progressBar) {
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', uploadUrl, true);
+        xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const percentComplete = Math.round((e.loaded / e.total) * 100);
+                if (progressBar) {
+                    progressBar.style.width = percentComplete + '%';
+                    progressBar.textContent = percentComplete + '%';
+                }
+            }
+        };
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                showStatus(fileType + '-status', 'Upload concluído com sucesso!', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showStatus(fileType + '-status', 'Erro ao realizar upload: ' + xhr.responseText, 'error');
+                if (progressContainer) progressContainer.style.display = 'none';
+            }
+        };
+
+        xhr.onerror = function() {
+            showStatus(fileType + '-status', 'Erro de rede ao realizar upload.', 'error');
+            if (progressContainer) progressContainer.style.display = 'none';
+        };
+
+        xhr.send(formData);
+    }
+
+    function showStatus(elementId, message, type) {
+        const statusEl = document.getElementById(elementId);
+        if (!statusEl) return;
+        statusEl.textContent = message;
+        statusEl.className = 'status-indicator ' + type;
+        statusEl.style.display = 'block';
+        setTimeout(() => {
+            statusEl.style.display = 'none';
+        }, 5000);
+    }
+
+    // Restore active tab on load
+    window.addEventListener('DOMContentLoaded', () => {
+        const activeTab = localStorage.getItem('activeProjectTab');
+        if (activeTab && activeTab !== 'visao-geral') {
+            switchTab(activeTab);
+        }
+    });
 
     function openModal(id) {
         document.getElementById(id).style.display = 'flex';

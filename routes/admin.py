@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, abort, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from database import database
-from models import Usuario, Cliente, Funcionario, Projeto, Equipes, Skill, membros_equipe, Log, Requisito
+from models import Usuario, Cliente, Funcionario, Projeto, Equipes, Skill, membros_equipe, equipes_projeto, Log, Requisito, Documento, Diagrama, Galeria, Comentario
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import extract
 import functools
@@ -116,25 +116,31 @@ def dashboard():
     ]
 
     # ── Logs com Equipe ──────────────────────────────────────────
-    logs_query = database.session.query(Log, Projeto, Equipes).outerjoin(Projeto, Log.projeto_id == Projeto.id).outerjoin(Equipes, Projeto.equipe_id == Equipes.id).order_by(Log.data.desc()).limit(10).all()
+    logs_query = database.session.query(Log, Projeto).outerjoin(Projeto, Log.projeto_id == Projeto.id).order_by(Log.data.desc()).limit(10).all()
     
     logs_data = []
-    for log, projeto, equipe in logs_query:
+    for log, projeto in logs_query:
+        equipe_nome = projeto.nome if projeto else 'Geral'
+        if projeto and projeto.lista_equipes:
+            equipe_nome = ', '.join([eq.nome for eq in projeto.lista_equipes])
         logs_data.append({
             'acao': log.acao,
             'descricao': log.descricao,
             'data': log.data,
-            'equipe_nome': equipe.nome if equipe else (projeto.nome if projeto else 'Geral')
+            'equipe_nome': equipe_nome
         })
 
-    todos_logs_query = database.session.query(Log, Projeto, Equipes).outerjoin(Projeto, Log.projeto_id == Projeto.id).outerjoin(Equipes, Projeto.equipe_id == Equipes.id).order_by(Log.data.desc()).all()
+    todos_logs_query = database.session.query(Log, Projeto).outerjoin(Projeto, Log.projeto_id == Projeto.id).order_by(Log.data.desc()).all()
     todos_logs_data = []
-    for log, projeto, equipe in todos_logs_query:
+    for log, projeto in todos_logs_query:
+        equipe_nome = projeto.nome if projeto else 'Geral'
+        if projeto and projeto.lista_equipes:
+            equipe_nome = ', '.join([eq.nome for eq in projeto.lista_equipes])
         todos_logs_data.append({
             'acao': log.acao,
             'descricao': log.descricao,
             'data': log.data,
-            'equipe_nome': equipe.nome if equipe else (projeto.nome if projeto else 'Geral')
+            'equipe_nome': equipe_nome
         })
 
     # ── Atividade Mensal do Mês Atual ──────────────────
@@ -210,7 +216,7 @@ def add_projeto():
     prazo = request.form.get('prazo')
     budget = request.form.get('budget', 0)
     cliente_id = request.form.get('cliente_id')
-    equipe_id = request.form.get('equipe_id')
+    equipes_ids = [int(x) for x in request.form.getlist('check_equipes') if x.isdigit()]
 
     projeto = Projeto(
         nome=nome,
@@ -218,9 +224,13 @@ def add_projeto():
         status="Em andamento",
         prazo=prazo,
         budget=float(budget) if budget else 0.0,
-        cliente_id=cliente_id if cliente_id else None,
-        equipe_id=equipe_id if equipe_id else None
+        cliente_id=cliente_id if cliente_id else None
     )
+    
+    if equipes_ids:
+        equipes = Equipes.query.filter(Equipes.id.in_(equipes_ids)).all()
+        projeto.lista_equipes.extend(equipes)
+    
     database.session.add(projeto)
     database.session.commit()
     
@@ -236,41 +246,53 @@ def projeto_detalhe():
     
     projeto = Projeto.query.get_or_404(projeto_id)
     cliente = projeto.cliente_rel
-    equipe = projeto.equipe_rel
+    equipes = projeto.lista_equipes
+    
     membros = []
-    if equipe:
+    equipes_ids = [eq.id for eq in equipes]
+    if equipes_ids:
         membros = (
-            Funcionario.query
+            database.session.query(Funcionario, Usuario)
             .join(membros_equipe, Funcionario.id == membros_equipe.c.funcionario_id)
-            .filter(membros_equipe.c.equipe_id == equipe.id)
+            .filter(membros_equipe.c.equipe_id.in_(equipes_ids))
             .join(Usuario, Funcionario.usuario_id == Usuario.id)
-            .add_entity(Usuario)
+            .distinct()
             .all()
         )
+        
+    documentos = Documento.query.filter_by(projeto_id=projeto_id).all()
+    diagramas = Diagrama.query.filter_by(projeto_id=projeto_id).all()
+    galeria = Galeria.query.filter_by(projeto_id=projeto_id).all()
+    comentarios = Comentario.query.filter_by(projeto_id=projeto_id).order_by(Comentario.data.asc()).all()
     
     return render_template(
         'admin/projeto-detalhe.html',
         projeto=projeto,
         cliente=cliente,
-        equipe=equipe,
+        equipes=equipes,
         membros=membros,
         requisitos=projeto.requisitos,
         todas_equipes=Equipes.query.all(),
-        todos_clientes=Cliente.query.all()
+        todos_clientes=Cliente.query.all(),
+        documentos=documentos,
+        diagramas=diagramas,
+        galeria=galeria,
+        comentarios=comentarios
     )
 
-@admin_bp.route('/vincular-equipe-projeto', methods=['POST'])
-def vincular_equipe_projeto():
+@admin_bp.route('/vincular-equipes-projeto', methods=['POST'])
+def vincular_equipes_projeto():
     projeto_id = request.form.get('projeto_id', type=int)
-    equipe_id = request.form.get('equipe_id', type=int)
+    equipes_ids = [int(x) for x in request.form.getlist('check_equipes') if x.isdigit()]
     
-    if projeto_id and equipe_id:
+    if projeto_id and equipes_ids:
         projeto = Projeto.query.get_or_404(projeto_id)
-        projeto.equipe_id = equipe_id
+        equipes = Equipes.query.filter(Equipes.id.in_(equipes_ids)).all()
+        projeto.lista_equipes = equipes
         database.session.commit()
         
-        equipe = Equipes.query.get(equipe_id)
-        registrar_log('projeto', 'Equipe vinculada', f"A equipe '{equipe.nome}' foi vinculada ao projeto '{projeto.nome}'.", projeto.id)
+        nomes = ', '.join([eq.nome for eq in equipes])
+        registrar_log('projeto', 'Equipes vinculadas', f"As equipes '{nomes}' foram vinculadas ao projeto '{projeto.nome}'.", projeto.id)
     
     return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
 
@@ -290,7 +312,13 @@ def editar_projeto():
     projeto.prazo = request.form.get('prazo')
     projeto.descricao = request.form.get('descricao')
     projeto.cliente_id = request.form.get('cliente_id', type=int)
-    projeto.equipe_id = request.form.get('equipe_id', type=int)
+    
+    equipes_ids = [int(x) for x in request.form.getlist('check_equipes') if x.isdigit()]
+    if equipes_ids:
+        equipes = Equipes.query.filter(Equipes.id.in_(equipes_ids)).all()
+        projeto.lista_equipes = equipes
+    else:
+        projeto.lista_equipes = []
     
     try:
         database.session.commit()
@@ -454,23 +482,33 @@ def editar_cliente(id):
 def equipes():
     todas_equipes = Equipes.query.all()
     todos_funcionarios = Funcionario.query.join(Usuario).all()
+    todos_projetos = Projeto.query.all()
     return render_template(
         'admin/equipes.html',
         equipes = todas_equipes,
-        funcionarios = todos_funcionarios
+        funcionarios = todos_funcionarios,
+        projetos = todos_projetos
     )
 
 @admin_bp.route('/add-equipe', methods=['POST'])
 def add_equipe():
     nome = request.form.get('nome')
+    descricao = request.form.get('descricao')
+    funcao = request.form.get('funcao')
+    lider_equipe = request.form.get('lider_equipe', type=int)
     # Converter IDs para inteiros explicitamente para evitar erro de tipo no PostgreSQL (in_)
     funcionarios_ids = [int(x) for x in request.form.getlist('check_funcionarios') if x.isdigit()]
+    projetos_ids = [int(x) for x in request.form.getlist('check_projetos') if x.isdigit()]
     
-    equipe = Equipes(nome=nome)
+    equipe = Equipes(nome=nome, descricao=descricao, funcao=funcao, lider_equipe=lider_equipe)
     
     if funcionarios_ids:
         membros = Funcionario.query.filter(Funcionario.id.in_(funcionarios_ids)).all()
         equipe.membros_da_equipe.extend(membros)
+
+    if projetos_ids:
+        projs = Projeto.query.filter(Projeto.id.in_(projetos_ids)).all()
+        equipe.projetos.extend(projs)
 
     database.session.add(equipe)
     database.session.commit()
@@ -482,7 +520,7 @@ def excluir_equipe(id):
     equipe = Equipes.query.get_or_404(id)
     nome = equipe.nome
     try:
-        Projeto.query.filter_by(equipe_id=id).update({Projeto.equipe_id: None})
+        database.session.execute(equipes_projeto.delete().where(equipes_projeto.c.equipe_id == id))
         equipe.membros_da_equipe = []
         database.session.delete(equipe)
         database.session.commit()
@@ -498,20 +536,33 @@ def excluir_equipe(id):
 def editar_equipe(id):
     equipe = Equipes.query.get_or_404(id)
     nome = request.form.get('nome')
+    descricao = request.form.get('descricao')
+    funcao = request.form.get('funcao')
+    lider_equipe = request.form.get('lider_equipe', type=int)
     # Converter IDs para inteiros explicitamente para evitar erro de tipo no PostgreSQL (in_)
     funcionarios_ids = [int(x) for x in request.form.getlist('check_funcionarios') if x.isdigit()]
+    projetos_ids = [int(x) for x in request.form.getlist('check_projetos') if x.isdigit()]
     
     if not nome:
         flash("O nome da equipe é obrigatório.", "erro")
         return redirect(url_for('admin.equipes'))
     
     equipe.nome = nome
+    equipe.descricao = descricao
+    equipe.funcao = funcao
+    equipe.lider_equipe = lider_equipe
     
     if funcionarios_ids:
         membros = Funcionario.query.filter(Funcionario.id.in_(funcionarios_ids)).all()
         equipe.membros_da_equipe = membros
     else:
         equipe.membros_da_equipe = []
+    
+    if projetos_ids:
+        projs = Projeto.query.filter(Projeto.id.in_(projetos_ids)).all()
+        equipe.projetos = projs
+    else:
+        equipe.projetos = []
     
     try:
         database.session.commit()
@@ -528,7 +579,12 @@ def editar_equipe(id):
 def equipe_detalhe(id):
     equipe = Equipes.query.get_or_404(id)
     funcionarios = equipe.membros_da_equipe
-    projetos = Projeto.query.filter_by(equipe_id=equipe.id).all()
+    projetos = equipe.projetos
+    
+    # Busca o líder da equipe
+    lider = None
+    if equipe.lider_equipe:
+        lider = Funcionario.query.get(equipe.lider_equipe)
     
     # Busca os logs dos projetos dessa equipe
     projeto_ids = [p.id for p in projetos]
@@ -549,7 +605,8 @@ def equipe_detalhe(id):
                            funcionarios=funcionarios, 
                            projetos=projetos,
                            logs=logs,
-                           todos_funcionarios=todos_funcionarios)
+                           todos_funcionarios=todos_funcionarios,
+                           lider=lider)
 
 
 @admin_bp.route('/equipes/<int:equipe_id>/add-membro', methods=['POST'])

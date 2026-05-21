@@ -1,6 +1,6 @@
 import os
 from database import database
-from models import Usuario, Admin, Cliente, Funcionario, Projeto, Equipes, Skill, Requisito, Log
+from models import Usuario, Admin, Cliente, Funcionario, Projeto, Equipes, Skill, Requisito, Log, equipes_projeto
 from werkzeug.security import generate_password_hash
 
 
@@ -15,28 +15,30 @@ def adicionar(app):
             from sqlalchemy import text
             # Tentativa para Postgres (Render)
             try:
-                database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS equipe_id INTEGER REFERENCES equipes(id)"))
                 database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS prioridade VARCHAR(20)"))
                 database.session.execute(text("ALTER TABLE requisito ADD COLUMN IF NOT EXISTS tipo VARCHAR(50)"))
                 database.session.execute(text("ALTER TABLE funcionario ADD COLUMN IF NOT EXISTS skills VARCHAR(255)"))
                 database.session.execute(text("ALTER TABLE usuario ADD COLUMN IF NOT EXISTS nivel INTEGER"))
+                database.session.execute(text("ALTER TABLE equipes ADD COLUMN IF NOT EXISTS descricao VARCHAR(250) DEFAULT ''"))
+                database.session.execute(text("ALTER TABLE equipes ADD COLUMN IF NOT EXISTS funcao VARCHAR(250) DEFAULT ''"))
+                database.session.execute(text("ALTER TABLE equipes ADD COLUMN IF NOT EXISTS lider_equipe INTEGER"))
                 database.session.commit()
             except:
                 database.session.rollback()
                 # Tentativa para MySQL (Local) - sem o IF NOT EXISTS
-                # Projeto
-                try: database.session.execute(text("ALTER TABLE projeto ADD COLUMN equipe_id INTEGER REFERENCES equipes(id)"))
-                except: database.session.rollback()
                 try: database.session.execute(text("ALTER TABLE projeto ADD COLUMN prioridade VARCHAR(20)"))
                 except: database.session.rollback()
-                # Requisito
                 try: database.session.execute(text("ALTER TABLE requisito ADD COLUMN tipo VARCHAR(50)"))
                 except: database.session.rollback()
-                # Funcionario
                 try: database.session.execute(text("ALTER TABLE funcionario ADD COLUMN skills VARCHAR(255)"))
                 except: database.session.rollback()
-                # Usuario
                 try: database.session.execute(text("ALTER TABLE usuario ADD COLUMN nivel INTEGER"))
+                except: database.session.rollback()
+                try: database.session.execute(text("ALTER TABLE equipes ADD COLUMN descricao VARCHAR(250) DEFAULT ''"))
+                except: database.session.rollback()
+                try: database.session.execute(text("ALTER TABLE equipes ADD COLUMN funcao VARCHAR(250) DEFAULT ''"))
+                except: database.session.rollback()
+                try: database.session.execute(text("ALTER TABLE equipes ADD COLUMN lider_equipe INTEGER"))
                 except: database.session.rollback()
                 database.session.commit()
         except Exception as e:
@@ -124,7 +126,7 @@ def adicionar(app):
                     for eq_nome in [e.strip() for e in equipes_str.split(',')]:
                         equipe = Equipes.query.filter_by(nome=eq_nome).first()
                         if not equipe:
-                            equipe = Equipes(nome=eq_nome)
+                            equipe = Equipes(nome=eq_nome, descricao='', funcao='')
                             database.session.add(equipe)
                             database.session.flush()
                         f.lista_equipes.append(equipe)
@@ -132,13 +134,18 @@ def adicionar(app):
                 # Tratar Skills (M2M)
                 skills_str = os.getenv(f'{prefix}SKILLS', '')
                 if skills_str:
+                    seen_ids = set()
                     for sk_nome in [s.strip() for s in skills_str.split(',')]:
+                        if not sk_nome:
+                            continue
                         skill = Skill.query.filter_by(nome=sk_nome).first()
                         if not skill:
                             skill = Skill(nome=sk_nome)
                             database.session.add(skill)
                             database.session.flush()
-                        f.lista_skills.append(skill)
+                        if skill.id not in seen_ids:
+                            seen_ids.add(skill.id)
+                            f.lista_skills.append(skill)
 
                 database.session.add(f)
                 database.session.commit()
@@ -174,9 +181,10 @@ def adicionar(app):
                     prazo          = os.getenv(f'{prefix}PRAZO'),
                     budget         = float(os.getenv(f'{prefix}BUDGET', 0)),
                     prioridade     = os.getenv(f'{prefix}PRIORIDADE'),
-                    cliente_id     = _cliente.id if _cliente else None,
-                    equipe_id      = _equipe.id  if _equipe  else None
+                    cliente_id     = _cliente.id if _cliente else None
                 )
+                if _equipe:
+                    p.lista_equipes.append(_equipe)
                 database.session.add(p)
                 database.session.commit()
                 print(f"[OK] Projeto {i} criado: {nome}")

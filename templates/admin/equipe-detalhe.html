@@ -117,40 +117,12 @@
   /* Header Card */
   .team-header-grid {
     display: grid;
-    grid-template-columns: 180px 1fr 300px;
+    grid-template-columns: 1fr 300px;
     gap: 32px;
     padding: 32px;
     align-items: center;
-    border: 1px solid rgba(168, 85, 247, 0.15); /* Efeito de glow roxo */
+    border: 1px solid rgba(168, 85, 247, 0.15);
     box-shadow: 0 0 30px rgba(168, 85, 247, 0.05);
-  }
-
-  .team-avatar-container {
-    position: relative;
-    width: 180px;
-    height: 180px;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .team-avatar-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .team-avatar-overlay {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.6);
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.1);
   }
 
   .team-info-main h1 {
@@ -553,14 +525,6 @@
 
     <!-- Header Card -->
     <div class="premium-card team-header-grid">
-      <!-- Avatar -->
-      <div class="team-avatar-container">
-        <img src="https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=400&q=80" alt="Team Avatar">
-        <div class="team-avatar-overlay">
-          <i data-lucide="camera" style="width: 14px;"></i>
-        </div>
-      </div>
-
       <!-- Info -->
       <div class="team-info-main">
         <h1>
@@ -568,12 +532,12 @@
           <span class="badge badge-purple" style="font-size: 11px; padding: 2px 8px; border-radius: 4px;">Ativa</span>
         </h1>
         <p class="team-description">
-          Equipe especializada em desenvolvimento de soluções web e automações inteligentes. Focada em entregas de alta performance e código limpo.
+          {{ equipe.descricao or 'Sem descrição cadastrada.' }}
         </p>
         <div class="team-tags">
-          <span class="badge badge-blue">Desenvolvimento Web</span>
-          <span class="badge badge-purple">Backend</span>
-          <span class="badge badge-red">Automação</span>
+          {% if equipe.funcao %}
+          <span class="badge badge-purple">{{ equipe.funcao }}</span>
+          {% endif %}
         </div>
       </div>
 
@@ -581,11 +545,7 @@
       <div class="team-meta-list">
         <div class="team-meta-item">
           <span class="team-meta-label"><i data-lucide="user" style="width:14px;"></i>Líder da equipe</span>
-          <span class="team-meta-value">{{ funcionarios[0].usuario_rel.nome if funcionarios else 'Não definido' }}</span>
-        </div>
-        <div class="team-meta-item">
-          <span class="team-meta-label"><i data-lucide="calendar" style="width:14px;"></i>Criada em</span>
-          <span class="team-meta-value">10/03/2025</span>
+          <span class="team-meta-value">{{ lider.usuario_rel.nome if lider else 'Não definido' }}</span>
         </div>
         <div class="team-meta-item">
           <span class="team-meta-label"><i data-lucide="users" style="width:14px;"></i>Membros</span>
@@ -652,31 +612,6 @@
         </div>
       </div>
 
-      <!-- Tarefas Concluídas -->
-      <div class="kpi-card">
-        <div class="kpi-left">
-          <div class="kpi-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
-            <i data-lucide="list-checks"></i>
-          </div>
-          <div class="kpi-data">
-            <h3>87</h3>
-            <p>Tarefas Concluídas</p>
-          </div>
-        </div>
-        <!-- Waves -->
-        <div class="kpi-waves">
-          <svg viewBox="0 0 240 50" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="grad-kpi-3" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#a855f7" stop-opacity="0.25"></stop>
-                <stop offset="100%" stop-color="#a855f7" stop-opacity="0.0"></stop>
-              </linearGradient>
-            </defs>
-            <path class="wave1" fill="url(#grad-kpi-3)" d="M0,25 Q30,15 60,25 T120,25 T180,25 T240,25 L240,50 L0,50 Z"></path>
-            <path class="wave2" fill="url(#grad-kpi-3)" d="M0,20 Q30,35 60,20 T120,20 T180,20 T240,20 L240,50 L0,50 Z"></path>
-          </svg>
-        </div>
-      </div>
     </div>
 
     <!-- Content Grid -->
@@ -705,11 +640,11 @@
                 <form action="{{ url_for('admin.equipe_remover_membro', equipe_id=equipe.id, funcionario_id=func.id) }}" method="POST" class="member-remove-form" onsubmit="return confirm('Tem certeza que deseja remover {{ func.usuario_rel.nome }} desta equipe?');">
                   <button type="submit" class="btn-remove-member" title="Remover da Equipe">&times;</button>
                 </form>
-                <div class="member-avatar {% if loop.first %}leader{% endif %}">
+                <div class="member-avatar {% if lider and func.id == lider.id %}leader{% endif %}">
                   {{ func.usuario_rel.nome[:2].upper() }}
                 </div>
                 <span class="member-name">{{ func.usuario_rel.nome }}</span>
-                <span class="member-role">{% if loop.first %}Líder{% else %}Dev{% endif %}</span>
+                <span class="member-role">{% if lider and func.id == lider.id %}Líder{% else %}Membro{% endif %}</span>
               </div>
             {% else %}
               <p style="color: var(--tx2); font-size: 13px; padding: 24px;">Nenhum membro vinculado.</p>

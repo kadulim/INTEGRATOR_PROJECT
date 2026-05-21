@@ -13,7 +13,7 @@ load_dotenv()
 _api_codeflow_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api_codeflow', 'api')
 
 from database import database
-from models import Usuario, Cliente, Projeto, Log
+from models import Usuario, Cliente, Projeto, Log, Documento, Diagrama, Galeria, Comentario
 
 import function.login as logar
 import function.adicionar_na_tabela as adicionar_na_tabela
@@ -115,7 +115,12 @@ def cliente_projeto_detalhe(projeto_id):
     
     # Buscar logs associados ao projeto
     logs = Log.query.filter_by(projeto_id=projeto_id).order_by(Log.data.desc()).all()
-    return render_template('cliente/projeto-detalhe.html', projeto=projeto, logs=logs)
+    documentos = Documento.query.filter_by(projeto_id=projeto_id).all()
+    diagramas = Diagrama.query.filter_by(projeto_id=projeto_id).all()
+    galeria = Galeria.query.filter_by(projeto_id=projeto_id).all()
+    comentarios = Comentario.query.filter_by(projeto_id=projeto_id).order_by(Comentario.data.asc()).all()
+    return render_template('cliente/projeto-detalhe.html', projeto=projeto, logs=logs,
+                           documentos=documentos, diagramas=diagramas, galeria=galeria, comentarios=comentarios)
 
 @app.route('/cliente-dashboard/projeto/<int:projeto_id>/feedback', methods=['POST'])
 @login_required
@@ -182,6 +187,276 @@ if os.environ.get('RENDER') == 'true':
     app.config['CODEFLOW_API_URL'] = os.getenv('CODEFLOW_API_URL', 'https://api-codeflow.onrender.com')
 else:
     app.config['CODEFLOW_API_URL'] = os.getenv('CODEFLOW_API_URL', '')
+
+from werkzeug.utils import secure_filename
+import time
+
+app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+
+@app.route('/projeto/<int:projeto_id>/upload-documento', methods=['POST'])
+@login_required
+def upload_documento(projeto_id):
+    projeto = Projeto.query.get_or_404(projeto_id)
+    if 'file' not in request.files:
+        return "Nenhum arquivo enviado", 400
+    file = request.files['file']
+    if file.filename == '':
+        return "Nenhum arquivo selecionado", 400
+    
+    ext = file.filename.split('.')[-1].lower()
+    if ext not in ['pdf', 'docx']:
+        return "Tipo de arquivo inválido. Apenas PDF e DOCX são aceitos.", 400
+        
+    filename = secure_filename(file.filename)
+    unique_filename = f"{int(time.time())}_{filename}"
+    
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], 'documentos')
+    os.makedirs(upload_path, exist_ok=True)
+    file_path = os.path.join(upload_path, unique_filename)
+    file.save(file_path)
+    
+    doc = Documento(
+        projeto_id=projeto_id,
+        nome=filename,
+        caminho=f"uploads/documentos/{unique_filename}",
+        tipo_arquivo=ext
+    )
+    database.session.add(doc)
+    
+    log = Log(
+        tipo='documento',
+        acao='Documento enviado',
+        descricao=f"Documento '{filename}' enviado por {current_user.nome}.",
+        projeto_id=projeto_id
+    )
+    database.session.add(log)
+    database.session.commit()
+    return "Upload concluído", 200
+
+@app.route('/projeto/delete-documento/<int:doc_id>', methods=['POST'])
+@login_required
+def delete_documento(doc_id):
+    doc = Documento.query.get_or_404(doc_id)
+    projeto_id = doc.projeto_id
+    
+    try:
+        physical_path = os.path.join(app.root_path, 'static', doc.caminho)
+        if os.path.exists(physical_path):
+            os.remove(physical_path)
+    except Exception as e:
+        print(f"Erro ao remover arquivo físico: {e}")
+        
+    log = Log(
+        tipo='documento',
+        acao='Documento excluído',
+        descricao=f"Documento '{doc.nome}' excluído por {current_user.nome}.",
+        projeto_id=projeto_id
+    )
+    database.session.add(log)
+    database.session.delete(doc)
+    database.session.commit()
+    
+    if current_user.tipo == 'admin':
+        return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
+    elif current_user.tipo == 'funcionario':
+        return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
+    else:
+        return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
+
+@app.route('/projeto/<int:projeto_id>/upload-diagrama', methods=['POST'])
+@login_required
+def upload_diagrama(projeto_id):
+    projeto = Projeto.query.get_or_404(projeto_id)
+    if 'file' not in request.files:
+        return "Nenhum arquivo enviado", 400
+    file = request.files['file']
+    if file.filename == '':
+        return "Nenhum arquivo selecionado", 400
+        
+    ext = file.filename.split('.')[-1].lower()
+    if ext not in ['png', 'jpg', 'jpeg', 'gif', 'svg']:
+        return "Tipo de arquivo inválido. Apenas imagens são aceitas.", 400
+        
+    filename = secure_filename(file.filename)
+    unique_filename = f"{int(time.time())}_{filename}"
+    
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], 'diagramas')
+    os.makedirs(upload_path, exist_ok=True)
+    file_path = os.path.join(upload_path, unique_filename)
+    file.save(file_path)
+    
+    diag = Diagrama(
+        projeto_id=projeto_id,
+        nome=filename,
+        caminho=f"uploads/diagramas/{unique_filename}"
+    )
+    database.session.add(diag)
+    
+    log = Log(
+        tipo='diagrama',
+        acao='Diagrama enviado',
+        descricao=f"Diagrama '{filename}' enviado por {current_user.nome}.",
+        projeto_id=projeto_id
+    )
+    database.session.add(log)
+    database.session.commit()
+    return "Upload concluído", 200
+
+@app.route('/projeto/delete-diagrama/<int:diag_id>', methods=['POST'])
+@login_required
+def delete_diagrama(diag_id):
+    diag = Diagrama.query.get_or_404(diag_id)
+    projeto_id = diag.projeto_id
+    
+    try:
+        physical_path = os.path.join(app.root_path, 'static', diag.caminho)
+        if os.path.exists(physical_path):
+            os.remove(physical_path)
+    except Exception as e:
+        print(f"Erro ao remover arquivo físico: {e}")
+        
+    log = Log(
+        tipo='diagrama',
+        acao='Diagrama excluído',
+        descricao=f"Diagrama '{diag.nome}' excluído por {current_user.nome}.",
+        projeto_id=projeto_id
+    )
+    database.session.add(log)
+    database.session.delete(diag)
+    database.session.commit()
+    
+    if current_user.tipo == 'admin':
+        return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
+    elif current_user.tipo == 'funcionario':
+        return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
+    else:
+        return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
+
+@app.route('/projeto/<int:projeto_id>/upload-galeria', methods=['POST'])
+@login_required
+def upload_galeria(projeto_id):
+    projeto = Projeto.query.get_or_404(projeto_id)
+    if 'file' not in request.files:
+        return "Nenhum arquivo enviado", 400
+    file = request.files['file']
+    if file.filename == '':
+        return "Nenhum arquivo selecionado", 400
+        
+    ext = file.filename.split('.')[-1].lower()
+    if ext not in ['png', 'jpg', 'jpeg', 'gif', 'svg']:
+        return "Tipo de arquivo inválido. Apenas imagens são aceitas.", 400
+        
+    filename = secure_filename(file.filename)
+    unique_filename = f"{int(time.time())}_{filename}"
+    
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], 'galeria')
+    os.makedirs(upload_path, exist_ok=True)
+    file_path = os.path.join(upload_path, unique_filename)
+    file.save(file_path)
+    
+    gal = Galeria(
+        projeto_id=projeto_id,
+        nome=filename,
+        caminho=f"uploads/galeria/{unique_filename}"
+    )
+    database.session.add(gal)
+    
+    log = Log(
+        tipo='galeria',
+        acao='Imagem da galeria enviada',
+        descricao=f"Imagem '{filename}' enviada para a galeria por {current_user.nome}.",
+        projeto_id=projeto_id
+    )
+    database.session.add(log)
+    database.session.commit()
+    return "Upload concluído", 200
+
+@app.route('/projeto/delete-galeria/<int:item_id>', methods=['POST'])
+@login_required
+def delete_galeria(item_id):
+    gal = Galeria.query.get_or_404(item_id)
+    projeto_id = gal.projeto_id
+    
+    try:
+        physical_path = os.path.join(app.root_path, 'static', gal.caminho)
+        if os.path.exists(physical_path):
+            os.remove(physical_path)
+    except Exception as e:
+        print(f"Erro ao remover arquivo físico: {e}")
+        
+    log = Log(
+        tipo='galeria',
+        acao='Imagem da galeria excluída',
+        descricao=f"Imagem '{gal.nome}' removida da galeria por {current_user.nome}.",
+        projeto_id=projeto_id
+    )
+    database.session.add(log)
+    database.session.delete(gal)
+    database.session.commit()
+    
+    if current_user.tipo == 'admin':
+        return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
+    elif current_user.tipo == 'funcionario':
+        return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
+    else:
+        return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
+
+@app.route('/projeto/<int:projeto_id>/add-comentario', methods=['POST'])
+@login_required
+def add_comentario(projeto_id):
+    projeto = Projeto.query.get_or_404(projeto_id)
+    conteudo = request.form.get('conteudo', '').strip()
+    if not conteudo:
+        flash("O conteúdo do comentário não pode estar vazio.", "erro")
+        if current_user.tipo == 'admin':
+            return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
+        elif current_user.tipo == 'funcionario':
+            return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
+        else:
+            return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
+            
+    com = Comentario(
+        projeto_id=projeto_id,
+        usuario_id=current_user.id,
+        conteudo=conteudo
+    )
+    database.session.add(com)
+    
+    log = Log(
+        tipo='comentario',
+        acao='Comentário enviado',
+        descricao=f"{current_user.nome} adicionou um comentário.",
+        projeto_id=projeto_id
+    )
+    database.session.add(log)
+    database.session.commit()
+    
+    if current_user.tipo == 'admin':
+        return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
+    elif current_user.tipo == 'funcionario':
+        return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
+    else:
+        return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
+
+@app.route('/projeto/delete-comentario/<int:com_id>', methods=['POST'])
+@login_required
+def delete_comentario(com_id):
+    com = Comentario.query.get_or_404(com_id)
+    projeto_id = com.projeto_id
+    
+    if current_user.nivel != 1 and com.usuario_id != current_user.id:
+        abort(403)
+        
+    database.session.delete(com)
+    database.session.commit()
+    
+    if current_user.tipo == 'admin':
+        return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
+    elif current_user.tipo == 'funcionario':
+        return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
+    else:
+        return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
 
 if __name__ == '__main__':
     app.run(debug=True)

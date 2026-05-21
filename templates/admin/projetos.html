@@ -516,6 +516,23 @@
     margin-top: 8px;
   }
   .section-lbl::after { content: ''; flex: 1; height: 1px; background: var(--b1); }
+
+  /* Checkboxes layout for equipes */
+  .members-checkbox-list {
+    display: flex; flex-direction: column; gap: 8px;
+    max-height: 180px; overflow-y: auto;
+    border: 1px solid var(--b1); padding: 12px; border-radius: 8px;
+    background: var(--s2);
+  }
+  .light-mode .members-checkbox-list { background: #ffffff; }
+  .members-checkbox-list::-webkit-scrollbar { width: 4px; }
+  .members-checkbox-list::-webkit-scrollbar-thumb { background: var(--b3); border-radius: 2px; }
+
+  .check-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--tx); cursor: pointer;
+  }
+  .check-label input { accent-color: var(--ac); cursor: pointer; }
 </style>
 {% endblock %}
 
@@ -673,13 +690,16 @@
 
               <div class="pcard-tags">
                 <span class="ptag {{ status_tag_class.get(p.status, 'ptag-ac') }}"><span class="ptag-dot"></span>{{ p.status }}</span>
-                {% if p.equipe_rel %}
+                {% for eq in p.lista_equipes[:2] %}
                 <span class="ptag ptag-user">
                   <svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0116 0"/>
                   </svg>
-                  {{ p.equipe_rel.nome }}
+                  {{ eq.nome }}
                 </span>
+                {% endfor %}
+                {% if p.lista_equipes|length > 2 %}
+                <span class="ptag ptag-pu">+{{ p.lista_equipes|length - 2 }}</span>
                 {% endif %}
               </div>
 
@@ -702,8 +722,13 @@
                 Prazo: {{ p.prazo }}
               </div>
               <div class="pcard-team">
-                {% if p.equipe_rel %}
-                  <div class="team-avatar">{{ p.equipe_rel.nome[:2].upper() }}</div>
+                {% if p.lista_equipes %}
+                  {% for eq in p.lista_equipes[:3] %}
+                  <div class="team-avatar" style="background:var(--ac-d); color:var(--ac);">{{ eq.nome[:2].upper() }}</div>
+                  {% endfor %}
+                  {% if p.lista_equipes|length > 3 %}
+                  <div class="team-avatar" style="background:var(--s2); color:var(--tx3);">+{{ p.lista_equipes|length - 3 }}</div>
+                  {% endif %}
                 {% else %}
                   <div class="team-avatar" style="background:var(--s2); color:var(--tx3);">--</div>
                 {% endif %}
@@ -751,8 +776,10 @@
                 </td>
                 <td>{{ p.cliente_rel.usuario_rel.nome if p.cliente_rel else '---' }}</td>
                 <td>
-                  {% if p.equipe_rel %}
-                  <span class="tag tag-gr" style="background: var(--pu-d); color: var(--pu);">{{ p.equipe_rel.nome }}</span>
+                  {% if p.lista_equipes %}
+                    {% for eq in p.lista_equipes %}
+                    <span class="tag tag-gr" style="background: var(--pu-d); color: var(--pu);">{{ eq.nome }}</span>{% if not loop.last %}<br>{% endif %}
+                    {% endfor %}
                   {% else %}
                   <span style="color:var(--tx3); font-style: italic;">Não atribuída</span>
                   {% endif %}
@@ -847,13 +874,14 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Equipe Responsável</label>
-          <select name="equipe_id" class="form-input">
-            <option value="">Selecione uma equipe</option>
+          <label class="form-label" style="margin-bottom: 8px;">Equipes Responsáveis</label>
+          <div class="members-checkbox-list">
             {% for eq in equipes %}
-            <option value="{{ eq.id }}">{{ eq.nome }}</option>
+            <label class="check-label">
+              <input type="checkbox" name="check_equipes" value="{{ eq.id }}"> {{ eq.nome }}
+            </label>
             {% endfor %}
-          </select>
+          </div>
         </div>
       </div>
       <div class="modal-footer">

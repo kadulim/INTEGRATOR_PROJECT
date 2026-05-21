@@ -13,4 +13,5 @@ with app.app_context():
         
     print("\n--- PROJETOS ---")
     for p in Projeto.query.all():
-        print(f"ID: {p.id}, Nome: {p.nome}, Cliente ID: {p.cliente_id}, Equipe ID: {p.equipe_id}")
+        equipes_nomes = ', '.join([eq.nome for eq in p.lista_equipes]) if p.lista_equipes else 'Nenhuma'
+        print(f"ID: {p.id}, Nome: {p.nome}, Cliente ID: {p.cliente_id}, Equipes: {equipes_nomes}")

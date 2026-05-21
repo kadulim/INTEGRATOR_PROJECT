@@ -5,6 +5,25 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/projeto-detalhe.css') }}">
+<style>
+  .status-indicator {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .status-indicator.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+  .status-indicator.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+</style>
 {% endblock %}
 
 {% block topbar_title %}{{ projeto.nome }}{% endblock %}
@@ -42,6 +61,10 @@
   <button class="proj-tab active" onclick="switchTab('visao-geral', this)">Visão Geral</button>
   <button class="proj-tab" onclick="switchTab('equipe', this)">Equipe</button>
   <button class="proj-tab" onclick="switchTab('requisitos', this)">Requisitos</button>
+  <button class="proj-tab" onclick="switchTab('documentacao', this)">Documentação</button>
+  <button class="proj-tab" onclick="switchTab('diagramas', this)">Diagramas</button>
+  <button class="proj-tab" onclick="switchTab('galeria', this)">Galeria</button>
+  <button class="proj-tab" onclick="switchTab('comentarios', this)">Comentários</button>
   <button class="proj-tab" onclick="switchTab('editar', this)">Editar Projeto</button>
 </div>
 
@@ -83,81 +106,95 @@
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:20px;">
-        <div class="card">
+        {% if equipes %}
+        {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-yellow'] %}
+        {% for equipe in equipes %}
+        <div class="card" style="margin-bottom: 16px;">
           <div class="card-body">
-            <h3 style="margin-bottom: 8px;">Equipe Responsável</h3>
-            <div style="font-size: 16px; font-weight: 700; color: var(--accent);">{{ equipe.nome if equipe else 'Nenhuma equipe atribuída' }}</div>
-          </div>
-        </div>
-
-        {% if membros %}
-        <div class="card">
-          <div class="card-body">
-            <h3 style="margin-bottom: 20px;">Membros da Equipe</h3>
-            {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-yellow'] %}
-            {% for funcionario, usuario in membros %}
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-              <div class="avatar sm {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ usuario.nome[:2].upper() }}</div>
+            <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+              <span class="badge badge-purple" style="font-size: 13px;">{{ equipe.nome }}</span>
+              <span style="font-size: 12px; color: var(--text-muted);">{{ equipe.membros_da_equipe|length }} membro(s)</span>
+            </h4>
+            {% for func in equipe.membros_da_equipe %}
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+              <div class="avatar sm {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ func.usuario_rel.nome[:2].upper() }}</div>
               <div>
-                <div style="font-weight:600; font-size:14px; color:#fff;">{{ usuario.nome }}</div>
-                <div style="font-size:12px; color:var(--text-muted);">{{ funcionario.cargo }}</div>
+                <div style="font-weight:600; font-size:14px; color:#fff;">{{ func.usuario_rel.nome }}</div>
+                <div style="font-size:12px; color:var(--text-muted);">{{ func.cargo }}</div>
               </div>
             </div>
+            {% else %}
+            <p style="color:var(--text-muted); font-size:13px;">Nenhum membro nesta equipe.</p>
             {% endfor %}
           </div>
         </div>
+        {% endfor %}
         {% endif %}
       </div>
     </div>
   </div>
 
   <div id="tab-equipe" class="tab-pane">
-    <div class="card">
-      <div class="card-body">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
-          <div>
-            <h3 style="margin-bottom:4px;">Equipe Atribuída</h3>
-            <p style="color:var(--text-muted); font-size:13px;">Detalhes e membros da equipe responsável pelo projeto.</p>
+    {% if equipes %}
+      {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-yellow'] %}
+      {% for equipe in equipes %}
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-body">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <div>
+              <h3 style="margin-bottom:4px;">{{ equipe.nome }}</h3>
+              <p style="color:var(--text-muted); font-size:13px;">
+                {{ equipe.descricao or 'Sem descrição' }} · 
+                {{ equipe.membros_da_equipe|length }} membro(s)
+              </p>
+            </div>
+            {% if equipe.funcao %}
+            <span class="badge badge-purple" style="font-size:12px; padding:6px 14px;">{{ equipe.funcao }}</span>
+            {% endif %}
           </div>
-          {% if equipe %}
-          <span class="badge badge-purple" style="font-size:14px; padding:8px 16px;">{{ equipe.nome }}</span>
-          {% endif %}
-        </div>
 
-        {% if membros %}
-        <div class="proj-team-grid">
-          {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-yellow'] %}
-          {% for funcionario, usuario in membros %}
-          <div class="proj-member-card">
-            <div class="avatar {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ usuario.nome[:2].upper() }}</div>
-            <div class="pmc-info">
-              <div class="pmc-name">{{ usuario.nome }}</div>
-              <div class="pmc-role">{{ funcionario.cargo }}</div>
-              <div class="pmc-skills">
-                <span class="pmc-skill">Python</span>
-                <span class="pmc-skill">DevOps</span>
+          {% if equipe.membros_da_equipe %}
+          <div class="proj-team-grid">
+            {% for func in equipe.membros_da_equipe %}
+            <div class="proj-member-card">
+              <div class="avatar {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ func.usuario_rel.nome[:2].upper() }}</div>
+              <div class="pmc-info">
+                <div class="pmc-name">{{ func.usuario_rel.nome }}</div>
+                <div class="pmc-role">{{ func.cargo }}</div>
+                <div class="pmc-skills">
+                  {% for skill in func.lista_skills[:3] %}
+                  <span class="pmc-skill">{{ skill.nome }}</span>
+                  {% endfor %}
+                </div>
               </div>
             </div>
+            {% endfor %}
           </div>
-          {% endfor %}
+          {% else %}
+          <p style="color:var(--text-muted); font-size:13px; padding: 20px 0;">Nenhum membro vinculado a esta equipe.</p>
+          {% endif %}
         </div>
-        {% else %}
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="card">
+      <div class="card-body">
         <div style="text-align:center; padding:80px 40px; background:rgba(255,255,255,0.02); border-radius:16px; border:1px dashed var(--border);">
           <div style="width:64px; height:64px; background:rgba(139, 92, 246, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; color:var(--purple);">
             <i data-lucide="users" style="width:32px; height:32px;"></i>
           </div>
           <h3 style="margin-bottom:8px;">Nenhuma Equipe Vinculada</h3>
           <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px; max-width:400px; margin-left:auto; margin-right:auto;">
-            Este projeto ainda não possui uma equipe responsável. Vincule uma equipe para começar a delegar tarefas.
+            Este projeto ainda não possui equipes responsáveis. Vincule equipes para começar a delegar tarefas.
           </p>
           <button class="btn btn-primary" onclick="openModal('modal-vincular-equipe')">
             <i data-lucide="plus" style="width:16px; margin-right:8px;"></i>
-            Vincular Equipe Agora
+            Vincular Equipes Agora
           </button>
         </div>
-        {% endif %}
       </div>
     </div>
+    {% endif %}
   </div>
 
   <div id="tab-requisitos" class="tab-pane">
@@ -220,6 +257,286 @@
     </div>
   </div>
 
+  <!-- Aba Documentação -->
+  <div id="tab-documentacao" class="tab-pane">
+    <div class="card">
+      <div class="card-body" style="padding: 32px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+          <div>
+            <h3 style="margin-bottom:4px;">Documentação do Projeto</h3>
+            <p style="color:var(--text-muted); font-size:13px;">Upload e gerenciamento de especificações, manuais e outros arquivos em formato PDF ou DOCX.</p>
+          </div>
+          <div>
+            <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+              <i data-lucide="upload" style="width:16px;"></i>
+              Enviar Documento
+              <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.id }}/upload-documento')">
+            </label>
+          </div>
+        </div>
+
+        <div id="document-status" class="status-indicator" style="display:none;"></div>
+        <div id="document-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
+          <div id="document-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
+        </div>
+
+        {% if documentos %}
+        <div class="docs-grid">
+          {% for doc in documentos %}
+          <div class="doc-card" onclick="window.open('/static/{{ doc.caminho }}', '_blank')">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div class="doc-icon" style="background:{% if doc.tipo_arquivo == 'pdf' %}rgba(239, 68, 68, 0.1);color:#ef4444;{% else %}rgba(59, 130, 246, 0.1);color:#3b82f6;{% endif %}">
+                {% if doc.tipo_arquivo == 'pdf' %}
+                <i data-lucide="file-text"></i>
+                {% else %}
+                <i data-lucide="file-down"></i>
+                {% endif %}
+              </div>
+              <form action="/projeto/delete-documento/{{ doc.id }}" method="POST" onclick="event.stopPropagation();" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir arquivo">
+                  <i data-lucide="trash-2" style="width:16px;"></i>
+                </button>
+              </form>
+            </div>
+            <div class="doc-title" style="word-break: break-all;">{{ doc.nome }}</div>
+            <div class="doc-cat">{{ doc.tipo_arquivo.upper() }}</div>
+            <div class="doc-footer">
+              <div class="doc-meta">
+                <i data-lucide="calendar" style="width:12px;"></i>
+                <span>{{ doc.data_upload.strftime('%d/%m/%Y') }}</span>
+              </div>
+              <a href="/static/{{ doc.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px;">
+                <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:60px 40px; background:rgba(255,255,255,0.01); border-radius:16px; border:1px dashed var(--border);">
+          <div style="width:56px; height:56px; background:rgba(59, 130, 246, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--blue);">
+            <i data-lucide="file" style="width:24px; height:24px;"></i>
+          </div>
+          <h4 style="margin-bottom:6px;">Nenhum Documento</h4>
+          <p style="color:var(--text-muted); font-size:13px; max-width:320px; margin:0 auto 16px;">Upload de relatórios de requisitos, propostas comerciais ou manuais de integração.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Aba Diagramas -->
+  <div id="tab-diagramas" class="tab-pane">
+    <div class="card">
+      <div class="card-body" style="padding: 32px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+          <div>
+            <h3 style="margin-bottom:4px;">Diagramas do Projeto</h3>
+            <p style="color:var(--text-muted); font-size:13px;">Upload de diagramas de arquitetura, UML, fluxogramas de processos, etc.</p>
+          </div>
+          <div>
+            <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+              <i data-lucide="upload" style="width:16px;"></i>
+              Enviar Diagrama
+              <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.id }}/upload-diagrama')">
+            </label>
+          </div>
+        </div>
+
+        <div id="diagram-status" class="status-indicator" style="display:none;"></div>
+        <div id="diagram-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
+          <div id="diagram-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
+        </div>
+
+        {% if diagramas %}
+        <div class="diagrams-grid">
+          {% for diag in diagramas %}
+          <div class="diagram-card">
+            <div class="diagram-preview" onclick="window.open('/static/{{ diag.caminho }}', '_blank')" style="position:relative;">
+              <img src="/static/{{ diag.caminho }}" alt="{{ diag.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+              <form action="/projeto/delete-diagrama/{{ diag.id }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="close-btn" style="background:rgba(0,0,0,0.6); color:#fff; border:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Excluir diagrama">
+                  <i data-lucide="trash-2" style="width:14px;"></i>
+                </button>
+              </form>
+            </div>
+            <div class="diagram-info">
+              <div>
+                <div class="diagram-name">{{ diag.nome }}</div>
+                <div class="diagram-type">Upload em {{ diag.data_upload.strftime('%d/%m/%Y') }}</div>
+              </div>
+              <a href="/static/{{ diag.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
+                <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:60px 40px; background:rgba(255,255,255,0.01); border-radius:16px; border:1px dashed var(--border);">
+          <div style="width:56px; height:56px; background:rgba(168, 85, 247, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--purple);">
+            <i data-lucide="image" style="width:24px; height:24px;"></i>
+          </div>
+          <h4 style="margin-bottom:6px;">Nenhum Diagrama</h4>
+          <p style="color:var(--text-muted); font-size:13px; max-width:320px; margin:0 auto 16px;">Adicione diagramas técnicos para orientar o desenvolvimento da equipe.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Aba Galeria -->
+  <div id="tab-galeria" class="tab-pane">
+    <div class="card">
+      <div class="card-body" style="padding: 32px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+          <div>
+            <h3 style="margin-bottom:4px;">Galeria do Projeto</h3>
+            <p style="color:var(--text-muted); font-size:13px;">Imagens do projeto, capturas de tela das interfaces, mockups e inspirações visuais.</p>
+          </div>
+          <div>
+            <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+              <i data-lucide="upload" style="width:16px;"></i>
+              Enviar Imagem
+              <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.id }}/upload-galeria')">
+            </label>
+          </div>
+        </div>
+
+        <div id="gallery-status" class="status-indicator" style="display:none;"></div>
+        <div id="gallery-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
+          <div id="gallery-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
+        </div>
+
+        {% if galeria %}
+        <div class="diagrams-grid">
+          {% for item in galeria %}
+          <div class="diagram-card">
+            <div class="diagram-preview" onclick="window.open('/static/{{ item.caminho }}', '_blank')" style="position:relative;">
+              <img src="/static/{{ item.caminho }}" alt="{{ item.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+              <form action="/projeto/delete-galeria/{{ item.id }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="close-btn" style="background:rgba(0,0,0,0.6); color:#fff; border:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Excluir imagem">
+                  <i data-lucide="trash-2" style="width:14px;"></i>
+                </button>
+              </form>
+            </div>
+            <div class="diagram-info">
+              <div>
+                <div class="diagram-name">{{ item.nome }}</div>
+                <div class="diagram-type">Upload em {{ item.data_upload.strftime('%d/%m/%Y') }}</div>
+              </div>
+              <a href="/static/{{ item.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
+                <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:60px 40px; background:rgba(255,255,255,0.01); border-radius:16px; border:1px dashed var(--border);">
+          <div style="width:56px; height:56px; background:rgba(16, 185, 129, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--green);">
+            <i data-lucide="gallery-thumbnails" style="width:24px; height:24px;"></i>
+          </div>
+          <h4 style="margin-bottom:6px;">Nenhuma Imagem</h4>
+          <p style="color:var(--text-muted); font-size:13px; max-width:320px; margin:0 auto 16px;">Faça upload de mockups de telas ou capturas de progresso do sistema.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Aba Comentários -->
+  <div id="tab-comentarios" class="tab-pane">
+    <div class="comments-layout">
+      <div class="comment-thread">
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-body" style="padding:24px;">
+            <h4 style="margin-bottom:16px;">Novo Comentário</h4>
+            <form action="/projeto/{{ projeto.id }}/add-comentario" method="POST" class="comment-input-area">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <textarea name="conteudo" required class="comment-textarea" placeholder="Deixe um comentário para a equipe ou para o cliente..."></textarea>
+              <div style="display:flex; justify-content:flex-end;">
+                <button type="submit" class="btn btn-primary" style="display:flex; align-items:center; gap:8px;">
+                  <i data-lucide="send" style="width:14px;"></i> Enviar Comentário
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {% if comentarios %}
+          {% for com in comentarios %}
+          <div class="comment-card" style="margin-bottom:16px;">
+            <div class="comment-header">
+              <div class="comment-meta">
+                {% set avatar_colors = {'admin': 'avatar-red', 'funcionario': 'avatar-purple', 'cliente': 'avatar-blue'} %}
+                <div class="avatar sm {{ avatar_colors.get(com.usuario_rel.tipo, 'avatar-gray') }}">
+                  {{ com.usuario_rel.nome[:2].upper() }}
+                </div>
+                <div>
+                  <span class="comment-author">{{ com.usuario_rel.nome }}</span>
+                  <span class="badge {% if com.usuario_rel.tipo == 'admin' %}badge-red{% elif com.usuario_rel.tipo == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size:10px; margin-left:6px; padding:2px 6px;">
+                    {{ com.usuario_rel.tipo.upper() }}
+                  </span>
+                  <div class="comment-time">{{ com.data.strftime('%d/%m/%Y %H:%M') }}</div>
+                </div>
+              </div>
+              {% if current_user.nivel == 1 or com.usuario_id == current_user.id %}
+              <form action="/projeto/delete-comentario/{{ com.id }}" method="POST" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent; cursor:pointer;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir comentário">
+                  <i data-lucide="trash-2" style="width:16px;"></i>
+                </button>
+              </form>
+              {% endif %}
+            </div>
+            <div class="comment-body">
+              {{ com.conteudo }}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+        <div style="text-align:center; padding:60px 40px; background:rgba(255,255,255,0.01); border-radius:16px; border:1px dashed var(--border);">
+          <div style="width:56px; height:56px; background:rgba(59, 130, 246, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--blue);">
+            <i data-lucide="message-square" style="width:24px; height:24px;"></i>
+          </div>
+          <h4 style="margin-bottom:6px;">Nenhum Comentário</h4>
+          <p style="color:var(--text-muted); font-size:13px; max-width:320px; margin:0 auto 16px;">Inicie a conversa! Deixe um comentário ou feedback sobre o andamento do projeto.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="comment-sidebar">
+        <div class="comment-filter-card">
+          <div class="csf-title">Informações de Contato</div>
+          <div style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-top:12px;">
+            {% if cliente %}
+            <strong>Cliente:</strong> {{ cliente.usuario_rel.nome }}<br>
+            <strong>Empresa:</strong> {{ cliente.empresa }}<br>
+            <strong>Email:</strong> {{ cliente.usuario_rel.email }}<br>
+            {% else %}
+            Sem cliente associado.
+            {% endif %}
+          </div>
+        </div>
+        <div class="comment-stats-card" style="margin-top:16px; background:var(--surface-2); padding:16px; border-radius:12px; border:1px solid var(--border);">
+          <div class="csf-title">Métricas de Comunicação</div>
+          <div style="display:flex; justify-content:space-between; margin-top:12px; margin-bottom:8px; font-size:13px;">
+            <span style="color:var(--text-muted);">Total de Comentários</span>
+            <span style="font-weight:700; color:var(--accent);">{{ comentarios|length }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:13px;">
+            <span style="color:var(--text-muted);">Membros Ativos</span>
+            <span style="font-weight:700; color:var(--blue);">{{ membros|length }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Aba Editar Projeto -->
   <div id="tab-editar" class="tab-pane">
     <div class="card" style="max-width: 800px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-lg);">
@@ -275,13 +592,15 @@
               </select>
             </div>
             <div class="form-group">
-              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Equipe Responsável</label>
-              <select name="equipe_id" class="form-input">
-                <option value="">Nenhuma Equipe</option>
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Equipes Responsáveis</label>
+              <div style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;padding:8px;border:1px solid var(--border);border-radius:8px;">
                 {% for eq in todas_equipes %}
-                <option value="{{ eq.id }}" {% if projeto.equipe_id == eq.id %}selected{% endif %}>{{ eq.nome }}</option>
+                <label class="check-label" style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+                  <input type="checkbox" name="check_equipes" value="{{ eq.id }}" style="accent-color:var(--accent);"
+                    {% if eq in projeto.lista_equipes %}checked{% endif %}> {{ eq.nome }}
+                </label>
                 {% endfor %}
-              </select>
+              </div>
             </div>
           </div>
 
@@ -326,29 +645,29 @@
   </div>
 </div>
 
-<!-- Modal Vincular Equipe -->
+<!-- Modal Vincular Equipes -->
 <div id="modal-vincular-equipe" class="modal-overlay">
   <div class="modal-content" style="max-width: 500px; background: #12141c; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.6);">
     <div class="modal-header" style="padding: 24px 32px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between;">
-      <h3 style="margin:0; font-size: 18px; font-weight: 700; color: #fff;">Vincular Equipe ao Projeto</h3>
+      <h3 style="margin:0; font-size: 18px; font-weight: 700; color: #fff;">Vincular Equipes ao Projeto</h3>
       <button class="close-btn" onclick="closeModal('modal-vincular-equipe')"><i data-lucide="x"></i></button>
     </div>
-    <form action="{{ url_for('admin.vincular_equipe_projeto') }}" method="POST">
+    <form action="{{ url_for('admin.vincular_equipes_projeto') }}" method="POST">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
       <div style="padding: 32px;">
         <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">
-          Selecione uma das equipes abaixo para assumir a responsabilidade por este projeto.
+          Selecione as equipes que serão responsáveis por este projeto.
         </p>
         <div class="form-group">
-          <label class="form-label">Equipe Disponível</label>
-          <div style="position: relative;">
-            <select name="equipe_id" class="form-input" required>
-              <option value="" disabled selected>Escolha uma equipe...</option>
-              {% for eq in todas_equipes %}
-              <option value="{{ eq.id }}">{{ eq.nome }}</option>
-              {% endfor %}
-            </select>
+          <label class="form-label">Equipes Disponíveis</label>
+          <div style="display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;">
+            {% for eq in todas_equipes %}
+            <label class="check-label" style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+              <input type="checkbox" name="check_equipes" value="{{ eq.id }}" style="accent-color:var(--accent);"
+                {% if eq in equipes %}checked{% endif %}> {{ eq.nome }}
+            </label>
+            {% endfor %}
           </div>
         </div>
       </div>
@@ -414,6 +733,78 @@
       }
       localStorage.setItem('activeProjectTab', tabId);
     }
+  }
+
+  function uploadFile(inputElement, fileType, uploadUrl) {
+    const file = inputElement.files[0];
+    if (!file) return;
+
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (fileType === 'document' && !['pdf', 'docx'].includes(ext)) {
+      showStatus('document-status', 'Tipo de arquivo inválido. Apenas PDF e DOCX são aceitos.', 'error');
+      return;
+    }
+    if ((fileType === 'diagram' || fileType === 'gallery') && !['png', 'jpg', 'jpeg', 'gif', 'svg'].includes(ext)) {
+      showStatus(fileType + '-status', 'Tipo de arquivo inválido. Apenas imagens (PNG, JPG, JPEG, GIF, SVG) são aceitas.', 'error');
+      return;
+    }
+
+    const progressContainer = document.getElementById(fileType + '-progress-container');
+    const progressBar = document.getElementById(fileType + '-progress-bar');
+    if (progressContainer && progressBar) {
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      progressBar.textContent = '0%';
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', uploadUrl, true);
+    xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+    xhr.upload.onprogress = function(e) {
+      if (e.lengthComputable) {
+        const percentComplete = Math.round((e.loaded / e.total) * 100);
+        if (progressBar) {
+          progressBar.style.width = percentComplete + '%';
+          progressBar.textContent = percentComplete + '%';
+        }
+      }
+    };
+
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        showStatus(fileType + '-status', 'Upload concluído com sucesso!', 'success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        showStatus(fileType + '-status', 'Erro ao realizar upload: ' + xhr.responseText, 'error');
+        if (progressContainer) progressContainer.style.display = 'none';
+      }
+    };
+
+    xhr.onerror = function() {
+      showStatus(fileType + '-status', 'Erro de rede ao realizar upload.', 'error');
+      if (progressContainer) progressContainer.style.display = 'none';
+    };
+
+    xhr.send(formData);
+  }
+
+  function showStatus(elementId, message, type) {
+    const statusEl = document.getElementById(elementId);
+    if (!statusEl) return;
+    statusEl.textContent = message;
+    statusEl.className = 'status-indicator ' + type;
+    statusEl.style.display = 'block';
+    setTimeout(() => {
+      statusEl.style.display = 'none';
+    }, 5000);
   }
 
   // Restore active tab on load

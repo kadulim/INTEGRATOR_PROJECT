@@ -22,6 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/cliente-dashboard.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/projeto-detalhe.css') }}">
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
@@ -278,6 +279,77 @@
             </div>
           </div>
 
+          <!-- Card de Documentos e Arquivos -->
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-top: 28px;">
+            <h2 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="folder" style="width: 18px; height: 18px; color: var(--blue);"></i>
+              Documentação & Arquivos
+            </h2>
+            
+            {% if documentos %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              {% for doc in documentos %}
+              <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1;">
+                  <div style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: {% if doc.tipo_arquivo == 'pdf' %}rgba(239, 68, 68, 0.1); color: #ef4444;{% else %}rgba(59, 130, 246, 0.1); color: #3b82f6;{% endif %};">
+                    <i data-lucide="{% if doc.tipo_arquivo == 'pdf' %}file-text{% else %}file-down{% endif %}" style="width: 18px; height: 18px;"></i>
+                  </div>
+                  <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ doc.nome }}">{{ doc.nome }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">{{ doc.tipo_arquivo.upper() }} • {{ doc.data_upload.strftime('%d/%m/%Y') }}</div>
+                  </div>
+                </div>
+                <a href="/static/{{ doc.caminho }}" download class="btn btn-ghost" style="padding: 8px; border-radius: 6px; min-width: auto;" title="Baixar arquivo">
+                  <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
+              <i data-lucide="file-warning" style="width: 32px; height: 32px; opacity: 0.3; margin-bottom: 12px;"></i>
+              <div style="font-size: 13px;">Nenhum documento disponível no momento.</div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Card de Diagramas & Protótipos -->
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-top: 28px;">
+            <h2 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="images" style="width: 18px; height: 18px; color: var(--blue);"></i>
+              Diagramas & Galeria
+            </h2>
+            
+            {% set total_midias = diagramas|length + galeria|length %}
+            {% if total_midias > 0 %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;">
+              {% for diag in diagramas %}
+              <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="height: 120px; overflow: hidden; background: #000; position: relative;">
+                  <img src="/static/{{ diag.caminho }}" alt="{{ diag.nome }}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+                  <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px;">Diagrama</span>
+                </div>
+                <div style="padding: 10px; font-size: 12px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ diag.nome }}</div>
+              </div>
+              {% endfor %}
+              {% for item in galeria %}
+              <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="height: 120px; overflow: hidden; background: #000; position: relative;">
+                  <img src="/static/{{ item.caminho }}" alt="{{ item.nome }}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+                  <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px;">Galeria</span>
+                </div>
+                <div style="padding: 10px; font-size: 12px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ item.nome }}</div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
+              <i data-lucide="image-off" style="width: 32px; height: 32px; opacity: 0.3; margin-bottom: 12px;"></i>
+              <div style="font-size: 13px;">Nenhuma imagem ou diagrama disponível no momento.</div>
+            </div>
+            {% endif %}
+          </div>
+
         </div>
 
         <!-- Coluna da Direita (Equipe & Feedback) -->
@@ -287,15 +359,16 @@
           <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
             <h2 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
               <i data-lucide="users" style="width: 18px; height: 18px; color: var(--blue);"></i>
-              Equipe CoByte Alocada
+              Equipes CoByte Alocadas
             </h2>
             
-            {% if projeto.equipe_rel %}
-            <div style="margin-bottom: 16px;">
-              <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Nome da Equipe: {{ projeto.equipe_rel.nome }}</div>
+            {% if projeto.lista_equipes %}
+            {% for eq in projeto.lista_equipes %}
+            <div style="margin-bottom: 16px; {% if not loop.last %}padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px;{% endif %}">
+              <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">{{ eq.nome }}</div>
               
               <div style="display: flex; flex-direction: column; gap: 12px;">
-                {% for membro in projeto.equipe_rel.membros_da_equipe %}
+                {% for membro in eq.membros_da_equipe %}
                 <div style="display: flex; align-items: center; gap: 12px; padding: 8px 0;">
                   <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">
                     {{ membro.usuario_rel.nome[:2].upper() }}
@@ -310,6 +383,7 @@
                 {% endfor %}
               </div>
             </div>
+            {% endfor %}
             {% else %}
             <div style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
               <i data-lucide="users-round" style="width: 32px; height: 32px; opacity: 0.3; margin-bottom: 12px;"></i>
@@ -318,59 +392,59 @@
             {% endif %}
           </div>
 
-          <!-- Card de Feedbacks & Histórico -->
+          <!-- Card de Comentários & Comunicação -->
           <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
             <h2 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-              <i data-lucide="message-square-plus" style="width: 18px; height: 18px; color: var(--blue);"></i>
-              Canal de Feedbacks
+              <i data-lucide="message-square" style="width: 18px; height: 18px; color: var(--blue);"></i>
+              Canal de Comentários
             </h2>
 
-            <!-- Enviar Novo Feedback -->
-            <form action="{{ url_for('cliente_feedback', projeto_id=projeto.id) }}" method="POST" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+            <!-- Enviar Novo Comentário -->
+            <form action="/projeto/{{ projeto.id }}/add-comentario" method="POST" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div>
-                <label style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Tipo de Feedback</label>
-                <select name="feedback_tipo" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); outline: none; font-size: 13.5px; font-family: var(--font);">
-                  <option value="Geral">Feedback Geral</option>
-                  <option value="Aprovação">Aprovação de Etapa</option>
-                  <option value="Revisão">Solicitação de Revisão</option>
-                  <option value="Elogio">Elogio à Equipe</option>
-                  <option value="Urgente">Chamado Urgente</option>
-                </select>
+                <label style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Nova Mensagem</label>
+                <textarea name="conteudo" required placeholder="Digite aqui o que você gostaria de comunicar à equipe..." style="width: 100%; height: 100px; padding: 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); outline: none; font-size: 13.5px; font-family: var(--font); resize: none;"></textarea>
               </div>
-              <div>
-                <label style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Mensagem</label>
-                <textarea name="comentario" required placeholder="Digite aqui o que você gostaria de comunicar à equipe..." style="width: 100%; height: 100px; padding: 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); outline: none; font-size: 13.5px; font-family: var(--font); resize: none;"></textarea>
-              </div>
-              <button type="submit" class="btn btn-blue" style="width: 100%; padding: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13.5px;">
-                <i data-lucide="send" style="width: 16px; height: 16px;"></i> Enviar Feedback
+              <button type="submit" class="btn btn-blue" style="width: 100%; padding: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13.5px; border: none; cursor: pointer;">
+                <i data-lucide="send" style="width: 16px; height: 16px;"></i> Enviar Mensagem
               </button>
             </form>
 
-            <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; padding-top: 16px; border-top: 1px solid var(--border);">Histórico de Feedbacks</div>
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; padding-top: 16px; border-top: 1px solid var(--border);">Mensagens Recentes</div>
             
             <div style="display: flex; flex-direction: column; gap: 14px; max-height: 350px; overflow-y: auto; padding-right: 4px;">
-              {% for log in logs %}
-                {% if log.tipo == 'feedback' %}
+              {% for com in comentarios %}
                 <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                     <div style="display: flex; align-items: center; gap: 6px;">
-                      <span class="avatar xs avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600; width: 22px; height: 22px; font-size: 10px;">CL</span>
-                      <span style="font-size: 12.5px; font-weight: 600; color: var(--text-primary);">Você</span>
+                      {% set avatar_colors = {'admin': 'avatar-red', 'funcionario': 'avatar-purple', 'cliente': 'avatar-blue'} %}
+                      <div class="avatar sm {{ avatar_colors.get(com.usuario_rel.tipo, 'avatar-gray') }}" style="width: 22px; height: 22px; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                        {{ com.usuario_rel.nome[:2].upper() }}
+                      </div>
+                      <div>
+                        <span style="font-size: 12.5px; font-weight: 600; color: var(--text-primary);">
+                          {% if com.usuario_id == current_user.id %}Você{% else %}{{ com.usuario_rel.nome }}{% endif %}
+                        </span>
+                        <span class="badge {% if com.usuario_rel.tipo == 'admin' %}badge-red{% elif com.usuario_rel.tipo == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size: 8px; padding: 1px 4px; margin-left: 4px;">
+                          {{ com.usuario_rel.tipo.upper() }}
+                        </span>
+                      </div>
                     </div>
-                    {% set badge_class = 'ft-Geral' %}
-                    {% if 'Aprovação' in log.acao %}{% set badge_class = 'ft-Aprovação' %}
-                    {% elif 'Revisão' in log.acao %}{% set badge_class = 'ft-Revisão' %}
-                    {% elif 'Elogio' in log.acao %}{% set badge_class = 'ft-Elogio' %}
-                    {% elif 'Urgente' in log.acao %}{% set badge_class = 'ft-Urgente' %}
+                    {% if current_user.nivel == 1 or com.usuario_id == current_user.id %}
+                    <form action="/projeto/delete-comentario/{{ com.id }}" method="POST" style="display:inline;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent; cursor:pointer;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir comentário">
+                        <i data-lucide="trash-2" style="width:14px;"></i>
+                      </button>
+                    </form>
                     {% endif %}
-                    <span class="feedback-tipo-badge {{ badge_class }}" style="font-size: 9.5px; padding: 2px 8px; border-radius: 12px;">{{ log.acao.replace('Feedback - ', '') }}</span>
                   </div>
-                  <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; word-break: break-word;">{{ log.descricao }}</div>
-                  <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px; text-align: right;">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
+                  <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; word-break: break-word;">{{ com.conteudo }}</div>
+                  <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px; text-align: right;">{{ com.data.strftime('%d/%m/%Y %H:%M') }}</div>
                 </div>
-                {% endif %}
               {% else %}
-              <div style="text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: 12.5px;">Você ainda não enviou nenhum feedback para este projeto.</div>
+              <div style="text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: 12.5px;">Nenhum comentário cadastrado para este projeto.</div>
               {% endfor %}
             </div>
           </div>
