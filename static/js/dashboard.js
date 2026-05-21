@@ -83,10 +83,10 @@ function renderModernDonut() {
     const data = (window.DASHBOARD_STATUS && window.DASHBOARD_STATUS.length > 0)
         ? window.DASHBOARD_STATUS.filter(d => d.val > 0 && d.label !== 'Cancelado' && d.label !== 'Cancelados')
         : [
-            { label: 'Em andamento', val: 1, color: '#3b82f6' },
+            { label: 'Em andamento', val: 1, color: '#f59e0b' },
             { label: 'Concluídos', val: 0, color: '#10b981' },
-            { label: 'Pausado', val: 0, color: '#f59e0b' },
-            { label: 'Cancelados', val: 0, color: '#ef4444' }
+            { label: 'Pausado', val: 0, color: '#FF5577' },
+            { label: 'Cancelados', val: 0, color: '#ec0000' }
         ];
 
     const total = data.reduce((acc, d) => acc + d.val, 0);

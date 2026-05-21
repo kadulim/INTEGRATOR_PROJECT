@@ -27,7 +27,7 @@
                     </div>
                     <div>
                         <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px;">Status</div>
-                        <span class="badge {% if p.status == 'Em andamento' %}badge-blue{% elif p.status == 'Concluído' %}badge-green{% else %}badge-yellow{% endif %}" style="font-size: 11px;">{{ p.status }}</span>
+                        <span class="badge {% if p.status == 'Em andamento' %}badge-em-andamento{% elif p.status == 'Concluído' %}badge-concluido{% elif p.status == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 11px;">{{ p.status }}</span>
                     </div>
                     <div>
                         <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px;">Prazo Final</div>

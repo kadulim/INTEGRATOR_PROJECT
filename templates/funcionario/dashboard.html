@@ -279,9 +279,38 @@
     overflow: hidden;
     height: 140px;
     cursor: pointer;
-    transition: border-color 0.2s, transform 0.2s;
+    transition: border-color 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+    animation: cardSlideIn 0.6s ease-out forwards;
+    opacity: 0;
   }
-  .scard:hover { border-color: var(--b2); transform: translateY(-2px); }
+  .stats-row .scard:nth-child(1) { animation-delay: 0.1s; }
+  .stats-row .scard:nth-child(2) { animation-delay: 0.2s; }
+  .stats-row .scard:nth-child(3) { animation-delay: 0.3s; }
+  .stats-row .scard:nth-child(4) { animation-delay: 0.4s; }
+  @keyframes cardSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .scard:hover { 
+    border-color: var(--b2); 
+    transform: translateY(-4px); 
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+  }
+  .scard:hover .scard-waves {
+    opacity: 1 !important;
+  }
+  .scard:hover .wave1 {
+    animation-duration: 6s !important;
+  }
+  .scard:hover .wave2 {
+    animation-duration: 4s !important;
+  }
 
   .scard-top { display: flex; justify-content: space-between; align-items: flex-start; }
   .scard-lbl { font-size: 10.5px; font-weight: 700; color: var(--tx2); letter-spacing: 0.8px; text-transform: uppercase; }
@@ -300,29 +329,54 @@
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 24px; overflow: hidden;
-    pointer-events: none; opacity: 0.7;
+    pointer-events: none; opacity: 0.5;
     border-bottom-left-radius: var(--r);
     border-bottom-right-radius: var(--r);
+    transition: opacity 0.4s ease-out;
   }
   .scard-waves svg { width: 100%; height: 100%; display: block; }
   
   .wave1 {
     animation: waveMotion1 12s linear infinite;
+    transform-origin: center;
   }
   .wave2 {
     animation: waveMotion2 8s linear infinite;
-    opacity: 0.5;
+    opacity: 0.65;
+    transform-origin: center;
   }
 
   @keyframes waveMotion1 {
-    0% { d: path("M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"); }
-    50% { d: path("M0,12 Q30,18 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"); }
-    100% { d: path("M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"); }
+    0% { transform: translateX(0); }
+    100% { transform: translateX(60px); }
   }
   @keyframes waveMotion2 {
-    0% { d: path("M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"); }
-    50% { d: path("M0,8 Q30,0 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"); }
-    100% { d: path("M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"); }
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-60px); }
+  }
+
+  /* Shine effect on cards */
+  .scard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .scard:hover::before {
+    left: 100%;
+    opacity: 1;
+    animation: shine 0.6s ease-in-out;
+  }
+  @keyframes shine {
+    0% { left: -100%; opacity: 0; }
+    50% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
   }
 
   /* ─── BOTTOM GRID ─── */

@@ -54,9 +54,10 @@ def dashboard():
 
     # ── Status dos Projetos (donut) ──────────────────────────────────
     status_cores = {
-        'Em andamento': '#3b82f6',
+        'Em andamento': '#f59e0b',
         'Concluído':    '#10b981',
-        'Pausado':      '#f59e0b',
+        'Pausado':      '#FF5577',
+        'Cancelado':    '#ec0000'
     }
     status_rows = database.session.query(
         Projeto.status, database.func.count(Projeto.id)

@@ -63,9 +63,9 @@ def dashboard():
     
     # ── Status dos Projetos (Donut) ──────────────────
     status_cores = {
-        'Em andamento': '#3b82f6',
+        'Em andamento': '#f59e0b',
         'Concluído':    '#10b981',
-        'Pausado':      '#f59e0b',
+        'Pausado':      '#FF5577',
     }
     status_counts = {s: 0 for s in status_cores.keys()}
     for p in projetos:

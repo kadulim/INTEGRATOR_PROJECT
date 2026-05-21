@@ -22,6 +22,7 @@
     --ac-d: rgba(0, 207, 255, 0.10);
     --ac-d2: rgba(0, 207, 255, 0.06);
     --gr: #00E5A0;
+    --gr-conclu:#10b981;
     --gr-d: rgba(0, 229, 160, 0.10);
     --am: #FFB020;
     --am-d: rgba(255, 176, 32, 0.10);
@@ -34,6 +35,7 @@
     --rl: 16px;
     --vi: #A855F7;
     --vi-d: rgba(168, 85, 247, 0.10);
+    --am-anda: #f59e0b;
   }
 
   .light-mode {
@@ -477,24 +479,47 @@
     padding: 30px 26px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; cursor: pointer; gap: 14px;
-    transition: border-color 0.18s, transform 0.18s;
+    transition: border-color 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
     position: relative; overflow: hidden;
     min-height: 160px;
+    animation: slideInUp 0.5s ease-out forwards;
+    opacity: 0;
   }
-  .mcard:hover { border-color: var(--b2); transform: translateY(-2px); }
+  .mcard:nth-child(1) { animation-delay: 0.1s; }
+  .mcard:nth-child(2) { animation-delay: 0.2s; }
+  .mcard:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .mcard:hover { 
+    border-color: var(--b2); 
+    transform: translateY(-8px); 
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  }
 
   .mcard::before {
     content: ''; position: absolute;
     top: -50px; left: 50%; transform: translateX(-50%);
     width: 160px; height: 160px;
     border-radius: 50%;
-    opacity: 0.07;
+    opacity: 0.1;
     pointer-events: none;
+    transition: opacity 0.3s;
   }
-  .mcard-ac::before { background: var(--ac); }
-  .mcard-gr::before { background: var(--gr); }
-  .mcard-am::before { background: var(--am); }
-  .mcard-rd::before { background: #ef4444; }
+  .mcard:hover::before {
+    opacity: 0.18;
+  }
+  .mcard-ac::before { background: var(--am-anda); }
+  .mcard-gr::before { background: var(--gr-conclu); }
+  .mcard-am::before { background: var(--rd); }
+  .mcard-rd::before { background: #ec0000; }
 
   /* Default / Dark Mode Monthly Cards & latest-change-box border definitions */
   .latest-change-box {
@@ -508,28 +533,44 @@
     transition: all 0.2s;
   }
   .mcard-gr {
-    border-color: rgba(0, 229, 160, 0.08) !important;
+    border-color: rgba(16, 185, 129, 0.15) !important;
   }
   .mcard-ac {
-    border-color: rgba(0, 207, 255, 0.14) !important;
+    border-color: rgba(245, 158, 11, 0.15) !important;
     background: linear-gradient(160deg, #0d1a2e 0%, #0B1220 100%) !important;
   }
   .mcard-am {
-    border-color: rgba(255, 176, 32, 0.08) !important;
+    border-color: rgba(255, 85, 119, 0.15) !important;
   }
   .mcard-rd {
-    border-color: rgba(239, 68, 68, 0.08) !important;
+    border-color: rgba(236, 0, 0, 0.15) !important;
   }
 
   .mcard-lbl {
     font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px;
     text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .mcard:hover .mcard-lbl {
+    letter-spacing: 2px;
   }
   .mcard-num {
     font-family: 'JetBrains Mono', monospace;
     font-size: 52px; font-weight: 600; line-height: 1;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .mcard-sub { font-size: 11.5px; color: var(--tx2); }
+  .mcard:hover .mcard-num {
+    font-size: 58px;
+    transform: scale(1.05);
+  }
+  .mcard-sub { 
+    font-size: 11.5px; 
+    color: var(--tx2); 
+    transition: all 0.3s;
+  }
+  .mcard:hover .mcard-sub {
+    color: var(--tx);
+  }
 
   /* ─── DONUT ANIMATION ─── */
   .ring-track { opacity: 0.12; }
@@ -606,6 +647,14 @@
     overflow-y: auto;
     flex: 1;
   }
+  /* ─── DONUT SEGMENTOS ─── */
+.seg-path {
+  transition: filter 0.2s ease, transform 0.2s ease;
+  transform-origin: 130px 130px;
+  cursor: pointer;
+}
+.seg-path:hover  { filter: brightness(1.35); transform: scale(1.04); }
+.seg-path.active { filter: brightness(1.5);  transform: scale(1.07); }
 </style>
 {% endblock %}
 
@@ -647,33 +696,35 @@
       </div>
 
       <!-- Center: Donut -->
-      <div class="donut-wrap">
-        <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260">
-          <!-- Track rings -->
-          <circle class="ring-track" cx="130" cy="130" r="104" fill="none" stroke="#ffffff" stroke-width="16"/>
-          <circle class="ring-track" cx="130" cy="130" r="80" fill="none" stroke="#ffffff" stroke-width="16"/>
-          <circle class="ring-track" cx="130" cy="130" r="56" fill="none" stroke="#ffffff" stroke-width="16"/>
-
-          <!-- Em andamento (Azul/Cyan) r=104 -> circ=653.45 -->
-          <circle id="ringProgress" class="ring-fill-seg" cx="130" cy="130" r="104"
-            fill="none" stroke="var(--ac)" stroke-width="16" stroke-linecap="round"
-            stroke-dasharray="653.45 653.45" stroke-dashoffset="653.45"/>
-            
-          <!-- Concluído (Verde) r=80 -> circ=502.65 -->
-          <circle id="ringConcluido" class="ring-fill-seg" cx="130" cy="130" r="80"
-            fill="none" stroke="var(--gr)" stroke-width="16" stroke-linecap="round"
-            stroke-dasharray="502.65 502.65" stroke-dashoffset="502.65"/>
-            
-          <!-- Pausado (Amarelo/Laranja) r=56 -> circ=351.85 -->
-          <circle id="ringPausado" class="ring-fill-seg" cx="130" cy="130" r="56"
-            fill="none" stroke="var(--am)" stroke-width="16" stroke-linecap="round"
-            stroke-dasharray="351.85 351.85" stroke-dashoffset="351.85"/>
-        </svg>
-        <div class="donut-center">
-          <div class="d-num" id="totalCount">0</div>
-          <div class="d-lbl">Total</div>
-        </div>
-      </div>
+<!-- Center: Donut -->
+<div class="donut-wrap" id="donutWrap">
+  <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260" style="overflow:visible;">
+    <!-- Anel de pulso animado -->
+    <circle id="pulseRing" cx="130" cy="130" r="92"
+      fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+    <!-- Track de fundo -->
+    <circle cx="130" cy="130" r="92"
+      fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="22"/>
+    <!-- Segmentos e gaps gerados por JS -->
+    <g id="segsGroup"></g>
+    <g id="gapsGroup"></g>
+  </svg>
+  <div class="donut-center">
+    <div class="d-num" id="totalCount">0</div>
+    <div class="d-lbl">Total</div>
+  </div>
+  <!-- Tooltip flutuante -->
+  <div id="donut-tooltip" style="
+    position:absolute; background:var(--s2); border:1px solid var(--b2);
+    border-radius:8px; padding:7px 12px; font-family:'Outfit',sans-serif;
+    pointer-events:none; opacity:0; transition:opacity 0.18s ease;
+    white-space:nowrap; z-index:10; top:50%; left:50%;
+    transform:translate(-50%, 68px);">
+    <div id="tt-name" style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;"></div>
+    <div id="tt-val" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--tx);margin-top:1px;"></div>
+    <div id="tt-pct" style="font-size:10px;color:var(--tx2);"></div>
+  </div>
+</div>
 
       <!-- Right: breakdown stats -->
       <div class="hero-right">
@@ -681,35 +732,35 @@
 
         <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('em_andamento')">
           <div class="bs-left">
-            <div class="bs-bar" style="background:var(--ac);box-shadow:0 0 10px rgba(0,207,255,0.4);"></div>
+            <div class="bs-bar" style="background:var(--am-anda);box-shadow:0 0 10px rgba(245,158,11,0.4);"></div>
             <div>
               <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Em andamento</div>
               <div class="bs-name">Projetos ativos</div>
             </div>
           </div>
-          <div class="bs-num" style="color:var(--ac);" id="breakdownAndamento">0</div>
+          <div class="bs-num" style="color:var(--am-anda);" id="breakdownAndamento">0</div>
         </div>
 
         <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('concluido')">
           <div class="bs-left">
-            <div class="bs-bar" style="background:var(--gr);box-shadow:0 0 10px rgba(0,229,160,0.3);"></div>
+            <div class="bs-bar" style="background:var(--gr-conclu);box-shadow:0 0 10px rgba(16,185,129,0.3);"></div>
             <div>
               <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Concluído</div>
               <div class="bs-name">Finalizados</div>
             </div>
           </div>
-          <div class="bs-num" style="color:var(--gr);" id="breakdownConcluido">0</div>
+          <div class="bs-num" style="color:var(--gr-conclu);" id="breakdownConcluido">0</div>
         </div>
 
         <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('pausado')">
           <div class="bs-left">
-            <div class="bs-bar" style="background:var(--am);box-shadow:0 0 10px rgba(255,176,32,0.3);"></div>
+            <div class="bs-bar" style="background:var(--rd);box-shadow:0 0 10px rgba(255,85,119,0.3);"></div>
             <div>
               <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Pausado</div>
               <div class="bs-name">Parados</div>
             </div>
           </div>
-          <div class="bs-num" style="color:var(--am);" id="breakdownPausado">0</div>
+          <div class="bs-num" style="color:var(--rd);" id="breakdownPausado">0</div>
         </div>
       </div>
     </div>
@@ -887,20 +938,20 @@
     <div class="monthly">
 
       <div class="mcard mcard-gr" onclick="openProjectsModal('concluido')">
-          <div class="mcard-lbl" style="color:var(--gr);">Concluídos</div>
-          <div class="mcard-num" style="color:var(--gr);">{{ current_month_projects.concluido|length }}</div>
+          <div class="mcard-lbl" style="color:var(--gr-conclu);">Concluídos</div>
+          <div class="mcard-num" style="color:var(--gr-conclu);">{{ current_month_projects.concluido|length }}</div>
           <div class="mcard-sub">projetos finalizados</div>
       </div>
 
       <div class="mcard mcard-ac" onclick="openProjectsModal('em_andamento')">
-        <div class="mcard-lbl" style="color:var(--ac);">Desenvolvimento</div>
-        <div class="mcard-num" style="color:var(--ac);">{{ current_month_projects.em_andamento|length }}</div>
+        <div class="mcard-lbl" style="color:var(--am-anda);">Desenvolvimento</div>
+        <div class="mcard-num" style="color:var(--am-anda);">{{ current_month_projects.em_andamento|length }}</div>
         <div class="mcard-sub">projeto em andamento</div>
       </div>
 
       <div class="mcard mcard-am" onclick="openProjectsModal('pausado')">
-        <div class="mcard-lbl" style="color:var(--am);">Pausado</div>
-        <div class="mcard-num" style="color:var(--am);">{{ current_month_projects.pausado|length }}</div>
+        <div class="mcard-lbl" style="color:var(--rd);">Pausado</div>
+        <div class="mcard-num" style="color:var(--rd);">{{ current_month_projects.pausado|length }}</div>
         <div class="mcard-sub">parados</div>
       </div>
 
@@ -964,76 +1015,117 @@
 
   // Donut Chart logic
   window.addEventListener('load', () => {
-    // Parse dynamic values
-    const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
-    const concluidoVal = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
-    const pausadoVal = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
-    const totalVal = emAndamentoVal + concluidoVal + pausadoVal;
+  const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
+  const concluidoVal   = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
+  const pausadoVal     = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
+  
+  document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
+  document.getElementById('breakdownConcluido').textContent = concluidoVal;
+  document.getElementById('breakdownPausado').textContent   = pausadoVal;
 
-    // Set text elements
-    if (document.getElementById('legendAndamento')) document.getElementById('legendAndamento').textContent = emAndamentoVal;
-    if (document.getElementById('legendConcluido')) document.getElementById('legendConcluido').textContent = concluidoVal;
-    if (document.getElementById('legendPausado')) document.getElementById('legendPausado').textContent = pausadoVal;
+  const SEGS = statusData.filter(s => s.val > 0).map(s => ({
+    label: s.label,
+    val: s.val,
+    color: s.color
+  }));
+  
+  if (SEGS.length === 0) {
+    document.getElementById('totalCount').textContent = '0';
+    return;
+  }
 
-    document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
-    document.getElementById('breakdownConcluido').textContent = concluidoVal;
-    document.getElementById('breakdownPausado').textContent = pausadoVal;
+  const totalVal = SEGS.reduce((sum, s) => sum + s.val, 0);
 
-    // Calculate and animate Completion Rate
-    const completionRate = totalVal > 0 ? Math.round((concluidoVal / totalVal) * 100) : 0;
-    const rateText = document.getElementById('completionRateText');
-    const rateBar = document.getElementById('completionRateBar');
-    if (rateText) rateText.textContent = completionRate + '%';
-    if (rateBar) {
-      setTimeout(() => {
-        rateBar.style.width = completionRate + '%';
-      }, 500);
+  const CX = 130, CY = 130, R = 92, SW = 22;
+  const CIRC = 2 * Math.PI * R;
+  const GAP_DEG = 2.8;
+  const GAP_ARC = (GAP_DEG / 360) * CIRC;
+  const segsActive = SEGS.filter(s => s.val > 0).length;
+  const availArc = CIRC - (segsActive > 1 ? segsActive * GAP_ARC : 0);
+
+  const segsGroup = document.getElementById('segsGroup');
+  const gapsGroup = document.getElementById('gapsGroup');
+  let builtPaths = [];
+  let startAngle = -Math.PI / 2;
+
+  function polarToXY(angle, radius) {
+    return { x: CX + radius * Math.cos(angle), y: CY + radius * Math.sin(angle) };
+  }
+
+  function describeArc(startAng, endAng) {
+    const ro = R + SW / 2, ri = R - SW / 2;
+    const s1 = polarToXY(startAng, ro), e1 = polarToXY(endAng, ro);
+    const s2 = polarToXY(endAng, ri),   e2 = polarToXY(startAng, ri);
+    const large = (endAng - startAng) > Math.PI ? 1 : 0;
+    return `M ${s1.x} ${s1.y} A ${ro} ${ro} 0 ${large} 1 ${e1.x} ${e1.y} L ${s2.x} ${s2.y} A ${ri} ${ri} 0 ${large} 0 ${e2.x} ${e2.y} Z`;
+  }
+
+  function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function animatePathGrow(pathEl, startAng, endAng, delay, duration) {
+    setTimeout(() => {
+      const steps = 60;
+      let step = 0;
+      const timer = setInterval(() => {
+        step++;
+        const t = easeOutQuart(step / steps);
+        pathEl.setAttribute('d', describeArc(startAng, startAng + (endAng - startAng) * t));
+        pathEl.setAttribute('opacity', String(Math.min(t * 2, 1)));
+        if (step >= steps) clearInterval(timer);
+      }, duration / steps);
+    }, delay);
+  }
+
+  SEGS.forEach((seg, idx) => {
+    if (seg.val <= 0) return;
+    const pct = seg.val / totalVal;
+    const sweepAngle = (pct * availArc / CIRC) * 2 * Math.PI;
+    const endAngle = startAngle + sweepAngle;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', describeArc(startAngle, startAngle + 0.001));
+    path.setAttribute('fill', seg.color);
+    path.setAttribute('opacity', '0');
+    path.setAttribute('class', 'seg-path');
+
+    path.addEventListener('mouseenter', () => {
+      const tt = document.getElementById('donut-tooltip');
+      document.getElementById('tt-name').textContent = seg.label;
+      document.getElementById('tt-name').style.color = seg.color;
+      document.getElementById('tt-val').textContent = seg.val + (seg.val === 1 ? ' projeto' : ' projetos');
+      document.getElementById('tt-pct').textContent = Math.round(pct * 100) + '% do total';
+      if (tt) tt.style.opacity = '1';
+    });
+    path.addEventListener('mouseleave', () => {
+      const tt = document.getElementById('donut-tooltip');
+      if (tt) tt.style.opacity = '0';
+    });
+    path.addEventListener('click', () => {
+      const isActive = path.classList.contains('active');
+      document.querySelectorAll('.seg-path').forEach(p => p.classList.remove('active'));
+      if (!isActive) path.classList.add('active');
+    });
+
+    segsGroup.appendChild(path);
+    animatePathGrow(path, startAngle, endAngle, 300 + builtPaths.length * 220, 800);
+    builtPaths.push({ path, startAngle, endAngle });
+
+    if (segsActive > 1) {
+      const gapStart = endAngle;
+      const gapEnd   = gapStart + (GAP_ARC / CIRC) * 2 * Math.PI;
+      const gapPath  = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      gapPath.setAttribute('d', describeArc(gapStart, gapEnd));
+      gapPath.setAttribute('fill', 'var(--bg)');
+      gapPath.setAttribute('opacity', '0');
+      gapsGroup.appendChild(gapPath);
+      setTimeout(() => gapPath.setAttribute('opacity', '1'), 300 + builtPaths.length * 220 + 700);
+      startAngle = gapEnd;
+    } else {
+      startAngle = endAngle;
     }
+  });
 
-    // SVG elements
-    const ringProgress = document.getElementById('ringProgress');
-    const ringConcluido = document.getElementById('ringConcluido');
-    const ringPausado = document.getElementById('ringPausado');
-
-    const circProgress = 653.45;
-    const circConcluido = 502.65;
-    const circPausado = 351.85;
-
-    ringProgress.style.transform = 'rotate(-90deg)';
-    ringConcluido.style.transform = 'rotate(-90deg)';
-    ringPausado.style.transform = 'rotate(-90deg)';
-
-    function animarAnel(el, pct, circ, atraso) {
-      if (!el) return;
-      if (pct <= 0) {
-        el.style.opacity = '0'; 
-        return;
-      }
-      el.style.opacity = '1';
-      setTimeout(() => {
-        const inicio = performance.now();
-        const duracao = 1000;
-        function passo(agora) {
-          const t = Math.min((agora - inicio) / duracao, 1);
-          const ease = 1 - Math.pow(1 - t, 4);
-          const targetOffset = circ - (circ * pct);
-          const atualOffset = circ - ((circ - targetOffset) * ease);
-          el.style.strokeDashoffset = atualOffset.toFixed(1);
-          if (t < 1) requestAnimationFrame(passo);
-        }
-        requestAnimationFrame(passo);
-      }, atraso);
-    }
-
-    const pctAndamento = totalVal > 0 ? (emAndamentoVal / totalVal) : 0;
-    const pctConcluido = totalVal > 0 ? (concluidoVal / totalVal) : 0;
-    const pctPausado   = totalVal > 0 ? (pausadoVal / totalVal) : 0;
-
-    animarAnel(ringProgress, pctAndamento, circProgress, 300);
-    animarAnel(ringConcluido, pctConcluido, circConcluido, 600);
-    animarAnel(ringPausado, pctPausado, circPausado, 900);
-
-    // Animate total counter
+  // Animate total counter
     const el = document.getElementById('totalCount');
     let count = 0;
     const target = totalVal;

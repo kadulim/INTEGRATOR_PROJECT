@@ -5,9 +5,10 @@
 // ── Helpers ────────────────────────────────────────────────
 function statusBadge(status) {
   const map = {
-    'Em andamento': 'badge-blue',
-    'Concluído':    'badge-green',
-    'Pausado':      'badge-yellow',
+    'Em andamento': 'badge-em-andamento',
+    'Concluído':    'badge-concluido',
+    'Pausado':      'badge-pausado',
+    'Cancelado':    'badge-cancelado',
   };
   return `<span class="badge ${map[status] || 'badge-gray'}">${status}</span>`;
 }

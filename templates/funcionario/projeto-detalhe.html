@@ -18,8 +18,8 @@
         <div>
             <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">{{ projeto.nome }}</h2>
             <div style="display: flex; gap: 12px; align-items: center;">
-                {% set badge_status = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow', 'Cancelado': 'badge-red'} %}
-                <span class="badge {{ badge_status.get(projeto.status, 'badge-blue') }}">{{ projeto.status }}</span>
+                {% set badge_status = {'Em andamento': 'badge-em-andamento', 'Concluído': 'badge-concluido', 'Pausado': 'badge-pausado', 'Cancelado': 'badge-cancelado'} %}
+                <span class="badge {{ badge_status.get(projeto.status, 'badge-gray') }}">{{ projeto.status }}</span>
                 <span style="font-size: 13px; color: var(--text-muted);">Prazo: <strong>{{ projeto.prazo }}</strong></span>
             </div>
         </div>

@@ -15,9 +15,9 @@
     <div class="proj-header-info">
       <div class="proj-header-name">{{ projeto.nome }}</div>
       <div class="proj-header-meta">
-        {% set badge_status = {'Em andamento': 'badge-blue', 'Concluído': 'badge-green', 'Pausado': 'badge-yellow', 'Cancelado': 'badge-red'} %}
+        {% set badge_status = {'Em andamento': 'badge-em-andamento', 'Concluído': 'badge-concluido', 'Pausado': 'badge-pausado', 'Cancelado': 'badge-cancelado'} %}
         {% set badge_prioridade = {'Alta': 'badge-red', 'Média': 'badge-yellow', 'Baixa': 'badge-green'} %}
-        <span class="badge {{ badge_status.get(projeto.status, 'badge-blue') }}">{{ projeto.status }}</span>
+        <span class="badge {{ badge_status.get(projeto.status, 'badge-gray') }}">{{ projeto.status }}</span>
         {% if projeto.prioridade %}
         <span class="badge {{ badge_prioridade.get(projeto.prioridade, 'badge-blue') }}">{{ projeto.prioridade }}</span>
         {% endif %}

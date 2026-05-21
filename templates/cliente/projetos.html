@@ -213,7 +213,7 @@
             <div class="cpc-accent-bar" style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--blue);"></div>
             <h3 class="cpc-title" style="font-size: 16px; font-weight: 700; margin-bottom: 8px; padding-left: 8px; color: var(--text-primary);">{{ projeto.nome }}</h3>
             <div class="cpc-badges" style="padding-left: 8px;">
-              <span class="badge {% if projeto.status == 'Em andamento' %}badge-blue{% elif projeto.status == 'Concluído' %}badge-green{% else %}badge-yellow{% endif %}" style="font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">{{ projeto.status }}</span>
+              <span class="badge {% if projeto.status == 'Em andamento' %}badge-em-andamento{% elif projeto.status == 'Concluído' %}badge-concluido{% elif projeto.status == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">{{ projeto.status }}</span>
             </div>
           </div>
           

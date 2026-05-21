@@ -1,6 +1,7 @@
 import os
 import uuid
 import base64
+import tempfile
 from pathlib import Path
 
 from flask import Blueprint, request, jsonify
@@ -21,8 +22,8 @@ from analyzer.metrics import (
 from utils.github import parse_repo_url, list_repo_files, get_file_content
 
 analyze_bp = Blueprint("analyze", __name__)
-UPLOAD_DIR = Path("/tmp/codeflow-uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
+UPLOAD_DIR = Path(tempfile.gettempdir()) / "codeflow-uploads"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def build_file_entry(filepath, content):
