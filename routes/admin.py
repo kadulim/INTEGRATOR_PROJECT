@@ -476,32 +476,48 @@ def _gerar_email_cliente(nome):
 # Criar novo cliente (cria Usuario + Cliente)
 # ---------------------------------------------------------------------------
 @admin_bp.route('/add-cliente', methods=['POST'])
+
 def add_cliente():
     nome = request.form.get('nome')
     senha = request.form.get('senha')
     empresa = request.form.get('empresa')
-    email = _gerar_email_cliente(nome)
 
-    if not Usuario.query.filter_by(email=email).first():
-        usuario = Usuario(
-            nome=nome,
-            email=email,
-            senha=generate_password_hash(senha),
-            tipo='cliente',
-            nivel=3
-        )
-        database.session.add(usuario)
-        database.session.flush()
+    base_nome = unicodedata.normalize('NFKD', nome).encode(
+        'ascii', 'ignore'
+    ).decode('utf-8')
 
-        cliente = Cliente(
-            usuario_id=usuario.id,
-            empresa=empresa
-        )
-        database.session.add(cliente)
-        database.session.commit()
+    base_nome = base_nome.lower()
+    base_nome = base_nome.replace(' ', '.')
+    base_nome = re.sub(r'[^a-z0-9.]', '', base_nome)
+
+    email = f'{base_nome}@cobyte_cliente.com'
+
+    contador = 1
+
+    while Usuario.query.filter_by(email=email).first():
+        email = f'{base_nome}.{contador}@cobyte_cliente.com'
+        contador += 1
+
+    usuario = Usuario(
+        nome=nome,
+        email=email,
+        senha=generate_password_hash(senha),
+        tipo='cliente',
+        nivel=3
+    )
+
+    database.session.add(usuario)
+    database.session.flush()
+
+    cliente = Cliente(
+        usuario_id=usuario.id,
+        empresa=empresa
+    )
+
+    database.session.add(cliente)
+    database.session.commit()
 
     return redirect(url_for('admin.clientes'))
-
 # ---------------------------------------------------------------------------
 # Excluir cliente (remove Cliente + Usuario associado)
 # ---------------------------------------------------------------------------
