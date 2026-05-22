@@ -207,6 +207,10 @@
 
         </div>
 
+        <a href="{{ url_for('logout') }}" title="Sair" style="color:rgba(255,255,255,0.35);margin-left:auto;text-decoration:none;">
+          <i data-lucide="log-out" style="width:16px;"></i>
+        </a>
+
       </div>
 
     </div>
@@ -249,13 +253,179 @@
 
     </header>
 
-    <main class="page-content" id="page-root">
+    <main class="page-content" id="page-root" style="padding-bottom: 100px;">
       {% block content %}{% endblock %}
     </main>
+
+    <!-- Bottom Dock Menu -->
+    <div class="ios-dock">
+      <div class="ios-handle"></div>
+      <div class="dock-content">
+        <button class="dock-btn" onclick="window.history.back()">
+          <div class="btn-icon"><i data-lucide="arrow-left"></i></div>
+          <span>Voltar</span>
+        </button>
+        <a href="{{ url_for('admin.dashboard') }}" class="dock-btn">
+          <div class="btn-icon"><i data-lucide="home"></i></div>
+          <span>Início</span>
+        </a>
+        <button class="dock-btn" onclick="toggleTheme()">
+          <div class="btn-icon">
+            <i data-lucide="sun" class="theme-icon-sun"></i>
+            <i data-lucide="moon" class="theme-icon-moon" style="display:none;"></i>
+          </div>
+          <span>Tema</span>
+        </button>
+        <a href="{{ url_for('logout') }}" class="dock-btn">
+          <div class="btn-icon"><i data-lucide="log-out"></i></div>
+          <span>Sair</span>
+        </a>
+      </div>
+    </div>
 
   </div>
 
 </div>
+
+<style>
+  .ios-dock {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    background: rgba(17, 19, 28, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 32px;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+    height: 24px;
+    overflow: hidden;
+    transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+  }
+  .ios-handle {
+    width: 50px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    margin-bottom: 12px;
+    transition: 0.3s;
+    flex-shrink: 0;
+  }
+  .ios-dock:hover {
+    height: 90px;
+    background: rgba(15, 23, 42, 0.95);
+  }
+  .ios-dock:hover .ios-handle {
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    width: 70px;
+  }
+  .dock-content {
+    display: flex;
+    gap: 40px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: 0.4s 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ios-dock:hover .dock-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .dock-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: 0.3s;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .dock-btn:hover {
+    color: #fff;
+  }
+  .dock-btn:hover .btn-icon {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .dock-btn i {
+    width: 16px;
+    height: 16px;
+  }
+  .light-mode .ios-dock {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.06);
+  }
+  .light-mode .ios-dock:hover {
+    background: rgba(255, 255, 255, 0.98);
+  }
+  .light-mode .ios-handle {
+    background: rgba(0, 0, 0, 0.15);
+  }
+  .light-mode .dock-btn {
+    color: rgba(0, 0, 0, 0.6);
+  }
+  .light-mode .dock-btn:hover {
+    color: #000;
+  }
+  .light-mode .btn-icon {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.6);
+  }
+</style>
+
+<script>
+  function toggleTheme() {
+    const isLight = document.documentElement.classList.toggle('light-mode');
+    document.body.classList.toggle('light-mode');
+    localStorage.setItem('cobyte-theme', isLight ? 'light' : 'dark');
+    const sunIcon = document.querySelector('.theme-icon-sun');
+    const moonIcon = document.querySelector('.theme-icon-moon');
+    if (isLight) {
+      if (sunIcon) sunIcon.style.display = 'none';
+      if (moonIcon) moonIcon.style.display = 'block';
+    } else {
+      if (sunIcon) sunIcon.style.display = 'block';
+      if (moonIcon) moonIcon.style.display = 'none';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('cobyte-theme');
+    const sunIcon = document.querySelector('.theme-icon-sun');
+    const moonIcon = document.querySelector('.theme-icon-moon');
+    if (savedTheme === 'light') {
+      if (sunIcon) sunIcon.style.display = 'none';
+      if (moonIcon) moonIcon.style.display = 'block';
+    }
+  });
+</script>
 
 <script src="{{ url_for('static', filename='js/shared.js') }}"></script>
 
