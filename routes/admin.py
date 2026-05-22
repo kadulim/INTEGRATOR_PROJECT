@@ -359,7 +359,7 @@ def editar_projeto():
     try:
         projeto.prazo = date.fromisoformat(prazo_str) if prazo_str else None
     except:
-        projeto.prazo = None
+        projeto.prazo = request.form.get('status')
     projeto.descricao = request.form.get('descricao')
     projeto.cliente_id = request.form.get('cliente_id', type=int)
     
