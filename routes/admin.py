@@ -353,13 +353,17 @@ def editar_projeto():
 
     orcamento_raw = request.form.get('orcamento', type=float)
     projeto.orcamento = orcamento_raw if orcamento_raw else 0.0
-
     from datetime import date
+
+    projeto.situacao = request.form.get('status')
+
     prazo_str = request.form.get('prazo')
+
     try:
         projeto.prazo = date.fromisoformat(prazo_str) if prazo_str else None
-    except:
-        projeto.prazo = request.form.get('status')
+    except ValueError:
+        projeto.prazo = None
+
     projeto.descricao = request.form.get('descricao')
     projeto.cliente_id = request.form.get('cliente_id', type=int)
     
@@ -379,7 +383,6 @@ def editar_projeto():
         flash(f"Erro ao atualizar projeto: {e}", "erro")
     
     return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
-
 # ---------------------------------------------------------------------------
 # Excluir projeto (remove logs e requisitos associados)
 # ---------------------------------------------------------------------------
