@@ -42,7 +42,11 @@ app = Flask(__name__)
 # ---------------------------------------------------------------------------
 # Configurações de segurança
 # ---------------------------------------------------------------------------
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'cobyte_chave_padrao')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+if not app.config['SECRET_KEY']:
+    import warnings
+    warnings.warn("SECRET_KEY não definida. Usando fallback inseguro. Defina SECRET_KEY no ambiente.")
+    app.config['SECRET_KEY'] = 'cobyte_chave_padrao'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # 1 hora
 
@@ -256,6 +260,10 @@ import time
 
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+
+# Garante que as pastas de upload existam (importante no Render com filesystem efêmero)
+for subdir in ('documentos', 'diagramas', 'galeria'):
+    os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], subdir), exist_ok=True)
 
 # =============================================================================
 # ROTAS DE UPLOAD / CRUD DE ARQUIVOS (documentos, diagramas, galeria)
@@ -557,4 +565,5 @@ def delete_comentario(com_id):
 # Ponto de entrada da aplicação
 # =============================================================================
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
