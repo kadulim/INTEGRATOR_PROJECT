@@ -1,6 +1,6 @@
 import os
 from database import database
-from models import Usuario, Admin, Cliente, Funcionario, Projeto, Equipes, Skill, Requisito, Log, equipes_projeto
+from models import Usuario, Admin, Cliente, Funcionario, Projeto, Equipes, Habilidade, Requisito, Registro, equipes_projeto
 from werkzeug.security import generate_password_hash
 
 
@@ -131,21 +131,21 @@ def adicionar(app):
                             database.session.flush()
                         f.lista_equipes.append(equipe)
 
-                # Tratar Skills (M2M)
+                # Tratar Habilidades (M2M)
                 skills_str = os.getenv(f'{prefix}SKILLS', '')
                 if skills_str:
                     seen_ids = set()
-                    for sk_nome in [s.strip() for s in skills_str.split(',')]:
-                        if not sk_nome:
+                    for hab_nome in [s.strip() for s in skills_str.split(',')]:
+                        if not hab_nome:
                             continue
-                        skill = Skill.query.filter_by(nome=sk_nome).first()
-                        if not skill:
-                            skill = Skill(nome=sk_nome)
-                            database.session.add(skill)
+                        habilidade = Habilidade.query.filter_by(nome=hab_nome).first()
+                        if not habilidade:
+                            habilidade = Habilidade(nome=hab_nome)
+                            database.session.add(habilidade)
                             database.session.flush()
-                        if skill.id not in seen_ids:
-                            seen_ids.add(skill.id)
-                            f.lista_skills.append(skill)
+                        if habilidade.id not in seen_ids:
+                            seen_ids.add(habilidade.id)
+                            f.lista_habilidades.append(habilidade)
 
                 database.session.add(f)
                 database.session.commit()
@@ -174,14 +174,20 @@ def adicionar(app):
                 _equipe = (Equipes.query.filter_by(nome=equipe_nome).first() 
                            if equipe_nome else None)
 
+                from datetime import date as _date
+                prazo_raw = os.getenv(f'{prefix}PRAZO')
+                try:
+                    prazo_val = _date.fromisoformat(prazo_raw) if prazo_raw else None
+                except ValueError:
+                    prazo_val = None
+
                 p = Projeto(
-                    nome           = nome,
-                    descricao      = os.getenv(f'{prefix}DESCRICAO'),
-                    status         = os.getenv(f'{prefix}STATUS'),
-                    prazo          = os.getenv(f'{prefix}PRAZO'),
-                    budget         = float(os.getenv(f'{prefix}BUDGET', 0)),
-                    prioridade     = os.getenv(f'{prefix}PRIORIDADE'),
-                    cliente_id     = _cliente.id if _cliente else None
+                    nome      = nome,
+                    descricao = os.getenv(f'{prefix}DESCRICAO'),
+                    situacao  = os.getenv(f'{prefix}STATUS', 'Em andamento'),
+                    prazo     = prazo_val,
+                    orcamento = float(os.getenv(f'{prefix}BUDGET', 0)),
+                    cliente_id = _cliente.id if _cliente else None
                 )
                 if _equipe:
                     p.lista_equipes.append(_equipe)

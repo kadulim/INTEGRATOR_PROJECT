@@ -659,13 +659,13 @@
         
         {% if projetos %}
           {% for p in projetos %}
-          <div class="pcard" data-status="{{ p.status }}" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=p.id) }}'">
-            <div class="pcard-strip {{ status_strip.get(p.status, 'pcard-strip-ac') }}"></div>
+          <div class="pcard" data-status="{{ p.situacao }}" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=p.id) }}'">
+            <div class="pcard-strip {{ status_strip.get(p.situacao, 'pcard-strip-ac') }}"></div>
             <div class="pcard-body">
 
               <div class="pcard-top">
                 <div class="pcard-ico-wrap">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="{{ status_color.get(p.status, 'var(--ac)') }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="{{ status_color.get(p.situacao, 'var(--ac)') }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
                     <line x1="16" y1="13" x2="8" y2="13"/>
@@ -689,7 +689,7 @@
               </div>
 
               <div class="pcard-tags">
-                <span class="ptag {{ status_tag_class.get(p.status, 'ptag-ac') }}"><span class="ptag-dot"></span>{{ p.status }}</span>
+                <span class="ptag {{ status_tag_class.get(p.situacao, 'ptag-ac') }}"><span class="ptag-dot"></span>{{ p.situacao }}</span>
                 {% for eq in p.lista_equipes[:2] %}
                 <span class="ptag ptag-user">
                   <svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -706,7 +706,7 @@
               <div class="pcard-budget" style="margin-bottom: 20px;">
                 <div class="pcard-budget-row" style="margin-bottom: 0;">
                   <span class="pcard-budget-lbl">Orçamento</span>
-                  <span class="pcard-budget-val">R$ {{ "%.2f" | format(p.budget) }}</span>
+                  <span class="pcard-budget-val">R$ {{ "%.2f" | format(p.orcamento) }}</span>
                 </div>
               </div>
 
@@ -761,7 +761,7 @@
           <tbody>
             {% if projetos %}
               {% for p in projetos %}
-              <tr data-status="{{ p.status }}" class="table-proj-row">
+              <tr data-status="{{ p.situacao }}" class="table-proj-row">
                 <td>
                   <div style="font-weight:600; color:var(--tx);">{{ p.nome }}</div>
                 </td>
@@ -776,12 +776,12 @@
                   {% endif %}
                 </td>
                 <td>
-                  <span class="tag {{ 'tag-gr' if p.status == 'Concluído' else ('tag-am' if p.status == 'Em andamento' else 'tag-ac') }}">
-                    {{ p.status }}
+                  <span class="tag {{ 'tag-gr' if p.situacao == 'Concluído' else ('tag-am' if p.situacao == 'Em andamento' else 'tag-ac') }}">
+                    {{ p.situacao }}
                   </span>
                 </td>
                 <td style="font-family: 'JetBrains Mono', monospace;">{{ p.prazo }}</td>
-                <td style="font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--tx);">R$ {{ "%.2f" | format(p.budget) }}</td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--tx);">R$ {{ "%.2f" | format(p.orcamento) }}</td>
                 <td style="text-align: right;">
                   <div style="display:inline-flex; gap:8px; justify-content: flex-end; align-items: center;">
                     <a href="{{ url_for('admin.projeto_detalhe', id=p.id) }}" class="icon-btn-custom" title="Ver Detalhes" style="width: 28px; height: 28px; border-radius: 6px;">

@@ -36,7 +36,7 @@
             <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">{{ projeto.nome }}</h2>
             <div style="display: flex; gap: 12px; align-items: center;">
                 {% set badge_status = {'Em andamento': 'badge-em-andamento', 'Concluído': 'badge-concluido', 'Pausado': 'badge-pausado', 'Cancelado': 'badge-cancelado'} %}
-                <span class="badge {{ badge_status.get(projeto.status, 'badge-gray') }}">{{ projeto.status }}</span>
+                <span class="badge {{ badge_status.get(projeto.situacao, 'badge-gray') }}">{{ projeto.situacao }}</span>
                 <span style="font-size: 13px; color: var(--text-muted);">Prazo: <strong>{{ projeto.prazo }}</strong></span>
             </div>
         </div>
@@ -63,7 +63,7 @@
         <div class="overview-stats" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
             <div class="card" style="padding: 20px; background: rgba(255,255,255,0.02);">
                 <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">Budget Atribuído</div>
-                <div style="font-size: 20px; font-weight: 700;">R$ {{ "%.2f"|format(projeto.budget) }}</div>
+                <div style="font-size: 20px; font-weight: 700;">R$ {{ "%.2f"|format(projeto.orcamento) }}</div>
             </div>
             <div class="card" style="padding: 20px; background: rgba(255,255,255,0.02);">
                 <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">Cliente</div>

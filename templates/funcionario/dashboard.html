@@ -833,7 +833,7 @@
           <div>
             <div class="proj-name">{{ proj.nome }}</div>
             <div class="proj-desc" style="margin-bottom:6px;">{{ proj.descricao[:40] if proj.descricao else 'Sem descrição' }}...</div>
-            <span class="badge badge-ac"><span class="badge-dot"></span>{{ proj.status or 'Pendente' }}</span>
+            <span class="badge badge-ac"><span class="badge-dot"></span>{{ proj.situacao or 'Pendente' }}</span>
           </div>
           <div class="proj-date">
             <div class="proj-date-lbl">Prazo</div>

@@ -209,8 +209,8 @@
           </div>
         </div>
         <div>
-          <span class="badge {% if projeto.status == 'Em andamento' %}badge-em-andamento{% elif projeto.status == 'Concluído' %}badge-concluido{% elif projeto.status == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 20px;">
-            {{ projeto.status }}
+          <span class="badge {% if projeto.situacao == 'Em andamento' %}badge-em-andamento{% elif projeto.situacao == 'Concluído' %}badge-concluido{% elif projeto.situacao == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 20px;">
+            {{ projeto.situacao }}
           </span>
         </div>
       </div>
@@ -234,7 +234,7 @@
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding-top: 24px; border-top: 1px solid var(--border);">
               <div>
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Prioridade</div>
-                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ projeto.prioridade or 'Média' }}</div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ 'Média' or 'Média' }}</div>
               </div>
               <div>
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Prazo Final</div>
@@ -243,7 +243,7 @@
               <div>
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Orçamento</div>
                 <div style="font-size: 14px; font-weight: 600; color: var(--green);">
-                  {% if projeto.budget %} R$ {{ "{:,.2f}".format(projeto.budget).replace(",", "X").replace(".", ",").replace("X", ".") }} {% else %} Sob demanda {% endif %}
+                  {% if projeto.orcamento %} R$ {{ "{:,.2f}".format(projeto.orcamento).replace(",", "X").replace(".", ",").replace("X", ".") }} {% else %} Sob demanda {% endif %}
                 </div>
               </div>
             </div>
@@ -266,8 +266,8 @@
                   </div>
                   <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">{{ req.descricao or 'Sem descrição.' }}</div>
                 </div>
-                <span class="badge {% if req.status == 'Concluído' %}badge-green{% elif req.status == 'Em andamento' %}badge-blue{% else %}badge-gray{% endif %}" style="font-size: 11px; padding: 3px 8px;">
-                  {{ req.status }}
+                <span class="badge {% if req.situacao == 'Concluído' %}badge-green{% elif req.situacao == 'Em andamento' %}badge-blue{% else %}badge-gray{% endif %}" style="font-size: 11px; padding: 3px 8px;">
+                  {{ req.situacao }}
                 </span>
               </div>
               {% else %}
