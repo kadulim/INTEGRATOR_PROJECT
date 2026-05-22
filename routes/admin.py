@@ -99,30 +99,28 @@ def dashboard():
     ]
 
     # ── Gráfico de Atividade Mensal (barras por status) ────────────────
-    mes_expr = database.func.substring(Projeto.prazo, 6, 2)
+    mes_expr = database.func.extract('month', Projeto.prazo)
     monthly_status_rows = database.session.query(
         mes_expr.label('mes'),
         Projeto.situacao,
         database.func.count(Projeto.id).label('total')
-    ).filter(Projeto.prazo.like('____-__-__')).group_by(mes_expr, Projeto.situacao).all()
+    ).filter(Projeto.prazo.isnot(None)).group_by(mes_expr, Projeto.situacao).all()
 
     monthly_map = {m: {'Em andamento': 0, 'Concluído': 0, 'Pausado': 0} for m in range(1, 13)}
     
     for r in monthly_status_rows:
-        try:
-            if r.mes and r.mes.isdigit():
-                m_int = int(r.mes)
-                status_str = r.situacao or 'Pausado'
-                if status_str == 'Pendente':
-                    status_str = 'Pausado'
-                if status_str == 'Cancelado':
-                    continue
-                if status_str not in ['Em andamento', 'Concluído', 'Pausado']:
-                    status_str = 'Pausado'
-                if m_int in monthly_map:
-                    monthly_map[m_int][status_str] = r.total
-        except:
+        if r.mes is None:
             continue
+        m_int = int(r.mes)
+        status_str = r.situacao or 'Pausado'
+        if status_str == 'Pendente':
+            status_str = 'Pausado'
+        if status_str == 'Cancelado':
+            continue
+        if status_str not in ['Em andamento', 'Concluído', 'Pausado']:
+            status_str = 'Pausado'
+        if m_int in monthly_map:
+            monthly_map[m_int][status_str] = r.total
             
     volumes = [
         {
