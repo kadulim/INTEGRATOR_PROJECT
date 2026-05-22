@@ -638,6 +638,7 @@
               <div class="member-item">
                 <!-- Hover remove member form -->
                 <form action="{{ url_for('admin.equipe_remover_membro', equipe_id=equipe.id, funcionario_id=func.id) }}" method="POST" class="member-remove-form" onsubmit="return confirm('Tem certeza que deseja remover {{ func.usuario_rel.nome }} desta equipe?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button type="submit" class="btn-remove-member" title="Remover da Equipe">&times;</button>
                 </form>
                 <div class="member-avatar {% if lider and func.id == lider.id %}leader{% endif %}">
@@ -758,6 +759,7 @@
       <button class="modal-close" onclick="closeModal('modal-add-membro')">&times;</button>
     </div>
     <form action="{{ url_for('admin.equipe_add_membro', equipe_id=equipe.id) }}" method="POST" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
         <label class="form-label" style="color: var(--tx2); font-size: 11px; font-weight: 700; text-transform: uppercase;">Funcionário Ativo</label>
         <select name="funcionario_id" class="form-input" style="background: var(--s2); border: 1px solid var(--b1); color: var(--tx); width: 100%; padding: 12px; border-radius: 8px; outline: none; font-family: inherit; font-size: 14px;" required>
