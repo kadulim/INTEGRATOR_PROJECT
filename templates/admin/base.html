@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}CoByte{% endblock %}</title>
+
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
 
@@ -11,290 +12,258 @@
   <script>
     (function() {
       const savedTheme = localStorage.getItem('cobyte-theme');
-      // Se não houver tema salvo, garante que seja dark
+
       if (!savedTheme) {
         localStorage.setItem('cobyte-theme', 'dark');
       }
-      // Aplica light-mode apenas se explicitamente salvo como light
+
       if (savedTheme === 'light') {
         document.documentElement.classList.add('light-mode');
         document.body.classList.add('light-mode');
       }
     })();
   </script>
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
   {% block extra_css %}{% endblock %}
 </head>
+
 <body>
 
+{% set user_name = current_user.nome if current_user.is_authenticated and current_user.nome else 'Usuário' %}
+{% set user_initials = user_name[:2].upper() %}
+
 <div class="app-shell">
+
   <!-- Sidebar -->
   <aside class="sidebar">
+
     <div class="sidebar-logo" style="display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
-      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 44px; width: auto; object-fit: contain; transition: all 0.35s ease;">
-      <span class="sidebar-logo-text" style="font-size: 24px; font-weight: 800; letter-spacing: -1.2px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-1px); margin-left: 0px; display: inline-block; white-space: nowrap; transition: all 0.35s ease;">
-        <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
-      </span>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-label">Menu</div>
       
-      <a href="{{ url_for('admin.dashboard') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" data-tooltip="Dashboard">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <img 
+        src="{{ url_for('static', filename='img/logo.png') }}"
+        alt="Icon"
+        style="height: 44px; width: auto; object-fit: contain; transition: all 0.35s ease;"
+      >
+
+      <span class="sidebar-logo-text" style="font-size: 24px; font-weight: 800; letter-spacing: -1.2px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-1px); margin-left: 0px; display: inline-block; white-space: nowrap; transition: all 0.35s ease;">
+        <span style="color: var(--text-primary);">Co</span>
+        <span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+          Byte
+        </span>
+      </span>
+
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <div class="nav-label">Menu</div>
+
+      <a href="{{ url_for('admin.dashboard') }}"
+         class="nav-item {% if active_page == 'dashboard' %}active{% endif %}"
+         data-tooltip="Dashboard">
+
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+
+        </svg>
+
         <span>Dashboard</span>
       </a>
-      
-      <a href="{{ url_for('admin.projetos') }}" class="nav-item {% if active_page == 'projetos' %}active{% endif %}" data-tooltip="Projetos">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+
+      <a href="{{ url_for('admin.projetos') }}"
+         class="nav-item {% if active_page == 'projetos' %}active{% endif %}"
+         data-tooltip="Projetos">
+
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+
+        </svg>
+
         <span>Projetos</span>
       </a>
-      <a href="{{ url_for('admin.equipes') }}" class="nav-item {% if active_page == 'equipes' %}active{% endif %}" data-tooltip="Equipes">
+
+      <a href="{{ url_for('admin.equipes') }}"
+         class="nav-item {% if active_page == 'equipes' %}active{% endif %}"
+         data-tooltip="Equipes">
+
         <i data-lucide="shield"></i>
         <span>Equipes</span>
       </a>
-      <a href="{{ url_for('admin.funcionarios') }}" class="nav-item {% if active_page == 'funcionarios' %}active{% endif %}" data-tooltip="Funcionários">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+
+      <a href="{{ url_for('admin.funcionarios') }}"
+         class="nav-item {% if active_page == 'funcionarios' %}active{% endif %}"
+         data-tooltip="Funcionários">
+
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+
+        </svg>
+
         <span>Funcionários</span>
       </a>
 
-      <a href="{{ url_for('admin.clientes') }}" class="nav-item {% if active_page == 'clientes' %}active{% endif %}" data-tooltip="Clientes">
+      <a href="{{ url_for('admin.clientes') }}"
+         class="nav-item {% if active_page == 'clientes' %}active{% endif %}"
+         data-tooltip="Clientes">
+
         <i data-lucide="handshake"></i>
         <span>Clientes</span>
       </a>
-      
-      <a href="{{ url_for('admin.configuracoes') }}" class="nav-item {% if active_page == 'configuracoes' %}active{% endif %}" data-tooltip="Configurações">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+
+      <a href="{{ url_for('admin.configuracoes') }}"
+         class="nav-item {% if active_page == 'configuracoes' %}active{% endif %}"
+         data-tooltip="Configurações">
+
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+
+        </svg>
+
         <span>Configurações</span>
       </a>
 
       <div class="nav-label">Ferramentas</div>
 
-      <a href="{{ url_for('codeflow.dashboard') }}" class="nav-item {% if active_page == 'codeflow' %}active{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+      <a href="{{ url_for('codeflow.dashboard') }}"
+         class="nav-item {% if active_page == 'codeflow' %}active{% endif %}">
+
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+
+          <polyline points="16 3 21 3 21 8"/>
+          <line x1="4" y1="20" x2="21" y2="3"/>
+          <polyline points="21 16 21 21 16 21"/>
+          <line x1="15" y1="15" x2="21" y2="21"/>
+          <line x1="4" y1="4" x2="9" y2="9"/>
+
+        </svg>
+
         <span>CodeFlow</span>
       </a>
 
     </nav>
+
+    <!-- USER -->
     <div class="sidebar-footer">
+
       <div class="user-chip">
-        <div class="avatar sm avatar-blue">{{ current_user.nome[:2].upper() if current_user.is_authenticated else 'US' }}</div>
-        <div class="user-info">
-          <div class="user-name">{{ current_user.nome if current_user.is_authenticated else 'Usuário Logado' }}</div>
-          <div class="user-role">{{ 'Administrador' if current_user.is_authenticated and current_user.tipo == 'admin' else 'Usuário' }}</div>
+
+        <div class="avatar sm avatar-blue">
+          {{ user_initials }}
         </div>
+
+        <div class="user-info">
+
+          <div class="user-name">
+            {{ user_name }}
+          </div>
+
+          <div class="user-role">
+            {{ 'Administrador' if current_user.is_authenticated and current_user.tipo == 'admin' else 'Usuário' }}
+          </div>
+
+        </div>
+
       </div>
+
     </div>
+
   </aside>
 
   <div class="main-content">
+
     <!-- Topbar -->
     <header class="topbar">
-      <h1 class="topbar-title">{% block topbar_title %}{% endblock %}</h1>
+
+      <h1 class="topbar-title">
+        {% block topbar_title %}{% endblock %}
+      </h1>
+
       <div class="topbar-actions">
+
         {% block topbar_actions %}{% endblock %}
+
         <button class="icon-btn" title="Notificações">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+
+          <svg xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="2"
+               stroke-linecap="round"
+               stroke-linejoin="round">
+
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+
+          </svg>
+
           <span class="notif-dot"></span>
+
         </button>
+
       </div>
+
     </header>
 
     <main class="page-content" id="page-root">
       {% block content %}{% endblock %}
     </main>
+
   </div>
+
 </div>
-
-<!-- Bottom Dock Menu (iOS Style Pull-up) -->
-<div class="ios-dock">
-  <div class="ios-handle"></div>
-  <div class="dock-content">
-    <button class="dock-btn" onclick="window.history.back()">
-      <div class="btn-icon"><i data-lucide="arrow-left"></i></div>
-      <span>Voltar</span>
-    </button>
-    <a href="{{ url_for('admin.dashboard') }}" class="dock-btn">
-      <div class="btn-icon"><i data-lucide="home"></i></div>
-      <span>Início</span>
-    </a>
-    <button class="dock-btn" onclick="toggleTheme()">
-      <div class="btn-icon">
-        <i data-lucide="sun" class="theme-icon-sun"></i>
-        <i data-lucide="moon" class="theme-icon-moon" style="display:none;"></i>
-      </div>
-      <span>Tema</span>
-    </button>
-    <a href="{{ url_for('logout') }}" class="dock-btn">
-      <div class="btn-icon"><i data-lucide="log-out"></i></div>
-      <span>Sair</span>
-    </a>
-  </div>
-</div>
-
-<style>
-  .ios-dock {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2000;
-    background: rgba(17, 19, 28, 0.85);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: none;
-    border-radius: 20px 20px 0 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px 32px;
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
-    
-    /* Initial state: only handle visible */
-    height: 24px;
-    overflow: hidden;
-    transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    cursor: pointer;
-  }
-
-  .ios-handle {
-    width: 50px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    margin-bottom: 12px;
-    transition: 0.3s;
-    flex-shrink: 0;
-  }
-
-  .ios-dock:hover {
-    height: 90px; /* Expands to show content */
-    background: rgba(15, 23, 42, 0.95);
-  }
-
-  .ios-dock:hover .ios-handle {
-    background: var(--accent); /* Glow color */
-    box-shadow: 0 0 10px var(--accent);
-    width: 70px;
-  }
-
-  .dock-content {
-    display: flex;
-    gap: 40px;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: 0.4s 0.1s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .ios-dock:hover .dock-content {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .dock-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transition: 0.3s;
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .btn-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.03);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: 0.3s;
-    color: rgba(255, 255, 255, 0.6);
-  }
-
-  .dock-btn:hover {
-    color: #fff;
-  }
-
-  .dock-btn:hover .btn-icon {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.3);
-    color: var(--accent);
-    transform: translateY(-2px);
-  }
-
-  .dock-btn i {
-    width: 16px;
-    height: 16px;
-  }
-
-  /* iOS Dock Light Mode overrides */
-  .light-mode .ios-dock {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.06);
-  }
-  .light-mode .ios-dock:hover {
-    background: rgba(255, 255, 255, 0.98);
-  }
-  .light-mode .ios-handle {
-    background: rgba(0, 0, 0, 0.15);
-  }
-  .light-mode .dock-btn {
-    color: rgba(0, 0, 0, 0.6);
-  }
-  .light-mode .dock-btn:hover {
-    color: #000;
-  }
-  .light-mode .btn-icon {
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    color: rgba(0, 0, 0, 0.6);
-  }
-</style>
-
-<script>
-  function toggleTheme() {
-    const isLight = document.documentElement.classList.toggle('light-mode');
-    document.body.classList.toggle('light-mode');
-    localStorage.setItem('cobyte-theme', isLight ? 'light' : 'dark');
-    
-    // Update icons
-    const sunIcon = document.querySelector('.theme-icon-sun');
-    const moonIcon = document.querySelector('.theme-icon-moon');
-    if (isLight) {
-      if (sunIcon) sunIcon.style.display = 'none';
-      if (moonIcon) moonIcon.style.display = 'block';
-    } else {
-      if (sunIcon) sunIcon.style.display = 'block';
-      if (moonIcon) moonIcon.style.display = 'none';
-    }
-  }
-
-  // Initialize icons on load
-  document.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('cobyte-theme');
-    const sunIcon = document.querySelector('.theme-icon-sun');
-    const moonIcon = document.querySelector('.theme-icon-moon');
-    if (savedTheme === 'light') {
-      if (sunIcon) sunIcon.style.display = 'none';
-      if (moonIcon) moonIcon.style.display = 'block';
-    }
-  });
-</script>
 
 <script src="{{ url_for('static', filename='js/shared.js') }}"></script>
+
 <script>
   lucide.createIcons();
 </script>
+
 {% block extra_js %}{% endblock %}
+
 </body>
 </html>

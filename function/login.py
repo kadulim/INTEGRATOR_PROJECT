@@ -5,6 +5,8 @@ from sqlalchemy import or_
 from models import Usuario, Projeto, Cliente
 import logging
 
+
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def logar():
@@ -35,9 +37,13 @@ def logar():
             return render_template('auth/login.html', error="Senha incorreta",
                                  total_projetos=total_projetos, total_clientes=total_clientes,
                                  projeto_destaque=projeto_destaque)
+            
 
         login_user(usuario)
         logging.info(f"Login bem-sucedido: {identificador} (Tipo: {usuario.tipo})")
+        
+        
+        
 
         if usuario.tipo == 'admin':
             logging.warning(f"entrou no admin ({identificador})")
