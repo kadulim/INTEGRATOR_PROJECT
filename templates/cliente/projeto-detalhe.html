@@ -296,7 +296,7 @@
                   </div>
                   <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                     <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ doc.nome }}">{{ doc.nome }}</div>
-                    <div style="font-size: 11px; color: var(--text-muted);">{{ doc.tipo_arquivo.upper() }} • {{ doc.data_upload.strftime('%d/%m/%Y') }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">{{ doc.tipo_arquivo.upper() }} • {{ doc.data_envio.strftime('%d/%m/%Y') }}</div>
                   </div>
                 </div>
                 <a href="/static/{{ doc.caminho }}" download class="btn btn-ghost" style="padding: 8px; border-radius: 6px; min-width: auto;" title="Baixar arquivo">
@@ -369,12 +369,13 @@
               
               <div style="display: flex; flex-direction: column; gap: 12px;">
                 {% for membro in eq.membros_da_equipe %}
+                {% set nome_membro = membro.usuario_rel.nome if membro.usuario_rel else 'Desconhecido' %}
                 <div style="display: flex; align-items: center; gap: 12px; padding: 8px 0;">
                   <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">
-                    {{ membro.usuario_rel.nome[:2].upper() }}
+                    {{ nome_membro[:2].upper() }}
                   </div>
                   <div>
-                    <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">{{ membro.usuario_rel.nome }}</div>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">{{ nome_membro }}</div>
                     <div style="font-size: 11px; color: var(--text-muted);">{{ membro.cargo or 'Desenvolvedor' }}</div>
                   </div>
                 </div>
@@ -415,19 +416,21 @@
             
             <div style="display: flex; flex-direction: column; gap: 14px; max-height: 350px; overflow-y: auto; padding-right: 4px;">
               {% for com in comentarios %}
+                {% set nome_com = com.usuario_rel.nome if com.usuario_rel else 'Desconhecido' %}
+                {% set tipo_com = com.usuario_rel.tipo if com.usuario_rel else 'desconhecido' %}
                 <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                     <div style="display: flex; align-items: center; gap: 6px;">
                       {% set avatar_colors = {'admin': 'avatar-red', 'funcionario': 'avatar-purple', 'cliente': 'avatar-blue'} %}
-                      <div class="avatar sm {{ avatar_colors.get(com.usuario_rel.tipo, 'avatar-gray') }}" style="width: 22px; height: 22px; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-                        {{ com.usuario_rel.nome[:2].upper() }}
+                      <div class="avatar sm {{ avatar_colors.get(tipo_com, 'avatar-gray') }}" style="width: 22px; height: 22px; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                        {{ nome_com[:2].upper() }}
                       </div>
                       <div>
                         <span style="font-size: 12.5px; font-weight: 600; color: var(--text-primary);">
-                          {% if com.usuario_id == current_user.id %}Você{% else %}{{ com.usuario_rel.nome }}{% endif %}
+                          {% if com.usuario_id == current_user.id %}Você{% else %}{{ nome_com }}{% endif %}
                         </span>
-                        <span class="badge {% if com.usuario_rel.tipo == 'admin' %}badge-red{% elif com.usuario_rel.tipo == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size: 8px; padding: 1px 4px; margin-left: 4px;">
-                          {{ com.usuario_rel.tipo.upper() }}
+                        <span class="badge {% if tipo_com == 'admin' %}badge-red{% elif tipo_com == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size: 8px; padding: 1px 4px; margin-left: 4px;">
+                          {{ tipo_com.upper() }}
                         </span>
                       </div>
                     </div>

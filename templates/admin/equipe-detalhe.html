@@ -635,16 +635,17 @@
           </div>
           <div class="members-list">
             {% for func in funcionarios %}
+            {% set nome_func = func.usuario_rel.nome if func.usuario_rel else 'Desconhecido' %}
               <div class="member-item">
                 <!-- Hover remove member form -->
-                <form action="{{ url_for('admin.equipe_remover_membro', equipe_id=equipe.id, funcionario_id=func.id) }}" method="POST" class="member-remove-form" onsubmit="return confirm('Tem certeza que deseja remover {{ func.usuario_rel.nome }} desta equipe?');">
+                <form action="{{ url_for('admin.equipe_remover_membro', equipe_id=equipe.id, funcionario_id=func.id) }}" method="POST" class="member-remove-form" onsubmit="return confirm('Tem certeza que deseja remover {{ nome_func }} desta equipe?');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button type="submit" class="btn-remove-member" title="Remover da Equipe">&times;</button>
                 </form>
                 <div class="member-avatar {% if lider and func.id == lider.id %}leader{% endif %}">
-                  {{ func.usuario_rel.nome[:2].upper() }}
+                  {{ nome_func[:2].upper() }}
                 </div>
-                <span class="member-name">{{ func.usuario_rel.nome }}</span>
+                <span class="member-name">{{ nome_func }}</span>
                 <span class="member-role">{% if lider and func.id == lider.id %}Líder{% else %}Membro{% endif %}</span>
               </div>
             {% else %}

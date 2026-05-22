@@ -75,10 +75,11 @@
                 <h4 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Membros ({{ info.membros|length }})</h4>
                 <div class="members-list" style="display: flex; flex-direction: column; gap: 16px;">
                     {% for m in info.membros %}
+                    {% set nome_membro = m.usuario_rel.nome if m.usuario_rel else 'Desconhecido' %}
                     <div style="display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border);">
-                        <div class="avatar sm avatar-blue">{{ m.usuario_rel.nome[:2].upper() }}</div>
+                        <div class="avatar sm avatar-blue">{{ nome_membro[:2].upper() }}</div>
                         <div style="flex: 1;">
-                            <div style="font-weight: 600; font-size: 15px;">{{ m.usuario_rel.nome }} {% if m.usuario_id == current_user.id %}<span style="color: var(--accent); font-size: 11px; margin-left: 5px;">(Você)</span>{% endif %}</div>
+                            <div style="font-weight: 600; font-size: 15px;">{{ nome_membro }} {% if m.usuario_id == current_user.id %}<span style="color: var(--accent); font-size: 11px; margin-left: 5px;">(Você)</span>{% endif %}</div>
                             <div style="font-size: 12px; color: var(--text-muted);">{{ m.cargo }}</div>
                         </div>
                         <div style="text-align: right;">

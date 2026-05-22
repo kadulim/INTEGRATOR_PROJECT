@@ -99,7 +99,7 @@
             {% if cliente %}
             <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
               <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Cliente</div>
-              <div style="font-weight:600;">{{ cliente.usuario_rel.nome }} — {{ cliente.empresa }}</div>
+              <div style="font-weight:600;">{{ cliente.usuario_rel.nome if cliente.usuario_rel else 'Desconhecido' }} — {{ cliente.empresa }}</div>
             </div>
             {% endif %}
           </div>
@@ -116,10 +116,11 @@
               <span style="font-size: 12px; color: var(--text-muted);">{{ equipe.membros_da_equipe|length }} membro(s)</span>
             </h4>
             {% for func in equipe.membros_da_equipe %}
+            {% set nome_f = func.usuario_rel.nome if func.usuario_rel else 'Desconhecido' %}
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div class="avatar sm {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ func.usuario_rel.nome[:2].upper() }}</div>
+              <div class="avatar sm {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ nome_f[:2].upper() }}</div>
               <div>
-                <div style="font-weight:600; font-size:14px; color:#fff;">{{ func.usuario_rel.nome }}</div>
+                <div style="font-weight:600; font-size:14px; color:#fff;">{{ nome_f }}</div>
                 <div style="font-size:12px; color:var(--text-muted);">{{ func.cargo }}</div>
               </div>
             </div>
@@ -156,10 +157,11 @@
           {% if equipe.membros_da_equipe %}
           <div class="proj-team-grid">
             {% for func in equipe.membros_da_equipe %}
+            {% set nome_f = func.usuario_rel.nome if func.usuario_rel else 'Desconhecido' %}
             <div class="proj-member-card">
-              <div class="avatar {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ func.usuario_rel.nome[:2].upper() }}</div>
+              <div class="avatar {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ nome_f[:2].upper() }}</div>
               <div class="pmc-info">
-                <div class="pmc-name">{{ func.usuario_rel.nome }}</div>
+                <div class="pmc-name">{{ nome_f }}</div>
                 <div class="pmc-role">{{ func.cargo }}</div>
                 <div class="pmc-skills">
                   {% for skill in func.lista_habilidades[:3] %}
@@ -304,7 +306,7 @@
             <div class="doc-footer">
               <div class="doc-meta">
                 <i data-lucide="calendar" style="width:12px;"></i>
-                <span>{{ doc.data_upload.strftime('%d/%m/%Y') }}</span>
+                <span>{{ doc.data_envio.strftime('%d/%m/%Y') }}</span>
               </div>
               <a href="/static/{{ doc.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px;">
                 <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
@@ -365,7 +367,7 @@
             <div class="diagram-info">
               <div>
                 <div class="diagram-name">{{ diag.nome }}</div>
-                <div class="diagram-type">Upload em {{ diag.data_upload.strftime('%d/%m/%Y') }}</div>
+                <div class="diagram-type">Upload em {{ diag.data_envio.strftime('%d/%m/%Y') }}</div>
               </div>
               <a href="/static/{{ diag.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                 <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
@@ -426,7 +428,7 @@
             <div class="diagram-info">
               <div>
                 <div class="diagram-name">{{ item.nome }}</div>
-                <div class="diagram-type">Upload em {{ item.data_upload.strftime('%d/%m/%Y') }}</div>
+                <div class="diagram-type">Upload em {{ item.data_envio.strftime('%d/%m/%Y') }}</div>
               </div>
               <a href="/static/{{ item.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                 <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
@@ -469,17 +471,19 @@
 
         {% if comentarios %}
           {% for com in comentarios %}
+          {% set nome_com = com.usuario_rel.nome if com.usuario_rel else 'Desconhecido' %}
+          {% set tipo_com = com.usuario_rel.tipo if com.usuario_rel else 'desconhecido' %}
           <div class="comment-card" style="margin-bottom:16px;">
             <div class="comment-header">
               <div class="comment-meta">
                 {% set avatar_colors = {'admin': 'avatar-red', 'funcionario': 'avatar-purple', 'cliente': 'avatar-blue'} %}
-                <div class="avatar sm {{ avatar_colors.get(com.usuario_rel.tipo, 'avatar-gray') }}">
-                  {{ com.usuario_rel.nome[:2].upper() }}
+                <div class="avatar sm {{ avatar_colors.get(tipo_com, 'avatar-gray') }}">
+                  {{ nome_com[:2].upper() }}
                 </div>
                 <div>
-                  <span class="comment-author">{{ com.usuario_rel.nome }}</span>
-                  <span class="badge {% if com.usuario_rel.tipo == 'admin' %}badge-red{% elif com.usuario_rel.tipo == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size:10px; margin-left:6px; padding:2px 6px;">
-                    {{ com.usuario_rel.tipo.upper() }}
+                  <span class="comment-author">{{ nome_com }}</span>
+                  <span class="badge {% if tipo_com == 'admin' %}badge-red{% elif tipo_com == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size:10px; margin-left:6px; padding:2px 6px;">
+                    {{ tipo_com.upper() }}
                   </span>
                   <div class="comment-time">{{ com.data.strftime('%d/%m/%Y %H:%M') }}</div>
                 </div>
@@ -513,7 +517,7 @@
         <div class="comment-filter-card">
           <div class="csf-title">Informações de Contato</div>
           <div style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-top:12px;">
-            {% if cliente %}
+            {% if cliente and cliente.usuario_rel %}
             <strong>Cliente:</strong> {{ cliente.usuario_rel.nome }}<br>
             <strong>Empresa:</strong> {{ cliente.empresa }}<br>
             <strong>Email:</strong> {{ cliente.usuario_rel.email }}<br>
@@ -586,7 +590,7 @@
                 <option value="">Sem Cliente</option>
                 {% for cl in todos_clientes %}
                 <option value="{{ cl.id }}" {% if projeto.cliente_id == cl.id %}selected{% endif %}>
-                  {{ cl.usuario_rel.nome }} ({{ cl.empresa }})
+                  {{ cl.usuario_rel.nome if cl.usuario_rel else 'Desconhecido' }} ({{ cl.empresa }})
                 </option>
                 {% endfor %}
               </select>

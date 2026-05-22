@@ -110,10 +110,11 @@
         <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">Membros do Time</h3>
         <div class="proj-team-grid">
             {% for m in membros %}
+            {% set nome_m = m.usuario_rel.nome if m.usuario_rel else 'Desconhecido' %}
             <div class="proj-member-card">
-                <div class="avatar avatar-blue">{{ m.usuario_rel.nome[:2].upper() }}</div>
+                <div class="avatar avatar-blue">{{ nome_m[:2].upper() }}</div>
                 <div class="pmc-info">
-                    <div class="pmc-name">{{ m.usuario_rel.nome }}</div>
+                    <div class="pmc-name">{{ nome_m }}</div>
                     <div class="pmc-role">{{ m.cargo }}</div>
                 </div>
             </div>
@@ -166,7 +167,7 @@
                 <div class="doc-footer">
                     <div class="doc-meta">
                         <i data-lucide="calendar" style="width:12px;"></i>
-                        <span>{{ doc.data_upload.strftime('%d/%m/%Y') }}</span>
+                        <span>{{ doc.data_envio.strftime('%d/%m/%Y') }}</span>
                     </div>
                     <a href="/static/{{ doc.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px;">
                         <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
@@ -223,7 +224,7 @@
                 <div class="diagram-info">
                     <div>
                         <div class="diagram-name">{{ diag.nome }}</div>
-                        <div class="diagram-type">Upload em {{ diag.data_upload.strftime('%d/%m/%Y') }}</div>
+                        <div class="diagram-type">Upload em {{ diag.data_envio.strftime('%d/%m/%Y') }}</div>
                     </div>
                     <a href="/static/{{ diag.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                         <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
@@ -280,7 +281,7 @@
                 <div class="diagram-info">
                     <div>
                         <div class="diagram-name">{{ item.nome }}</div>
-                        <div class="diagram-type">Upload em {{ item.data_upload.strftime('%d/%m/%Y') }}</div>
+                        <div class="diagram-type">Upload em {{ item.data_envio.strftime('%d/%m/%Y') }}</div>
                     </div>
                     <a href="/static/{{ item.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                         <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
@@ -321,17 +322,19 @@
 
                 {% if comentarios %}
                     {% for com in comentarios %}
+                    {% set nome_com = com.usuario_rel.nome if com.usuario_rel else 'Desconhecido' %}
+                    {% set tipo_com = com.usuario_rel.tipo if com.usuario_rel else 'desconhecido' %}
                     <div class="comment-card" style="margin-bottom:16px;">
                         <div class="comment-header">
                             <div class="comment-meta">
                                 {% set avatar_colors = {'admin': 'avatar-red', 'funcionario': 'avatar-purple', 'cliente': 'avatar-blue'} %}
-                                <div class="avatar sm {{ avatar_colors.get(com.usuario_rel.tipo, 'avatar-gray') }}">
-                                    {{ com.usuario_rel.nome[:2].upper() }}
+                                <div class="avatar sm {{ avatar_colors.get(tipo_com, 'avatar-gray') }}">
+                                    {{ nome_com[:2].upper() }}
                                 </div>
                                 <div>
-                                    <span class="comment-author">{{ com.usuario_rel.nome }}</span>
-                                    <span class="badge {% if com.usuario_rel.tipo == 'admin' %}badge-red{% elif com.usuario_rel.tipo == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size:10px; margin-left:6px; padding:2px 6px;">
-                                        {{ com.usuario_rel.tipo.upper() }}
+                                    <span class="comment-author">{{ nome_com }}</span>
+                                    <span class="badge {% if tipo_com == 'admin' %}badge-red{% elif tipo_com == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size:10px; margin-left:6px; padding:2px 6px;">
+                                        {{ tipo_com.upper() }}
                                     </span>
                                     <div class="comment-time">{{ com.data.strftime('%d/%m/%Y %H:%M') }}</div>
                                 </div>
