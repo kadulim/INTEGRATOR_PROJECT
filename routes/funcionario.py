@@ -238,7 +238,11 @@ def dashboard():
 @funcionario_bp.route('/projetos')
 @login_required
 def projetos():
+    if current_user.tipo != 'funcionario':
+        return redirect(url_for('page_login'))
     funcionario = Funcionario.query.filter_by(usuario_id=current_user.id).first()
+    if not funcionario:
+        return "Perfil de funcionário não encontrado", 404
     equipes = funcionario.lista_equipes
     equipes_ids = [eq.id for eq in equipes]
     
@@ -254,9 +258,13 @@ def projetos():
 @funcionario_bp.route('/projeto-detalhe/<int:projeto_id>')
 @login_required
 def projeto_detalhe(projeto_id):
+    if current_user.tipo != 'funcionario':
+        return redirect(url_for('page_login'))
     projeto = Projeto.query.get_or_404(projeto_id)
     
     funcionario = Funcionario.query.filter_by(usuario_id=current_user.id).first()
+    if not funcionario:
+        return "Perfil de funcionário não encontrado", 404
     equipes_ids = [eq.id for eq in funcionario.lista_equipes]
     projeto_equipes_ids = [eq.id for eq in projeto.lista_equipes]
     if not any(eq_id in projeto_equipes_ids for eq_id in equipes_ids):
@@ -318,7 +326,11 @@ def add_requisito():
 @funcionario_bp.route('/equipe')
 @login_required
 def equipe():
+    if current_user.tipo != 'funcionario':
+        return redirect(url_for('page_login'))
     funcionario = Funcionario.query.filter_by(usuario_id=current_user.id).first()
+    if not funcionario:
+        return "Perfil de funcionário não encontrado", 404
     equipes = funcionario.lista_equipes
     
     membros_data = {}

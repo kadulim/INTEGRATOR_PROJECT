@@ -1,7 +1,7 @@
 {% extends 'admin/base.html' %}
 {% set active_page = 'funcionarios' %}
 
-{% block title %}{{ funcionario.usuario_rel.nome }} — CoByte{% endblock %}
+{% block title %}{{ funcionario.usuario_rel.nome if funcionario.usuario_rel else 'Perfil' }} — CoByte{% endblock %}
 
 {% block topbar_title %}Perfil do Funcionário{% endblock %}
 
@@ -14,16 +14,19 @@
 
 {% block content %}
 {% set usuario = funcionario.usuario_rel %}
+{% if not usuario %}
+<div class="alert alert-danger">Usuário não encontrado para este funcionário.</div>
+{% endif %}
 {% set avatar_colors = ['avatar-blue','avatar-purple','avatar-green','avatar-yellow'] %}
 
 <div class="fade-up">
   <div class="card" style="margin-bottom:24px;">
     <div class="card-body" style="display:flex; align-items:center; gap:24px;">
-      <div class="avatar lg avatar-blue" style="width:64px; height:64px; font-size:24px;">{{ usuario.nome[:2].upper() }}</div>
+      <div class="avatar lg avatar-blue" style="width:64px; height:64px; font-size:24px;">{{ usuario.nome[:2].upper() if usuario else '??' }}</div>
       <div style="flex:1;">
-        <h2 style="font-size:22px; font-weight:700; margin-bottom:4px;">{{ usuario.nome }}</h2>
+        <h2 style="font-size:22px; font-weight:700; margin-bottom:4px;">{{ usuario.nome if usuario else 'Desconhecido' }}</h2>
         <div style="color:var(--text-muted); font-size:14px;">{{ funcionario.cargo }}</div>
-        <div style="color:var(--text-muted); font-size:13px; margin-top:4px;">{{ usuario.email }}</div>
+        <div style="color:var(--text-muted); font-size:13px; margin-top:4px;">{{ usuario.email if usuario else '---' }}</div>
       </div>
       <span class="badge badge-green">Ativo</span>
     </div>

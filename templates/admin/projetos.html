@@ -567,7 +567,7 @@
         <div class="scard-top">
           <div>
             <div class="scard-lbl">Em Andamento</div>
-            <div class="scard-val" style="color:var(--am);">{{ projetos|selectattr("status", "equalto", "Em andamento")|list|length }}</div>
+            <div class="scard-val" style="color:var(--am);">{{ projetos|selectattr("situacao", "equalto", "Em andamento")|list|length }}</div>
             <div class="scard-sub">
               <span class="tag tag-am">Em desenvolvimento</span>
             </div>
@@ -585,7 +585,7 @@
         <div class="scard-top">
           <div>
             <div class="scard-lbl">Projetos Concluídos</div>
-            <div class="scard-val" style="color:var(--gr);">{{ projetos|selectattr("status", "equalto", "Concluído")|list|length }}</div>
+            <div class="scard-val" style="color:var(--gr);">{{ projetos|selectattr("situacao", "equalto", "Concluído")|list|length }}</div>
             <div class="scard-sub">
               <span class="tag tag-gr">Concluídos e entregues</span>
             </div>
@@ -685,7 +685,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0116 0"/>
                 </svg>
-                {{ p.cliente_rel.usuario_rel.nome if p.cliente_rel else 'Sem Cliente' }}
+                {{ p.cliente_rel.usuario_rel.nome if p.cliente_rel and p.cliente_rel.usuario_rel else 'Sem Cliente' }}
               </div>
 
               <div class="pcard-tags">
@@ -765,7 +765,7 @@
                 <td>
                   <div style="font-weight:600; color:var(--tx);">{{ p.nome }}</div>
                 </td>
-                <td>{{ p.cliente_rel.usuario_rel.nome if p.cliente_rel else '---' }}</td>
+                <td>{{ p.cliente_rel.usuario_rel.nome if p.cliente_rel and p.cliente_rel.usuario_rel else '---' }}</td>
                 <td>
                   {% if p.lista_equipes %}
                     {% for eq in p.lista_equipes %}

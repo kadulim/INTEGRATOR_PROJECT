@@ -712,10 +712,11 @@ def equipe_add_membro(equipe_id):
         if funcionario and funcionario not in equipe.membros_da_equipe:
             equipe.membros_da_equipe.append(funcionario)
             
+            nome_func = funcionario.usuario_rel.nome if funcionario.usuario_rel else 'Desconhecido'
             registro = Registro(
                 tipo="equipe",
                 acao="Membro adicionado",
-                descricao=f"Funcionário {funcionario.usuario_rel.nome} foi adicionado à equipe {equipe.nome}.",
+                descricao=f"Funcionário {nome_func} foi adicionado à equipe {equipe.nome}.",
                 projeto_id=None
             )
             database.session.add(registro)
@@ -733,10 +734,11 @@ def equipe_remover_membro(equipe_id, funcionario_id):
     if funcionario in equipe.membros_da_equipe:
         equipe.membros_da_equipe.remove(funcionario)
         
+        nome_func = funcionario.usuario_rel.nome if funcionario.usuario_rel else 'Desconhecido'
         registro = Registro(
             tipo="equipe",
             acao="Membro removido",
-            descricao=f"Funcionário {funcionario.usuario_rel.nome} foi removido da equipe {equipe.nome}.",
+            descricao=f"Funcionário {nome_func} foi removido da equipe {equipe.nome}.",
             projeto_id=None
         )
         database.session.add(registro)
@@ -841,6 +843,9 @@ def add_funcionario():
 def editar_funcionario(id):
     funcionario = Funcionario.query.get_or_404(id)
     usuario = Usuario.query.get(funcionario.usuario_id)
+    if not usuario:
+        flash("Usuário vinculado ao funcionário não encontrado.", "erro")
+        return redirect(url_for('admin.funcionarios'))
     
     nome = request.form.get('nome')
     email = request.form.get('email')

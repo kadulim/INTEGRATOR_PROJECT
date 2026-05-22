@@ -545,7 +545,7 @@
       <div class="team-meta-list">
         <div class="team-meta-item">
           <span class="team-meta-label"><i data-lucide="user" style="width:14px;"></i>Líder da equipe</span>
-          <span class="team-meta-value">{{ lider.usuario_rel.nome if lider else 'Não definido' }}</span>
+          <span class="team-meta-value">{{ lider.usuario_rel.nome if lider and lider.usuario_rel else 'Não definido' }}</span>
         </div>
         <div class="team-meta-item">
           <span class="team-meta-label"><i data-lucide="users" style="width:14px;"></i>Membros</span>
@@ -567,7 +567,7 @@
             <i data-lucide="check-circle"></i>
           </div>
           <div class="kpi-data">
-            <h3>{{ projetos|selectattr('status', 'equalto', 'Concluído')|list|length }}</h3>
+            <h3>{{ projetos|selectattr('situacao', 'equalto', 'Concluído')|list|length }}</h3>
             <p>Projetos Concluídos</p>
           </div>
         </div>
@@ -593,7 +593,7 @@
             <i data-lucide="code"></i>
           </div>
           <div class="kpi-data">
-            <h3>{{ projetos|selectattr('status', 'equalto', 'Em andamento')|list|length }}</h3>
+            <h3>{{ projetos|selectattr('situacao', 'equalto', 'Em andamento')|list|length }}</h3>
             <p>Projetos em Desenvolvimento</p>
           </div>
         </div>
