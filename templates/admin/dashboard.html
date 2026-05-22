@@ -1013,135 +1013,102 @@
 
 
 
-  // Donut Chart logic
-  window.addEventListener('load', () => {
-  const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
-  const concluidoVal   = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
-  const pausadoVal     = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
-  
-  document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
-  document.getElementById('breakdownConcluido').textContent = concluidoVal;
-  document.getElementById('breakdownPausado').textContent   = pausadoVal;
+  // Donut Chart logic — corrigido (DOMContentLoaded + requestAnimationFrame)
+  document.addEventListener('DOMContentLoaded', () => {
+    const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
+    const concluidoVal   = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
+    const pausadoVal     = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
 
-  const SEGS = statusData.filter(s => s.val > 0).map(s => ({
-    label: s.label,
-    val: s.val,
-    color: s.color
-  }));
-  
-  if (SEGS.length === 0) {
-    document.getElementById('totalCount').textContent = '0';
-    return;
-  }
+    document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
+    document.getElementById('breakdownConcluido').textContent = concluidoVal;
+    document.getElementById('breakdownPausado').textContent   = pausadoVal;
 
-  const totalVal = SEGS.reduce((sum, s) => sum + s.val, 0);
+    const SEGS = statusData.filter(s => s.val > 0).map(s => ({
+      label: s.label, val: s.val, color: s.color
+    }));
+    const totalVal = SEGS.reduce((sum, s) => sum + s.val, 0);
 
-  const CX = 130, CY = 130, R = 92, SW = 22;
-  const CIRC = 2 * Math.PI * R;
-  const GAP_DEG = 2.8;
-  const GAP_ARC = (GAP_DEG / 360) * CIRC;
-  const segsActive = SEGS.filter(s => s.val > 0).length;
-  const availArc = CIRC - (segsActive > 1 ? segsActive * GAP_ARC : 0);
-
-  const segsGroup = document.getElementById('segsGroup');
-  const gapsGroup = document.getElementById('gapsGroup');
-  let builtPaths = [];
-  let startAngle = -Math.PI / 2;
-
-  function polarToXY(angle, radius) {
-    return { x: CX + radius * Math.cos(angle), y: CY + radius * Math.sin(angle) };
-  }
-
-  function describeArc(startAng, endAng) {
-    const ro = R + SW / 2, ri = R - SW / 2;
-    const s1 = polarToXY(startAng, ro), e1 = polarToXY(endAng, ro);
-    const s2 = polarToXY(endAng, ri),   e2 = polarToXY(startAng, ri);
-    const large = (endAng - startAng) > Math.PI ? 1 : 0;
-    return `M ${s1.x} ${s1.y} A ${ro} ${ro} 0 ${large} 1 ${e1.x} ${e1.y} L ${s2.x} ${s2.y} A ${ri} ${ri} 0 ${large} 0 ${e2.x} ${e2.y} Z`;
-  }
-
-  function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
-
-  function animatePathGrow(pathEl, startAng, endAng, delay, duration) {
-    setTimeout(() => {
-      const steps = 60;
-      let step = 0;
-      const timer = setInterval(() => {
-        step++;
-        const t = easeOutQuart(step / steps);
-        pathEl.setAttribute('d', describeArc(startAng, startAng + (endAng - startAng) * t));
-        pathEl.setAttribute('opacity', String(Math.min(t * 2, 1)));
-        if (step >= steps) clearInterval(timer);
-      }, duration / steps);
-    }, delay);
-  }
-
-  SEGS.forEach((seg, idx) => {
-    if (seg.val <= 0) return;
-    const pct = seg.val / totalVal;
-    const sweepAngle = (pct * availArc / CIRC) * 2 * Math.PI;
-    const endAngle = startAngle + sweepAngle;
-
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', describeArc(startAngle, startAngle + 0.001));
-    path.setAttribute('fill', seg.color);
-    path.setAttribute('opacity', '0');
-    path.setAttribute('class', 'seg-path');
-
-    path.addEventListener('mouseenter', () => {
-      const tt = document.getElementById('donut-tooltip');
-      document.getElementById('tt-name').textContent = seg.label;
-      document.getElementById('tt-name').style.color = seg.color;
-      document.getElementById('tt-val').textContent = seg.val + (seg.val === 1 ? ' projeto' : ' projetos');
-      document.getElementById('tt-pct').textContent = Math.round(pct * 100) + '% do total';
-      if (tt) tt.style.opacity = '1';
-    });
-    path.addEventListener('mouseleave', () => {
-      const tt = document.getElementById('donut-tooltip');
-      if (tt) tt.style.opacity = '0';
-    });
-    path.addEventListener('click', () => {
-      const isActive = path.classList.contains('active');
-      document.querySelectorAll('.seg-path').forEach(p => p.classList.remove('active'));
-      if (!isActive) path.classList.add('active');
-    });
-
-    segsGroup.appendChild(path);
-    animatePathGrow(path, startAngle, endAngle, 300 + builtPaths.length * 220, 800);
-    builtPaths.push({ path, startAngle, endAngle });
-
-    if (segsActive > 1) {
-      const gapStart = endAngle;
-      const gapEnd   = gapStart + (GAP_ARC / CIRC) * 2 * Math.PI;
-      const gapPath  = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      gapPath.setAttribute('d', describeArc(gapStart, gapEnd));
-      gapPath.setAttribute('fill', 'var(--bg)');
-      gapPath.setAttribute('opacity', '0');
-      gapsGroup.appendChild(gapPath);
-      setTimeout(() => gapPath.setAttribute('opacity', '1'), 300 + builtPaths.length * 220 + 700);
-      startAngle = gapEnd;
-    } else {
-      startAngle = endAngle;
+    if (SEGS.length === 0 || totalVal === 0) {
+      document.getElementById('totalCount').textContent = '0';
+      return;
     }
-  });
 
-  // Animate total counter
+    const CX = 130, CY = 130, R = 92, SW = 22;
+    const GAP_RAD = (2.5 / 360) * 2 * Math.PI;
+    const segsN = SEGS.length;
+    const availAngle = 2 * Math.PI - (segsN > 1 ? segsN * GAP_RAD : 0);
+
+    const segsGroup = document.getElementById('segsGroup');
+    const gapsGroup = document.getElementById('gapsGroup');
+    segsGroup.innerHTML = '';
+    if (gapsGroup) gapsGroup.innerHTML = '';
+
+    function polarToXY(a, r) { return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) }; }
+    function describeArc(sa, ea) {
+      const ro = R + SW / 2, ri = R - SW / 2;
+      const s1 = polarToXY(sa, ro), e1 = polarToXY(ea, ro);
+      const s2 = polarToXY(ea, ri), e2 = polarToXY(sa, ri);
+      const large = (ea - sa) > Math.PI ? 1 : 0;
+      return `M ${s1.x} ${s1.y} A ${ro} ${ro} 0 ${large} 1 ${e1.x} ${e1.y} L ${s2.x} ${s2.y} A ${ri} ${ri} 0 ${large} 0 ${e2.x} ${e2.y} Z`;
+    }
+    function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
+    let cursor = -Math.PI / 2;
+    const DURATION = 900;
+
+    SEGS.forEach((seg, idx) => {
+      const sweep = (seg.val / totalVal) * availAngle;
+      const half  = segsN > 1 ? GAP_RAD / 2 : 0;
+      const segStart = cursor + half;
+      const segEnd   = cursor + sweep - half;
+      cursor += sweep;
+
+      const pct = seg.val / totalVal;
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', describeArc(segStart, segStart + 0.001));
+      path.setAttribute('fill', seg.color);
+      path.setAttribute('class', 'seg-path');
+
+      path.addEventListener('mouseenter', () => {
+        const tt = document.getElementById('donut-tooltip');
+        document.getElementById('tt-name').textContent = seg.label;
+        document.getElementById('tt-name').style.color = seg.color;
+        document.getElementById('tt-val').textContent = seg.val + (seg.val === 1 ? ' projeto' : ' projetos');
+        document.getElementById('tt-pct').textContent = Math.round(pct * 100) + '% do total';
+        if (tt) tt.style.opacity = '1';
+      });
+      path.addEventListener('mouseleave', () => {
+        const tt = document.getElementById('donut-tooltip');
+        if (tt) tt.style.opacity = '0';
+      });
+      path.addEventListener('click', () => {
+        const isActive = path.classList.contains('active');
+        document.querySelectorAll('.seg-path').forEach(p => p.classList.remove('active'));
+        if (!isActive) path.classList.add('active');
+      });
+
+      segsGroup.appendChild(path);
+
+      const delay = 150 + idx * 200;
+      setTimeout(() => {
+        const t0 = performance.now();
+        function frame(now) {
+          const t = Math.min((now - t0) / DURATION, 1);
+          path.setAttribute('d', describeArc(segStart, segStart + (segEnd - segStart) * easeOutQuart(t)));
+          if (t < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }, delay);
+    });
+
+    // Animate counter
     const el = document.getElementById('totalCount');
     let count = 0;
     const target = totalVal;
-    
-    if (target === 0) {
-      el.textContent = '0';
-    } else {
-      const step = () => {
-        if (count < target) {
-          count++;
-          el.textContent = count;
-          setTimeout(step, Math.max(30, 200 / target));
-        }
-      };
-      setTimeout(step, 400);
-    }
+    const step = () => {
+      if (count < target) { count++; el.textContent = count; setTimeout(step, Math.max(20, 300 / target)); }
+    };
+    setTimeout(step, 300);
   });
 
   // Monthly Activity Modal logic & project data serialization

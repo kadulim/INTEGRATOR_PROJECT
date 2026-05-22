@@ -12,6 +12,7 @@ from flask import Flask, render_template, abort, request, redirect, url_for
 from flask_login import LoginManager, login_required, current_user, logout_user
 from flask_wtf.csrf import CSRFProtect
 import functools
+import json
 import os
 import sys
 from dotenv import load_dotenv
@@ -131,16 +132,24 @@ def logout():
 def cliente_dashboard():
     cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
     projetos = cliente.projetos if cliente else []
-    
+
     total = len(projetos)
     ativos = sum(1 for p in projetos if p.situacao == 'Em andamento')
     concluidos = sum(1 for p in projetos if p.situacao == 'Concluído')
-    
-    return render_template('cliente/cliente-dashboard.html', 
-                           projetos=projetos, 
-                           total=total, 
-                           ativos=ativos, 
-                           concluidos=concluidos)
+    pausados = total - ativos - concluidos
+
+    status_data = [
+        {'label': 'Em andamento', 'val': ativos,    'color': '#f59e0b'},
+        {'label': 'Concluído',    'val': concluidos, 'color': '#10b981'},
+        {'label': 'Pausado',      'val': pausados,   'color': '#FF5577'},
+    ]
+
+    return render_template('cliente/cliente-dashboard.html',
+                           projetos=projetos,
+                           total=total,
+                           ativos=ativos,
+                           concluidos=concluidos,
+                           status_data_json=json.dumps(status_data))
 
 # ---------------------------------------------------------------------------
 # Listagem de projetos do cliente

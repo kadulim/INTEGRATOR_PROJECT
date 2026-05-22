@@ -22,8 +22,10 @@
     --ac-d: rgba(0, 207, 255, 0.10);
     --ac-d2: rgba(0, 207, 255, 0.06);
     --gr: #00E5A0;
+    --gr-conclu:#10b981;
     --gr-d: rgba(0, 229, 160, 0.10);
     --am: #FFB020;
+    --am-anda: #f59e0b;
     --am-d: rgba(255, 176, 32, 0.10);
     --rd: #FF5577;
     --tx: #DCE5F0;
@@ -530,13 +532,14 @@
   }
   .mcard-sub { font-size: 11.5px; color: var(--tx2); }
 
-  /* ─── DONUT ANIMATION ─── */
-  .ring-track { opacity: 0.12; }
-  .ring-fill {
-    transform-origin: center;
-    transform: rotate(-90deg);
-    transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
+  /* ─── DONUT SEGMENTOS ─── */
+  .seg-path {
+    transition: filter 0.2s ease, transform 0.2s ease;
+    transform-origin: 130px 130px;
+    cursor: pointer;
   }
+  .seg-path:hover  { filter: brightness(1.35); transform: scale(1.04); }
+  .seg-path.active { filter: brightness(1.5);  transform: scale(1.07); }
 
   /* section divider label */
   .section-lbl {
@@ -643,33 +646,34 @@
       </div>
 
       <!-- Center: Donut -->
-      <div class="donut-wrap">
-        <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260">
-          <!-- Track rings -->
-          <circle class="ring-track" cx="130" cy="130" r="104" fill="none" stroke="#ffffff" stroke-width="16"/>
-          <circle class="ring-track" cx="130" cy="130" r="80" fill="none" stroke="#ffffff" stroke-width="16"/>
-          <circle class="ring-track" cx="130" cy="130" r="56" fill="none" stroke="#ffffff" stroke-width="16"/>
-
-          <!-- Em andamento (Azul/Cyan) r=104 -> circ=653.45 -->
-          <circle id="ringProgress" class="ring-fill-seg" cx="130" cy="130" r="104"
-            fill="none" stroke="var(--ac)" stroke-width="16" stroke-linecap="round"
-            stroke-dasharray="653.45 653.45" stroke-dashoffset="653.45"/>
-            
-          <!-- Concluído (Verde) r=80 -> circ=502.65 -->
-          <circle id="ringConcluido" class="ring-fill-seg" cx="130" cy="130" r="80"
-            fill="none" stroke="var(--gr)" stroke-width="16" stroke-linecap="round"
-            stroke-dasharray="502.65 502.65" stroke-dashoffset="502.65"/>
-            
-          <!-- Pausado (Amarelo/Laranja) r=56 -> circ=351.85 -->
-          <circle id="ringPausado" class="ring-fill-seg" cx="130" cy="130" r="56"
-            fill="none" stroke="var(--am)" stroke-width="16" stroke-linecap="round"
-            stroke-dasharray="351.85 351.85" stroke-dashoffset="351.85"/>
-        </svg>
-        <div class="donut-center">
-          <div class="d-num" id="totalCount">0</div>
-          <div class="d-lbl">Total</div>
-        </div>
-      </div>
+<div class="donut-wrap" id="donutWrap">
+  <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260" style="overflow:visible;">
+    <!-- Anel de pulso animado -->
+    <circle id="pulseRing" cx="130" cy="130" r="92"
+      fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+    <!-- Track de fundo -->
+    <circle cx="130" cy="130" r="92"
+      fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="22"/>
+    <!-- Segmentos e gaps gerados por JS -->
+    <g id="segsGroup"></g>
+    <g id="gapsGroup"></g>
+  </svg>
+  <div class="donut-center">
+    <div class="d-num" id="totalCount">0</div>
+    <div class="d-lbl">Total</div>
+  </div>
+  <!-- Tooltip flutuante -->
+  <div id="donut-tooltip" style="
+    position:absolute; background:var(--s2); border:1px solid var(--b2);
+    border-radius:8px; padding:7px 12px; font-family:'Outfit',sans-serif;
+    pointer-events:none; opacity:0; transition:opacity 0.18s ease;
+    white-space:nowrap; z-index:10; top:50%; left:50%;
+    transform:translate(-50%, 68px);">
+    <div id="tt-name" style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;"></div>
+    <div id="tt-val" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--tx);margin-top:1px;"></div>
+    <div id="tt-pct" style="font-size:10px;color:var(--tx2);"></div>
+  </div>
+</div>
 
       <!-- Right: breakdown stats -->
       <div class="hero-right">
@@ -677,35 +681,35 @@
 
         <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('em_andamento')">
           <div class="bs-left">
-            <div class="bs-bar" style="background:var(--ac);box-shadow:0 0 10px rgba(0,207,255,0.4);"></div>
+            <div class="bs-bar" style="background:var(--am-anda);box-shadow:0 0 10px rgba(245,158,11,0.4);"></div>
             <div>
               <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Em andamento</div>
               <div class="bs-name">Projetos ativos</div>
             </div>
           </div>
-          <div class="bs-num" style="color:var(--ac);" id="breakdownAndamento">0</div>
+          <div class="bs-num" style="color:var(--am-anda);" id="breakdownAndamento">0</div>
         </div>
 
         <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('concluido')">
           <div class="bs-left">
-            <div class="bs-bar" style="background:var(--gr);box-shadow:0 0 10px rgba(0,229,160,0.3);"></div>
+            <div class="bs-bar" style="background:var(--gr-conclu);box-shadow:0 0 10px rgba(16,185,129,0.3);"></div>
             <div>
               <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Concluído</div>
               <div class="bs-name">Finalizados</div>
             </div>
           </div>
-          <div class="bs-num" style="color:var(--gr);" id="breakdownConcluido">0</div>
+          <div class="bs-num" style="color:var(--gr-conclu);" id="breakdownConcluido">0</div>
         </div>
 
         <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('pausado')">
           <div class="bs-left">
-            <div class="bs-bar" style="background:var(--am);box-shadow:0 0 10px rgba(255,176,32,0.3);"></div>
+            <div class="bs-bar" style="background:var(--rd);box-shadow:0 0 10px rgba(255,85,119,0.3);"></div>
             <div>
               <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Pausado</div>
               <div class="bs-name">Parados</div>
             </div>
           </div>
-          <div class="bs-num" style="color:var(--am);" id="breakdownPendente">0</div>
+          <div class="bs-num" style="color:var(--rd);" id="breakdownPausado">0</div>
         </div>
       </div>
 
@@ -951,80 +955,103 @@
 
 {% block extra_js %}
 <script>
-  // Donut Chart logic
-  window.addEventListener('load', () => {
-    const statusData = {{ status_data_json | safe }};
-
-    // Parse dynamic values
+  // Donut Chart logic — corrigido (DOMContentLoaded + requestAnimationFrame)
+  const statusData = {{ status_data_json | safe }};
+  document.addEventListener('DOMContentLoaded', () => {
     const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
-    const concluidoVal = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
-    const pausadoVal = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
-    const totalVal = emAndamentoVal + concluidoVal + pausadoVal;
+    const concluidoVal   = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
+    const pausadoVal     = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
 
     document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
     document.getElementById('breakdownConcluido').textContent = concluidoVal;
-    document.getElementById('breakdownPendente').textContent = pausadoVal;
+    document.getElementById('breakdownPausado').textContent   = pausadoVal;
 
-    // SVG elements
-    const ringProgress = document.getElementById('ringProgress');
-    const ringConcluido = document.getElementById('ringConcluido');
-    const ringPausado = document.getElementById('ringPausado');
+    const SEGS = statusData.filter(s => s.val > 0).map(s => ({
+      label: s.label, val: s.val, color: s.color
+    }));
+    const totalVal = SEGS.reduce((sum, s) => sum + s.val, 0);
 
-    const circProgress = 653.45;
-    const circConcluido = 502.65;
-    const circPausado = 351.85;
-
-    ringProgress.style.transform = 'rotate(-90deg)';
-    ringConcluido.style.transform = 'rotate(-90deg)';
-    ringPausado.style.transform = 'rotate(-90deg)';
-
-    function animarAnel(el, pct, circ, atraso) {
-      if (!el) return;
-      if (pct <= 0) {
-        el.style.opacity = '0'; 
-        return;
-      }
-      el.style.opacity = '1';
-      setTimeout(() => {
-        const inicio = performance.now();
-        const duracao = 1000;
-        function passo(agora) {
-          const t = Math.min((agora - inicio) / duracao, 1);
-          const ease = 1 - Math.pow(1 - t, 4);
-          const targetOffset = circ - (circ * pct);
-          const atualOffset = circ - ((circ - targetOffset) * ease);
-          el.style.strokeDashoffset = atualOffset.toFixed(1);
-          if (t < 1) requestAnimationFrame(passo);
-        }
-        requestAnimationFrame(passo);
-      }, atraso);
+    if (SEGS.length === 0 || totalVal === 0) {
+      document.getElementById('totalCount').textContent = '0';
+      return;
     }
 
-    const pctAndamento = totalVal > 0 ? (emAndamentoVal / totalVal) : 0;
-    const pctConcluido = totalVal > 0 ? (concluidoVal / totalVal) : 0;
-    const pctPausado   = totalVal > 0 ? (pausadoVal / totalVal) : 0;
+    const CX = 130, CY = 130, R = 92, SW = 22;
+    const GAP_RAD = (2.5 / 360) * 2 * Math.PI;
+    const segsN = SEGS.length;
+    const availAngle = 2 * Math.PI - (segsN > 1 ? segsN * GAP_RAD : 0);
 
-    animarAnel(ringProgress, pctAndamento, circProgress, 300);
-    animarAnel(ringConcluido, pctConcluido, circConcluido, 600);
-    animarAnel(ringPausado, pctPausado, circPausado, 900);
+    const segsGroup = document.getElementById('segsGroup');
+    const gapsGroup = document.getElementById('gapsGroup');
+    segsGroup.innerHTML = '';
+    if (gapsGroup) gapsGroup.innerHTML = '';
 
-    // Animate total counter
+    function polarToXY(a, r) { return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) }; }
+    function describeArc(sa, ea) {
+      const ro = R + SW / 2, ri = R - SW / 2;
+      const s1 = polarToXY(sa, ro), e1 = polarToXY(ea, ro);
+      const s2 = polarToXY(ea, ri), e2 = polarToXY(sa, ri);
+      const large = (ea - sa) > Math.PI ? 1 : 0;
+      return `M ${s1.x} ${s1.y} A ${ro} ${ro} 0 ${large} 1 ${e1.x} ${e1.y} L ${s2.x} ${s2.y} A ${ri} ${ri} 0 ${large} 0 ${e2.x} ${e2.y} Z`;
+    }
+    function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
+    let cursor = -Math.PI / 2;
+    const DURATION = 900;
+
+    SEGS.forEach((seg, idx) => {
+      const sweep = (seg.val / totalVal) * availAngle;
+      const half  = segsN > 1 ? GAP_RAD / 2 : 0;
+      const segStart = cursor + half;
+      const segEnd   = cursor + sweep - half;
+      cursor += sweep;
+
+      const pct = seg.val / totalVal;
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', describeArc(segStart, segStart + 0.001));
+      path.setAttribute('fill', seg.color);
+      path.setAttribute('class', 'seg-path');
+
+      path.addEventListener('mouseenter', () => {
+        const tt = document.getElementById('donut-tooltip');
+        document.getElementById('tt-name').textContent = seg.label;
+        document.getElementById('tt-name').style.color = seg.color;
+        document.getElementById('tt-val').textContent = seg.val + (seg.val === 1 ? ' projeto' : ' projetos');
+        document.getElementById('tt-pct').textContent = Math.round(pct * 100) + '% do total';
+        if (tt) tt.style.opacity = '1';
+      });
+      path.addEventListener('mouseleave', () => {
+        const tt = document.getElementById('donut-tooltip');
+        if (tt) tt.style.opacity = '0';
+      });
+      path.addEventListener('click', () => {
+        const isActive = path.classList.contains('active');
+        document.querySelectorAll('.seg-path').forEach(p => p.classList.remove('active'));
+        if (!isActive) path.classList.add('active');
+      });
+
+      segsGroup.appendChild(path);
+
+      const delay = 150 + idx * 200;
+      setTimeout(() => {
+        const t0 = performance.now();
+        function frame(now) {
+          const t = Math.min((now - t0) / DURATION, 1);
+          path.setAttribute('d', describeArc(segStart, segStart + (segEnd - segStart) * easeOutQuart(t)));
+          if (t < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }, delay);
+    });
+
+    // Animate counter
     const el = document.getElementById('totalCount');
     let count = 0;
     const target = totalVal;
-    
-    if (target === 0) {
-      el.textContent = '0';
-    } else {
-      const step = () => {
-        if (count < target) {
-          count++;
-          el.textContent = count;
-          setTimeout(step, Math.max(30, 200 / target));
-        }
-      };
-      setTimeout(step, 400);
-    }
+    const step = () => {
+      if (count < target) { count++; el.textContent = count; setTimeout(step, Math.max(20, 300 / target)); }
+    };
+    setTimeout(step, 300);
   });
 
   // Monthly Activity Modal logic & project data serialization
