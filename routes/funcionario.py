@@ -218,7 +218,7 @@ def dashboard():
         total_equipe=total_equipe,
         total_clientes=total_clientes,
         projetos_recentes=projetos,
-        orcamento_total=orcamento_total,
+        budget_total=orcamento_total,
         funcionarios_painel=funcionarios_painel,
         status_data_json=json.dumps(status_data),
         volumes_json=json.dumps(volumes),
