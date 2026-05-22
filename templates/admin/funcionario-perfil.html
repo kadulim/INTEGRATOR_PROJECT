@@ -33,9 +33,9 @@
     <div class="card">
       <div class="card-body">
         <h3 style="font-size:15px; font-weight:700; margin-bottom:16px;">Skills</h3>
-        {% if funcionario.lista_skills %}
+        {% if funcionario.lista_habilidades %}
         <div style="display:flex; flex-wrap:wrap; gap:8px;">
-          {% for skill in funcionario.lista_skills %}
+          {% for skill in funcionario.lista_habilidades %}
           <span class="badge badge-blue">{{ skill.nome }}</span>
           {% endfor %}
         </div>
