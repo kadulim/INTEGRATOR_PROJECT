@@ -359,10 +359,10 @@ def editar_projeto():
 
     prazo_str = request.form.get('prazo_str')
 
-try:
-    projeto.prazo = datetime.fromisoformat(prazo_str).date() if prazo_str else None
-except ValueError:
-    projeto.prazo = None
+    try:
+        projeto.prazo = datetime.fromisoformat(prazo_str).date() if prazo_str else None
+    except ValueError:
+        projeto.prazo = None
 
     projeto.descricao = request.form.get('descricao')
     projeto.cliente_id = request.form.get('cliente_id', type=int)
