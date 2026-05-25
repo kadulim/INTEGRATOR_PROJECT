@@ -144,5 +144,18 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/shared.js') }}"></script>
+<script>
+  // Exibir Flash Messages do Flask como Toasts
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      document.addEventListener('DOMContentLoaded', () => {
+        {% for category, msg in messages %}
+          {% set toast_type = 'error' if category in ['error', 'danger', 'message'] else 'success' %}
+          setTimeout(() => { toast("{{ msg | replace('\"', '\\\"') | replace('\n', ' ') }}", "{{ toast_type }}"); }, {{ loop.index * 150 }});
+        {% endfor %}
+      });
+    {% endif %}
+  {% endwith %}
+</script>
 </body>
 </html>

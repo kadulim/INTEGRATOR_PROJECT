@@ -181,6 +181,7 @@
   .content-scrollable {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 32px 32px 24px;
     display: flex;
     flex-direction: column;
@@ -198,9 +199,10 @@
     gap: 40px;
     align-items: center;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     min-height: 280px;
     flex-shrink: 0;
+    z-index: 10;
   }
 
   /* glow effects */
@@ -253,6 +255,7 @@
     position: relative;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
+    z-index: 50;
   }
   .donut-center {
     position: absolute; text-align: center; pointer-events: none;
@@ -654,7 +657,6 @@
   cursor: pointer;
 }
 .seg-path:hover  { filter: brightness(1.35); transform: scale(1.04); }
-.seg-path.active { filter: brightness(1.5);  transform: scale(1.07); }
 </style>
 {% endblock %}
 
@@ -713,16 +715,22 @@
     <div class="d-num" id="totalCount">0</div>
     <div class="d-lbl">Total</div>
   </div>
-  <!-- Tooltip flutuante -->
+  <!-- Tooltip flutuante de alta performance e riqueza visual -->
   <div id="donut-tooltip" style="
-    position:absolute; background:var(--s2); border:1px solid var(--b2);
-    border-radius:8px; padding:7px 12px; font-family:'Outfit',sans-serif;
+    position:absolute; background:rgba(16, 26, 45, 0.95); border:1px solid var(--b2);
+    backdrop-filter: blur(8px);
+    border-radius:10px; padding:10px 14px; font-family:'Outfit',sans-serif;
     pointer-events:none; opacity:0; transition:opacity 0.18s ease;
-    white-space:nowrap; z-index:10; top:50%; left:50%;
-    transform:translate(-50%, 68px);">
-    <div id="tt-name" style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;"></div>
-    <div id="tt-val" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--tx);margin-top:1px;"></div>
-    <div id="tt-pct" style="font-size:10px;color:var(--tx2);"></div>
+    z-index:10; top:50%; left:50%;
+    transform:translate(-50%, 68px); width:210px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);">
+    <div id="tt-name" style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:2px;"></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--tx);margin-top:1px;display:flex;justify-content:space-between;align-items:baseline;">
+      <span id="tt-val"></span>
+      <span id="tt-pct" style="font-size:10.5px;color:var(--tx2);font-weight:400;margin-left:8px;"></span>
+    </div>
+    <div id="tt-divider" style="height:1px;background:var(--b1);margin:8px 0;display:none;"></div>
+    <div id="tt-projects-list" style="display:flex;flex-direction:column;gap:5px;max-height:120px;overflow-y:auto;padding-right:2px;" class="custom-scroll"></div>
   </div>
 </div>
 
@@ -1010,6 +1018,7 @@
   
   const statusData = {{ status_data_json | safe }};
   const volumes = {{ volumes_json | safe }};
+  const projetosStatus = {{ projetos_status_json | safe }};
 
 
 
@@ -1045,6 +1054,9 @@
 
     function polarToXY(a, r) { return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) }; }
     function describeArc(sa, ea) {
+      if (ea - sa >= 2 * Math.PI - 0.001) {
+        ea = sa + 2 * Math.PI - 0.001;
+      }
       const ro = R + SW / 2, ri = R - SW / 2;
       const s1 = polarToXY(sa, ro), e1 = polarToXY(ea, ro);
       const s2 = polarToXY(ea, ri), e2 = polarToXY(sa, ri);
@@ -1060,8 +1072,8 @@
       const sweep = (seg.val / totalVal) * availAngle;
       const half  = segsN > 1 ? GAP_RAD / 2 : 0;
       const segStart = cursor + half;
-      const segEnd   = cursor + sweep - half;
-      cursor += sweep;
+      const segEnd   = cursor + half + sweep;
+      cursor += sweep + (segsN > 1 ? GAP_RAD : 0);
 
       const pct = seg.val / totalVal;
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -1074,31 +1086,68 @@
         document.getElementById('tt-name').textContent = seg.label;
         document.getElementById('tt-name').style.color = seg.color;
         document.getElementById('tt-val').textContent = seg.val + (seg.val === 1 ? ' projeto' : ' projetos');
-        document.getElementById('tt-pct').textContent = Math.round(pct * 100) + '% do total';
-        if (tt) tt.style.opacity = '1';
+        document.getElementById('tt-pct').textContent = Math.round(pct * 100) + '%';
+        
+        const keyMap = {
+          'Em andamento': 'em_andamento',
+          'Concluído': 'concluido',
+          'Pausado': 'pausado'
+        };
+        const statusKey = keyMap[seg.label];
+        const projs = projetosStatus[statusKey] || [];
+        
+        const listEl = document.getElementById('tt-projects-list');
+        const dividerEl = document.getElementById('tt-divider');
+        listEl.innerHTML = '';
+        
+        if (projs.length > 0) {
+          dividerEl.style.display = 'block';
+          projs.forEach(p => {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.flexDirection = 'column';
+            item.style.gap = '1px';
+            item.style.padding = '3px 0';
+            item.style.textAlign = 'left';
+            
+            item.innerHTML = `
+              <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.nome}">${p.nome}</span>
+              <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.prazo}</span>
+            `;
+            listEl.appendChild(item);
+          });
+        } else {
+          dividerEl.style.display = 'none';
+        }
+        
+        if (tt) {
+          tt.style.opacity = '1';
+          tt.style.pointerEvents = 'auto';
+        }
+        
+        if (tt && !tt.dataset.hoverBound) {
+          tt.addEventListener('mouseenter', () => clearTimeout(window.donutTtTimeout));
+          tt.addEventListener('mouseleave', () => {
+            window.donutTtTimeout = setTimeout(() => {
+              tt.style.opacity = '0';
+              tt.style.pointerEvents = 'none';
+            }, 150);
+          });
+          tt.dataset.hoverBound = 'true';
+        }
       });
       path.addEventListener('mouseleave', () => {
-        const tt = document.getElementById('donut-tooltip');
-        if (tt) tt.style.opacity = '0';
-      });
-      path.addEventListener('click', () => {
-        const isActive = path.classList.contains('active');
-        document.querySelectorAll('.seg-path').forEach(p => p.classList.remove('active'));
-        if (!isActive) path.classList.add('active');
+        window.donutTtTimeout = setTimeout(() => {
+          const tt = document.getElementById('donut-tooltip');
+          if (tt) {
+            tt.style.opacity = '0';
+            tt.style.pointerEvents = 'none';
+          }
+        }, 150);
       });
 
+      path.setAttribute('d', describeArc(segStart, segEnd));
       segsGroup.appendChild(path);
-
-      const delay = 150 + idx * 200;
-      setTimeout(() => {
-        const t0 = performance.now();
-        function frame(now) {
-          const t = Math.min((now - t0) / DURATION, 1);
-          path.setAttribute('d', describeArc(segStart, segStart + (segEnd - segStart) * easeOutQuart(t)));
-          if (t < 1) requestAnimationFrame(frame);
-        }
-        requestAnimationFrame(frame);
-      }, delay);
     });
 
     // Animate counter

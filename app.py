@@ -144,12 +144,39 @@ def cliente_dashboard():
         {'label': 'Pausado',      'val': pausados,   'color': '#FF5577'},
     ]
 
+    # ── Todos os projetos do cliente agrupados por status para o Donut Chart tooltip ──
+    projetos_por_status = {
+        'em_andamento': [],
+        'concluido': [],
+        'pausado': []
+    }
+    for proj in projetos:
+        status_str = proj.situacao or 'Pausado'
+        if status_str == 'Pendente':
+            status_str = 'Pausado'
+        if status_str == 'Cancelado':
+            continue
+        
+        proj_data = {
+            'nome': proj.nome,
+            'prazo': proj.prazo.strftime('%d/%m/%Y') if proj.prazo else 'Sem prazo',
+            'url': url_for('cliente_projeto_detalhe', projeto_id=proj.id)
+        }
+        
+        if status_str == 'Em andamento':
+            projetos_por_status['em_andamento'].append(proj_data)
+        elif status_str == 'Concluído':
+            projetos_por_status['concluido'].append(proj_data)
+        else:
+            projetos_por_status['pausado'].append(proj_data)
+
     return render_template('cliente/cliente-dashboard.html',
                            projetos=projetos,
                            total=total,
                            ativos=ativos,
                            concluidos=concluidos,
-                           status_data_json=json.dumps(status_data))
+                           status_data_json=json.dumps(status_data),
+                           projetos_status_json=json.dumps(projetos_por_status))
 
 # ---------------------------------------------------------------------------
 # Listagem de projetos do cliente
@@ -159,7 +186,11 @@ def cliente_dashboard():
 def cliente_projetos():
     cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
     projetos = cliente.projetos if cliente else []
-    return render_template('cliente/projetos.html', projetos=projetos)
+    if len(projetos) == 1:
+        return redirect(url_for('cliente_projeto_detalhe', projeto_id=projetos[0].id))  
+    else:
+        return render_template('cliente/projetos.html', projetos=projetos)
+
 
 # ---------------------------------------------------------------------------
 # Detalhes de um projeto específico (cliente)

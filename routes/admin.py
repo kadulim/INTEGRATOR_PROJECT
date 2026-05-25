@@ -198,6 +198,32 @@ def dashboard():
         else:
             current_month_projects['pausado'].append(proj)
 
+    # ── Todos os projetos agrupados por status para o Donut Chart tooltip ──
+    projetos_por_status = {
+        'em_andamento': [],
+        'concluido': [],
+        'pausado': []
+    }
+    for proj in Projeto.query.all():
+        status_str = proj.situacao or 'Pausado'
+        if status_str == 'Pendente':
+            status_str = 'Pausado'
+        if status_str == 'Cancelado':
+            continue
+        
+        proj_data = {
+            'nome': proj.nome,
+            'prazo': proj.prazo.strftime('%d/%m/%Y') if proj.prazo else 'Sem prazo',
+            'url': url_for('admin.projeto_detalhe', id=proj.id)
+        }
+        
+        if status_str == 'Em andamento':
+            projetos_por_status['em_andamento'].append(proj_data)
+        elif status_str == 'Concluído':
+            projetos_por_status['concluido'].append(proj_data)
+        else:
+            projetos_por_status['pausado'].append(proj_data)
+
     return render_template(
         'admin/dashboard.html',
         total_projetos    = total_projetos,
@@ -207,6 +233,7 @@ def dashboard():
         budget_total   = orcamento_total,
         funcionarios_painel = funcionarios_painel,
         status_data_json  = json.dumps(status_data),
+        projetos_status_json = json.dumps(projetos_por_status),
         volumes_json      = json.dumps(volumes),
         logs              = logs_data,
         todos_logs        = todos_logs_data,
