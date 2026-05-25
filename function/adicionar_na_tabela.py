@@ -46,9 +46,10 @@ def adicionar(app):
 
         # ─── Seed: Admin ────────────────────────────────────────────────
         admin_email = os.getenv('ADMIN_EMAIL')
-        if admin_email and not Usuario.query.filter_by(email=admin_email).first():
+        admin_nome = os.getenv('ADMIN_NOME')
+        if admin_email and not Usuario.query.filter_by(email=admin_email).first() and admin_nome and not Usuario.query.filter_by(nome=admin_nome).first():
             usuario = Usuario(
-                nome  = os.getenv('ADMIN_NOME'),
+                nome  = admin_nome,
                 email = admin_email,
                 senha = generate_password_hash(os.getenv('ADMIN_SENHA')),
                 tipo  = 'admin',
