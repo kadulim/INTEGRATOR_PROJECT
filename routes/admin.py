@@ -494,11 +494,18 @@ def clientes():
     )
 
 def _gerar_email_cliente(nome):
-    nome = unicodedata.normalize('NFKD', nome).encode('ascii', 'ignore').decode('utf-8')
-    nome = nome.lower()
-    nome = nome.replace(' ', '.')
-    nome = re.sub(r'[^a-z0-9.]', '', nome)
-    return f'{nome}@cobyte_cliente.com'
+    partes = nome.strip().split()
+    if len(partes) > 1:
+        nome_simplificado = f"{partes[0]} {partes[-1]}"
+    elif len(partes) == 1:
+        nome_simplificado = partes[0]
+    else:
+        nome_simplificado = ""
+    nome_simplificado = unicodedata.normalize('NFKD', nome_simplificado).encode('ascii', 'ignore').decode('utf-8')
+    nome_simplificado = nome_simplificado.lower()
+    nome_simplificado = nome_simplificado.replace(' ', '.')
+    nome_simplificado = re.sub(r'[^a-z0-9.]', '', nome_simplificado)
+    return f'{nome_simplificado}@cobyte_cliente.com'
 
 # ---------------------------------------------------------------------------
 # Criar novo cliente (cria Usuario + Cliente)
@@ -510,7 +517,15 @@ def add_cliente():
     senha = request.form.get('senha')
     empresa = request.form.get('empresa')
 
-    base_nome = unicodedata.normalize('NFKD', nome).encode(
+    partes_nome = nome.strip().split()
+    if len(partes_nome) > 1:
+        nome_simplificado = f"{partes_nome[0]} {partes_nome[-1]}"
+    elif len(partes_nome) == 1:
+        nome_simplificado = partes_nome[0]
+    else:
+        nome_simplificado = ""
+
+    base_nome = unicodedata.normalize('NFKD', nome_simplificado).encode(
         'ascii', 'ignore'
     ).decode('utf-8')
 
