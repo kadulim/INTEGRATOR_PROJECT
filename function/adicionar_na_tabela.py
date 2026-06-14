@@ -1,6 +1,6 @@
 import os
 from database import database
-from models import Usuario, Admin, Cliente, Funcionario, Projeto, Equipes, Habilidade, Requisito, Registro, equipes_projeto
+from models import User, Admin, Client, Employee, Project, Team, Skill, Requirement, Log, project_teams
 from werkzeug.security import generate_password_hash
 
 
@@ -47,18 +47,17 @@ def adicionar(app):
         # ─── Seed: Admin ────────────────────────────────────────────────
         admin_email = os.getenv('ADMIN_EMAIL')
         admin_nome = os.getenv('ADMIN_NOME')
-        if admin_email and not Usuario.query.filter_by(email=admin_email).first() and admin_nome and not Usuario.query.filter_by(nome=admin_nome).first():
-            usuario = Usuario(
-                nome  = admin_nome,
-                email = admin_email,
-                senha = generate_password_hash(os.getenv('ADMIN_SENHA')),
-                tipo  = 'admin',
-                nivel = 1
+        if admin_email and not User.query.filter_by(email_user=admin_email).first() and admin_nome and not User.query.filter_by(name_user=admin_nome).first():
+            user = User(
+                name_user     = admin_nome,
+                email_user    = admin_email,
+                password_user = generate_password_hash(os.getenv('ADMIN_SENHA')),
+                type_user     = 'admin',
             )
-            database.session.add(usuario)
+            database.session.add(user)
             database.session.flush()
 
-            admin = Admin(usuario_id=usuario.id, nivel='1')
+            admin = Admin(fk_user=user.pk_id_user, level_admin=1)
             database.session.add(admin)
             database.session.commit()
             print("[OK] Admin criado.")

@@ -15,6 +15,7 @@ import functools
 import json
 import os
 import sys
+
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 
@@ -30,7 +31,7 @@ _api_codeflow_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'a
 # Imports internos do projeto
 # ---------------------------------------------------------------------------
 from database import database
-from models import Usuario, Cliente, Projeto, Registro, Documento, Diagrama, Galeria, Comentario
+from models import User, Client, Project, Log, Document, Diagram, Gallery, Comment
 
 import function.login as logar
 import function.adicionar_na_tabela as adicionar_na_tabela
@@ -87,7 +88,7 @@ def login_required_nivel(nivel_minimo):
         def decorated_function(*args, **kwargs):
             if not current_user.is_authenticated:
                 return lm.unauthorized()
-            if current_user.nivel < nivel_minimo:
+            if current_user.type_user != 'admin':
                 abort(403)
             return f(*args, **kwargs)
         return decorated_function
@@ -98,7 +99,7 @@ def login_required_nivel(nivel_minimo):
 # ---------------------------------------------------------------------------
 @lm.user_loader
 def user_loader(id):
-    return database.session.get(Usuario, int(id))
+    return database.session.get(User, int(id))
 
 # =============================================================================
 # ROTAS PÚBLICAS
@@ -130,12 +131,12 @@ def logout():
 @app.route('/cliente-dashboard')
 @login_required
 def cliente_dashboard():
-    cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
-    projetos = cliente.projetos if cliente else []
+    cliente = Client.query.filter_by(fk_user=current_user.pk_id_user).first()
+    projetos = cliente.projects if cliente else []
 
     total = len(projetos)
-    ativos = sum(1 for p in projetos if p.situacao == 'Em andamento')
-    concluidos = sum(1 for p in projetos if p.situacao == 'Concluído')
+    ativos = sum(1 for p in projetos if p.status_project == 'Em andamento')
+    concluidos = sum(1 for p in projetos if p.status_project == 'Concluído')
     pausados = total - ativos - concluidos
 
     status_data = [
@@ -151,16 +152,16 @@ def cliente_dashboard():
         'pausado': []
     }
     for proj in projetos:
-        status_str = proj.situacao or 'Pausado'
+        status_str = proj.status_project or 'Pausado'
         if status_str == 'Pendente':
             status_str = 'Pausado'
         if status_str == 'Cancelado':
             continue
         
         proj_data = {
-            'nome': proj.nome,
-            'prazo': proj.prazo.strftime('%d/%m/%Y') if proj.prazo else 'Sem prazo',
-            'url': url_for('cliente_projeto_detalhe', projeto_id=proj.id)
+            'nome': proj.name_project,
+            'prazo': proj.end_date_project.strftime('%d/%m/%Y') if proj.end_date_project else 'Sem prazo',
+            'url': url_for('cliente_projeto_detalhe', projeto_id=proj.pk_id_project)
         }
         
         if status_str == 'Em andamento':
@@ -184,10 +185,10 @@ def cliente_dashboard():
 @app.route('/cliente-dashboard/projetos')
 @login_required
 def cliente_projetos():
-    cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
-    projetos = cliente.projetos if cliente else []
+    cliente = Client.query.filter_by(fk_user=current_user.pk_id_user).first()
+    projetos = cliente.projects if cliente else []
     if len(projetos) == 1:
-        return redirect(url_for('cliente_projeto_detalhe', projeto_id=projetos[0].id))  
+        return redirect(url_for('cliente_projeto_detalhe', projeto_id=projetos[0].pk_id_project))  
     else:
         return render_template('cliente/projetos.html', projetos=projetos)
 
@@ -198,18 +199,18 @@ def cliente_projetos():
 @app.route('/cliente-dashboard/projeto/<int:projeto_id>')
 @login_required
 def cliente_projeto_detalhe(projeto_id):
-    cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
+    cliente = Client.query.filter_by(fk_user=current_user.pk_id_user).first()
     if not cliente:
         abort(403)
-    projeto = Projeto.query.get_or_404(projeto_id)
-    if projeto.cliente_id != cliente.id:
+    projeto = Project.query.get_or_404(projeto_id)
+    if projeto.fk_client != cliente.pk_id_client:
         abort(403)
     
-    logs = Registro.query.filter_by(projeto_id=projeto_id).order_by(Registro.data.desc()).all()
-    documentos = Documento.query.filter_by(projeto_id=projeto_id).all()
-    diagramas = Diagrama.query.filter_by(projeto_id=projeto_id).all()
-    galeria = Galeria.query.filter_by(projeto_id=projeto_id).all()
-    comentarios = Comentario.query.filter_by(projeto_id=projeto_id).order_by(Comentario.data.asc()).all()
+    logs = Log.query.filter_by(fk_project=projeto_id).order_by(Log.date_log.desc()).all()
+    documentos = Document.query.filter_by(fk_project=projeto_id).all()
+    diagramas = Diagram.query.filter_by(fk_project=projeto_id).all()
+    galeria = Gallery.query.filter_by(fk_project=projeto_id).all()
+    comentarios = Comment.query.filter_by(fk_project=projeto_id).order_by(Comment.date_comment.asc()).all()
     return render_template('cliente/projeto-detalhe.html', projeto=projeto, logs=logs,
                            documentos=documentos, diagramas=diagramas, galeria=galeria, comentarios=comentarios)
 
@@ -219,24 +220,24 @@ def cliente_projeto_detalhe(projeto_id):
 @app.route('/cliente-dashboard/projeto/<int:projeto_id>/feedback', methods=['POST'])
 @login_required
 def cliente_feedback(projeto_id):
-    cliente = Cliente.query.filter_by(usuario_id=current_user.id).first()
+    cliente = Client.query.filter_by(fk_user=current_user.pk_id_user).first()
     if not cliente:
         abort(403)
-    projeto = Projeto.query.get_or_404(projeto_id)
-    if projeto.cliente_id != cliente.id:
+    projeto = Project.query.get_or_404(projeto_id)
+    if projeto.fk_client != cliente.pk_id_client:
         abort(403)
     
     feedback_tipo = request.form.get('feedback_tipo', 'Geral')
     comentario = request.form.get('comentario', '').strip()
     
     if comentario:
-        registro = Registro(
-            tipo='feedback',
-            acao=f"Feedback - {feedback_tipo}",
-            descricao=comentario,
-            projeto_id=projeto_id
+        log_entry = Log(
+            type_log='feedback',
+            description_log=comentario,
+            fk_project=projeto_id,
+            fk_user=current_user.pk_id_user
         )
-        database.session.add(registro)
+        database.session.add(log_entry)
         database.session.commit()
     
     return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
@@ -315,7 +316,7 @@ for subdir in ('documentos', 'diagramas', 'galeria'):
 @app.route('/projeto/<int:projeto_id>/upload-documento', methods=['POST'])
 @login_required
 def upload_documento(projeto_id):
-    projeto = Projeto.query.get_or_404(projeto_id)
+    projeto = Project.query.get_or_404(projeto_id)
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
     file = request.files['file']
@@ -334,21 +335,21 @@ def upload_documento(projeto_id):
     file_path = os.path.join(upload_path, unique_filename)
     file.save(file_path)
     
-    doc = Documento(
-        projeto_id=projeto_id,
-        nome=filename,
-        caminho=f"uploads/documentos/{unique_filename}",
-        tipo_arquivo=ext
+    doc = Document(
+        fk_project=projeto_id,
+        name_document=filename,
+        path_document=f"uploads/documentos/{unique_filename}",
+        type_document=ext
     )
     database.session.add(doc)
     
-    registro = Registro(
-        tipo='documento',
-        acao='Documento enviado',
-        descricao=f"Documento '{filename}' enviado por {current_user.nome}.",
-        projeto_id=projeto_id
+    log_entry = Log(
+        type_log='documento',
+        description_log=f"Documento '{filename}' enviado por {current_user.name_user}.",
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user
     )
-    database.session.add(registro)
+    database.session.add(log_entry)
     database.session.commit()
     return "Upload concluído", 200
 
@@ -358,29 +359,29 @@ def upload_documento(projeto_id):
 @app.route('/projeto/delete-documento/<int:doc_id>', methods=['POST'])
 @login_required
 def delete_documento(doc_id):
-    doc = Documento.query.get_or_404(doc_id)
-    projeto_id = doc.projeto_id
+    doc = Document.query.get_or_404(doc_id)
+    projeto_id = doc.fk_project
     
     try:
-        physical_path = os.path.join(app.root_path, 'static', doc.caminho)
+        physical_path = os.path.join(app.root_path, 'static', doc.path_document)
         if os.path.exists(physical_path):
             os.remove(physical_path)
     except Exception as e:
         print(f"Erro ao remover arquivo físico: {e}")
         
-    registro = Registro(
-        tipo='documento',
-        acao='Documento excluído',
-        descricao=f"Documento '{doc.nome}' excluído por {current_user.nome}.",
-        projeto_id=projeto_id
+    log_entry = Log(
+        type_log='documento',
+        description_log=f"Documento '{doc.name_document}' excluído por {current_user.name_user}.",
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user
     )
-    database.session.add(registro)
+    database.session.add(log_entry)
     database.session.delete(doc)
     database.session.commit()
     
-    if current_user.tipo == 'admin':
+    if current_user.type_user == 'admin':
         return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
-    elif current_user.tipo == 'funcionario':
+    elif current_user.type_user == 'employee':
         return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
     else:
         return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
@@ -391,7 +392,7 @@ def delete_documento(doc_id):
 @app.route('/projeto/<int:projeto_id>/upload-diagrama', methods=['POST'])
 @login_required
 def upload_diagrama(projeto_id):
-    projeto = Projeto.query.get_or_404(projeto_id)
+    projeto = Project.query.get_or_404(projeto_id)
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
     file = request.files['file']
@@ -410,20 +411,20 @@ def upload_diagrama(projeto_id):
     file_path = os.path.join(upload_path, unique_filename)
     file.save(file_path)
     
-    diag = Diagrama(
-        projeto_id=projeto_id,
-        nome=filename,
-        caminho=f"uploads/diagramas/{unique_filename}"
+    diag = Diagram(
+        fk_project=projeto_id,
+        name_diagram=filename,
+        path_diagram=f"uploads/diagramas/{unique_filename}"
     )
     database.session.add(diag)
     
-    registro = Registro(
-        tipo='diagrama',
-        acao='Diagrama enviado',
-        descricao=f"Diagrama '{filename}' enviado por {current_user.nome}.",
-        projeto_id=projeto_id
+    log_entry = Log(
+        type_log='diagrama',
+        description_log=f"Diagrama '{filename}' enviado por {current_user.name_user}.",
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user
     )
-    database.session.add(registro)
+    database.session.add(log_entry)
     database.session.commit()
     return "Upload concluído", 200
 
@@ -433,29 +434,29 @@ def upload_diagrama(projeto_id):
 @app.route('/projeto/delete-diagrama/<int:diag_id>', methods=['POST'])
 @login_required
 def delete_diagrama(diag_id):
-    diag = Diagrama.query.get_or_404(diag_id)
-    projeto_id = diag.projeto_id
+    diag = Diagram.query.get_or_404(diag_id)
+    projeto_id = diag.fk_project
     
     try:
-        physical_path = os.path.join(app.root_path, 'static', diag.caminho)
+        physical_path = os.path.join(app.root_path, 'static', diag.path_diagram)
         if os.path.exists(physical_path):
             os.remove(physical_path)
     except Exception as e:
         print(f"Erro ao remover arquivo físico: {e}")
         
-    registro = Registro(
-        tipo='diagrama',
-        acao='Diagrama excluído',
-        descricao=f"Diagrama '{diag.nome}' excluído por {current_user.nome}.",
-        projeto_id=projeto_id
+    log_entry = Log(
+        type_log='diagrama',
+        description_log=f"Diagrama '{diag.name_diagram}' excluído por {current_user.name_user}.",
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user
     )
-    database.session.add(registro)
+    database.session.add(log_entry)
     database.session.delete(diag)
     database.session.commit()
     
-    if current_user.tipo == 'admin':
+    if current_user.type_user == 'admin':
         return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
-    elif current_user.tipo == 'funcionario':
+    elif current_user.type_user == 'employee':
         return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
     else:
         return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
@@ -466,7 +467,7 @@ def delete_diagrama(diag_id):
 @app.route('/projeto/<int:projeto_id>/upload-galeria', methods=['POST'])
 @login_required
 def upload_galeria(projeto_id):
-    projeto = Projeto.query.get_or_404(projeto_id)
+    projeto = Project.query.get_or_404(projeto_id)
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
     file = request.files['file']
@@ -485,20 +486,19 @@ def upload_galeria(projeto_id):
     file_path = os.path.join(upload_path, unique_filename)
     file.save(file_path)
     
-    gal = Galeria(
-        projeto_id=projeto_id,
-        nome=filename,
-        caminho=f"uploads/galeria/{unique_filename}"
+    gal = Gallery(
+        fk_project=projeto_id,
+        path_gallery=f"uploads/galeria/{unique_filename}"
     )
     database.session.add(gal)
     
-    registro = Registro(
-        tipo='galeria',
-        acao='Imagem da galeria enviada',
-        descricao=f"Imagem '{filename}' enviada para a galeria por {current_user.nome}.",
-        projeto_id=projeto_id
+    log_entry = Log(
+        type_log='galeria',
+        description_log=f"Imagem '{filename}' enviada para a galeria por {current_user.name_user}.",
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user
     )
-    database.session.add(registro)
+    database.session.add(log_entry)
     database.session.commit()
     return "Upload concluído", 200
 
@@ -508,29 +508,29 @@ def upload_galeria(projeto_id):
 @app.route('/projeto/delete-galeria/<int:item_id>', methods=['POST'])
 @login_required
 def delete_galeria(item_id):
-    gal = Galeria.query.get_or_404(item_id)
-    projeto_id = gal.projeto_id
+    gal = Gallery.query.get_or_404(item_id)
+    projeto_id = gal.fk_project
     
     try:
-        physical_path = os.path.join(app.root_path, 'static', gal.caminho)
+        physical_path = os.path.join(app.root_path, 'static', gal.path_gallery)
         if os.path.exists(physical_path):
             os.remove(physical_path)
     except Exception as e:
         print(f"Erro ao remover arquivo físico: {e}")
         
-    registro = Registro(
-        tipo='galeria',
-        acao='Imagem da galeria excluída',
-        descricao=f"Imagem '{gal.nome}' removida da galeria por {current_user.nome}.",
-        projeto_id=projeto_id
+    log_entry = Log(
+        type_log='galeria',
+        description_log=f"Imagem removida da galeria por {current_user.name_user}.",
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user
     )
-    database.session.add(registro)
+    database.session.add(log_entry)
     database.session.delete(gal)
     database.session.commit()
     
-    if current_user.tipo == 'admin':
+    if current_user.type_user == 'admin':
         return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
-    elif current_user.tipo == 'funcionario':
+    elif current_user.type_user == 'employee':
         return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
     else:
         return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
@@ -545,36 +545,36 @@ def delete_galeria(item_id):
 @app.route('/projeto/<int:projeto_id>/add-comentario', methods=['POST'])
 @login_required
 def add_comentario(projeto_id):
-    projeto = Projeto.query.get_or_404(projeto_id)
+    projeto = Project.query.get_or_404(projeto_id)
     conteudo = request.form.get('conteudo', '').strip()
     if not conteudo:
         flash("O conteúdo do comentário não pode estar vazio.", "erro")
-        if current_user.tipo == 'admin':
+        if current_user.type_user == 'admin':
             return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
-        elif current_user.tipo == 'funcionario':
+        elif current_user.type_user == 'employee':
             return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
         else:
             return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
             
-    com = Comentario(
-        projeto_id=projeto_id,
-        usuario_id=current_user.id,
-        conteudo=conteudo
+    com = Comment(
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user,
+        content_comment=conteudo
     )
     database.session.add(com)
     
-    registro = Registro(
-        tipo='comentario',
-        acao='Comentário enviado',
-        descricao=f"{current_user.nome} adicionou um comentário.",
-        projeto_id=projeto_id
+    log_entry = Log(
+        type_log='comentario',
+        description_log=f"{current_user.name_user} adicionou um comentário.",
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user
     )
-    database.session.add(registro)
+    database.session.add(log_entry)
     database.session.commit()
     
-    if current_user.tipo == 'admin':
+    if current_user.type_user == 'admin':
         return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
-    elif current_user.tipo == 'funcionario':
+    elif current_user.type_user == 'employee':
         return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
     else:
         return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
@@ -585,21 +585,146 @@ def add_comentario(projeto_id):
 @app.route('/projeto/delete-comentario/<int:com_id>', methods=['POST'])
 @login_required
 def delete_comentario(com_id):
-    com = Comentario.query.get_or_404(com_id)
-    projeto_id = com.projeto_id
+    com = Comment.query.get_or_404(com_id)
+    projeto_id = com.fk_project
     
-    if current_user.nivel != 1 and com.usuario_id != current_user.id:
+    if current_user.type_user != 'admin' and com.fk_user != current_user.pk_id_user:
         abort(403)
         
     database.session.delete(com)
     database.session.commit()
     
-    if current_user.tipo == 'admin':
+    if current_user.type_user == 'admin':
         return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
-    elif current_user.tipo == 'funcionario':
+    elif current_user.type_user == 'employee':
         return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
     else:
         return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
+
+def _redirect_to_projeto(projeto_id):
+    if current_user.type_user == 'admin':
+        return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
+    elif current_user.type_user == 'employee':
+        return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
+    else:
+        return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
+
+def _next_version_name(current_name):
+    match = re.search(r' \(versão (\d+)\)', current_name)
+    if match:
+        v = int(match.group(1)) + 1
+        return re.sub(r' \(versão \d+\)', f' (versão {v})', current_name)
+    name_parts = current_name.rsplit('.', 1)
+    if len(name_parts) == 2:
+        return f"{name_parts[0]} (versão 2).{name_parts[1]}"
+    return f"{current_name} (versão 2)"
+
+def _update_file(record, attr_name, file, upload_subdir, allowed_exts):
+    ext = file.filename.rsplit('.', 1)[-1].lower()
+    if ext not in allowed_exts:
+        return "Tipo de arquivo inválido.", 400
+    filename = secure_filename(file.filename)
+    unique_filename = f"{int(time.time())}_{filename}"
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], upload_subdir)
+    os.makedirs(upload_path, exist_ok=True)
+    file.save(os.path.join(upload_path, unique_filename))
+    try:
+        old_path = os.path.join(app.root_path, 'static', getattr(record, attr_name))
+        if os.path.exists(old_path):
+            os.remove(old_path)
+    except Exception as e:
+        print(f"Erro ao remover arquivo físico: {e}")
+    setattr(record, attr_name, f"uploads/{upload_subdir}/{unique_filename}")
+
+# ---------------------------------------------------------------------------
+# Atualizar documento
+# ---------------------------------------------------------------------------
+@app.route('/projeto/update-documento/<int:doc_id>', methods=['POST'])
+@login_required
+def update_documento(doc_id):
+    doc = Document.query.get_or_404(doc_id)
+    projeto_id = doc.fk_project
+    if 'file' not in request.files:
+        flash("Nenhum arquivo enviado.", "erro")
+        return _redirect_to_projeto(projeto_id)
+    file = request.files['file']
+    if file.filename == '':
+        flash("Nenhum arquivo selecionado.", "erro")
+        return _redirect_to_projeto(projeto_id)
+    result = _update_file(doc, 'path_document', file, 'documentos', ['pdf', 'docx'])
+    if isinstance(result, tuple):
+        return result
+    database.session.commit()
+    log_entry = Log(
+        type_log='documento',
+        description_log=f"Documento '{doc.name_document}' foi atualizado por {current_user.name_user}.",
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user
+    )
+    database.session.add(log_entry)
+    database.session.commit()
+    flash("Documento atualizado com sucesso!", "sucesso")
+    return _redirect_to_projeto(projeto_id)
+
+# ---------------------------------------------------------------------------
+# Atualizar diagrama
+# ---------------------------------------------------------------------------
+@app.route('/projeto/update-diagrama/<int:diag_id>', methods=['POST'])
+@login_required
+def update_diagrama(diag_id):
+    diag = Diagram.query.get_or_404(diag_id)
+    projeto_id = diag.fk_project
+    if 'file' not in request.files:
+        flash("Nenhum arquivo enviado.", "erro")
+        return _redirect_to_projeto(projeto_id)
+    file = request.files['file']
+    if file.filename == '':
+        flash("Nenhum arquivo selecionado.", "erro")
+        return _redirect_to_projeto(projeto_id)
+    result = _update_file(diag, 'path_diagram', file, 'diagramas', ['png', 'jpg', 'jpeg', 'gif', 'svg'])
+    if isinstance(result, tuple):
+        return result
+    database.session.commit()
+    log_entry = Log(
+        type_log='diagrama',
+        description_log=f"Diagrama '{diag.name_diagram}' foi atualizado por {current_user.name_user}.",
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user
+    )
+    database.session.add(log_entry)
+    database.session.commit()
+    flash("Diagrama atualizado com sucesso!", "sucesso")
+    return _redirect_to_projeto(projeto_id)
+
+# ---------------------------------------------------------------------------
+# Atualizar galeria
+# ---------------------------------------------------------------------------
+@app.route('/projeto/update-galeria/<int:item_id>', methods=['POST'])
+@login_required
+def update_galeria(item_id):
+    gal = Gallery.query.get_or_404(item_id)
+    projeto_id = gal.fk_project
+    if 'file' not in request.files:
+        flash("Nenhum arquivo enviado.", "erro")
+        return _redirect_to_projeto(projeto_id)
+    file = request.files['file']
+    if file.filename == '':
+        flash("Nenhum arquivo selecionado.", "erro")
+        return _redirect_to_projeto(projeto_id)
+    result = _update_file(gal, 'path_gallery', file, 'galeria', ['png', 'jpg', 'jpeg', 'gif', 'svg'])
+    if isinstance(result, tuple):
+        return result
+    database.session.commit()
+    log_entry = Log(
+        type_log='galeria',
+        description_log=f"Imagem na galeria foi atualizada por {current_user.name_user}.",
+        fk_project=projeto_id,
+        fk_user=current_user.pk_id_user
+    )
+    database.session.add(log_entry)
+    database.session.commit()
+    flash("Galeria atualizada com sucesso!", "sucesso")
+    return _redirect_to_projeto(projeto_id)
 
 # =============================================================================
 # Ponto de entrada da aplicação
