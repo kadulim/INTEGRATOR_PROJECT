@@ -27,7 +27,7 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 @admin_bp.before_request
 @login_required
 def verificar_nivel_admin():
-    if current_user.nivel != 1:
+    if not current_user.admin or current_user.admin.level_admin != 1:
         abort(403)
 
 # =============================================================================
@@ -35,11 +35,10 @@ def verificar_nivel_admin():
 # =============================================================================
 def registrar_log(tipo, acao, descricao, projeto_id=None):
     try:
-        novo_registro = Registro(
-            tipo=tipo,
-            acao=acao,
-            descricao=descricao,
-            projeto_id=projeto_id
+        novo_registro = Log(
+            type_log=tipo,
+            description_log=descricao,
+            fk_project=projeto_id
         )
         database.session.add(novo_registro)
         database.session.commit()
@@ -314,8 +313,8 @@ def projeto_detalhe():
     if equipes_ids:
         membros = (
             database.session.query(Funcionario, Usuario)
-            .join(membros_equipe, Funcionario.id == membros_equipe.c.funcionario_id)
-            .filter(membros_equipe.c.equipe_id.in_(equipes_ids))
+            .join(membros_equipe, Funcionario.id == membros_equipe.c.fk_employee)
+            .filter(membros_equipe.c.fk_team.in_(equipes_ids))
             .join(Usuario, Funcionario.usuario_id == Usuario.id)
             .distinct()
             .all()
@@ -672,7 +671,7 @@ def excluir_equipe(id):
     equipe = Equipes.query.get_or_404(id)
     nome = equipe.nome
     try:
-        database.session.execute(equipes_projeto.delete().where(equipes_projeto.c.equipe_id == id))
+        database.session.execute(equipes_projeto.delete().where(equipes_projeto.c.fk_team == id))
         equipe.membros_da_equipe = []
         database.session.delete(equipe)
         database.session.commit()
@@ -772,11 +771,9 @@ def equipe_add_membro(equipe_id):
             equipe.membros_da_equipe.append(funcionario)
             
             nome_func = funcionario.usuario_rel.nome if funcionario.usuario_rel else 'Desconhecido'
-            registro = Registro(
-                tipo="equipe",
-                acao="Membro adicionado",
-                descricao=f"Funcionário {nome_func} foi adicionado à equipe {equipe.nome}.",
-                projeto_id=None
+            registro = Log(
+                type_log="Membro adicionado",
+                description_log=f"Funcionário {nome_func} foi adicionado à equipe {equipe.nome}.",
             )
             database.session.add(registro)
             database.session.commit()
@@ -794,11 +791,9 @@ def equipe_remover_membro(equipe_id, funcionario_id):
         equipe.membros_da_equipe.remove(funcionario)
         
         nome_func = funcionario.usuario_rel.nome if funcionario.usuario_rel else 'Desconhecido'
-        registro = Registro(
-            tipo="equipe",
-            acao="Membro removido",
-            descricao=f"Funcionário {nome_func} foi removido da equipe {equipe.nome}.",
-            projeto_id=None
+        registro = Log(
+            type_log="Membro removido",
+            description_log=f"Funcionário {nome_func} foi removido da equipe {equipe.nome}.",
         )
         database.session.add(registro)
         database.session.commit()

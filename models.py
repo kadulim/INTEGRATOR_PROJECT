@@ -1,6 +1,7 @@
 from database import database as db
 from flask_login import UserMixin
 from datetime import datetime
+from sqlalchemy.ext.hybrid import hybrid_property
 
 # ---------------------------------------------------------------------------
 # Tabelas de Associação (Many-to-Many)
@@ -84,6 +85,51 @@ class User(UserMixin, db.Model):
     def get_id(self):
         return str(self.pk_id_user)
 
+    # ── Aliases Português → Inglês ──────────────────────────────────
+    @hybrid_property
+    def id(self): return self.pk_id_user
+    @id.setter
+    def id(self, v): self.pk_id_user = v
+    @id.expression
+    def id(cls): return cls.pk_id_user
+
+    @property
+    def nome(self): return self.name_user
+    @nome.setter
+    def nome(self, v): self.name_user = v
+
+    @hybrid_property
+    def email(self): return self.email_user
+    @email.setter
+    def email(self, v): self.email_user = v
+    @email.expression
+    def email(cls): return cls.email_user
+
+    @property
+    def senha(self): return self.password_user
+    @senha.setter
+    def senha(self, v): self.password_user = v
+
+    @property
+    def tipo(self): return self.type_user
+    @tipo.setter
+    def tipo(self, v): self.type_user = v
+
+    @property
+    def status(self): return self.status_user
+    @status.setter
+    def status(self, v): self.status_user = v
+
+    @property
+    def nivel(self):
+        if self.admin:
+            return self.admin.level_admin
+        return None
+    @nivel.setter
+    def nivel(self, v):
+        if self.admin:
+            self.admin.level_admin = v
+
     def __repr__(self):
         return f"<User pk_id_user={self.pk_id_user} email_user={self.email_user!r}>"
 
@@ -109,6 +155,22 @@ class Admin(db.Model):
     __table_args__ = (
         db.Index("ix_admin_fk_user", "fk_user"),
     )
+
+    # ── Aliases ─────────────────────────────────────────────────────
+    @property
+    def id(self): return self.pk_id_admin
+    @id.setter
+    def id(self, v): self.pk_id_admin = v
+
+    @property
+    def usuario_id(self): return self.fk_user
+    @usuario_id.setter
+    def usuario_id(self, v): self.fk_user = v
+
+    @property
+    def nivel(self): return self.level_admin
+    @nivel.setter
+    def nivel(self, v): self.level_admin = v
 
     def __repr__(self):
         return f"<Admin pk_id_admin={self.pk_id_admin} fk_user={self.fk_user}>"
@@ -140,6 +202,40 @@ class Client(db.Model):
         db.Index("ix_client_cnpj_client", "cnpj_client"),
     )
 
+    # ── Aliases ─────────────────────────────────────────────────────
+    @property
+    def id(self): return self.pk_id_client
+    @id.setter
+    def id(self, v): self.pk_id_client = v
+
+    @property
+    def usuario_id(self): return self.fk_user
+    @usuario_id.setter
+    def usuario_id(self, v): self.fk_user = v
+
+    @property
+    def empresa(self): return self.company_client
+    @empresa.setter
+    def empresa(self, v): self.company_client = v
+
+    @property
+    def cnpj(self): return self.cnpj_client
+    @cnpj.setter
+    def cnpj(self, v): self.cnpj_client = v
+
+    @property
+    def telefone(self): return self.phone_client
+    @telefone.setter
+    def telefone(self, v): self.phone_client = v
+
+    @property
+    def usuario_rel(self): return self.user
+
+    @property
+    def projetos(self): return self.projects
+    @projetos.setter
+    def projetos(self, v): self.projects = v
+
     def __repr__(self):
         return f"<Client pk_id_client={self.pk_id_client} company_client={self.company_client!r}>"
 
@@ -160,6 +256,24 @@ class Skill(db.Model):
         secondary=employee_skills,
         back_populates="skills",
     )
+
+    # ── Aliases ─────────────────────────────────────────────────────
+    @property
+    def id(self): return self.pk_id_skill
+    @id.setter
+    def id(self, v): self.pk_id_skill = v
+
+    @hybrid_property
+    def nome(self): return self.name_skill
+    @nome.setter
+    def nome(self, v): self.name_skill = v
+    @nome.expression
+    def nome(cls): return cls.name_skill
+
+    @property
+    def descricao(self): return self.description_skill
+    @descricao.setter
+    def descricao(self, v): self.description_skill = v
 
     def __repr__(self):
         return f"<Skill pk_id_skill={self.pk_id_skill} name_skill={self.name_skill!r}>"
@@ -197,6 +311,39 @@ class Employee(db.Model):
         db.Index("ix_employee_fk_user", "fk_user"),
     )
 
+    # ── Aliases ─────────────────────────────────────────────────────
+    @hybrid_property
+    def id(self): return self.pk_id_employee
+    @id.setter
+    def id(self, v): self.pk_id_employee = v
+    @id.expression
+    def id(cls): return cls.pk_id_employee
+
+    @hybrid_property
+    def usuario_id(self): return self.fk_user
+    @usuario_id.setter
+    def usuario_id(self, v): self.fk_user = v
+    @usuario_id.expression
+    def usuario_id(cls): return cls.fk_user
+
+    @property
+    def cargo(self): return self.role_employee
+    @cargo.setter
+    def cargo(self, v): self.role_employee = v
+
+    @property
+    def usuario_rel(self): return self.user
+
+    @property
+    def lista_habilidades(self): return self.skills
+    @lista_habilidades.setter
+    def lista_habilidades(self, v): self.skills = v
+
+    @property
+    def lista_equipes(self): return self.teams
+    @lista_equipes.setter
+    def lista_equipes(self, v): self.teams = v
+
     def __repr__(self):
         return f"<Employee pk_id_employee={self.pk_id_employee} role_employee={self.role_employee!r}>"
 
@@ -212,6 +359,8 @@ class Team(db.Model):
     name_team        = db.Column(db.String(120), nullable=False)
     description_team = db.Column(db.Text, nullable=True)
     status_team      = db.Column(db.String(20), nullable=False, default="active")
+    funcao           = db.Column(db.String(250), nullable=True)
+    lider_equipe     = db.Column(db.Integer, nullable=True)
 
     employees = db.relationship(
         "Employee",
@@ -223,6 +372,39 @@ class Team(db.Model):
         secondary=project_teams,
         back_populates="teams",
     )
+
+    # ── Aliases ─────────────────────────────────────────────────────
+    @hybrid_property
+    def id(self): return self.pk_id_team
+    @id.setter
+    def id(self, v): self.pk_id_team = v
+    @id.expression
+    def id(cls): return cls.pk_id_team
+
+    @property
+    def nome(self): return self.name_team
+    @nome.setter
+    def nome(self, v): self.name_team = v
+
+    @property
+    def descricao(self): return self.description_team
+    @descricao.setter
+    def descricao(self, v): self.description_team = v
+
+    @property
+    def status(self): return self.status_team
+    @status.setter
+    def status(self, v): self.status_team = v
+
+    @property
+    def membros_da_equipe(self): return self.employees
+    @membros_da_equipe.setter
+    def membros_da_equipe(self, v): self.employees = v
+
+    @property
+    def projetos(self): return self.projects
+    @projetos.setter
+    def projetos(self, v): self.projects = v
 
     def __repr__(self):
         return f"<Team pk_id_team={self.pk_id_team} name_team={self.name_team!r}>"
@@ -246,6 +428,7 @@ class Project(db.Model):
     status_project      = db.Column(db.String(20), nullable=False, default="open")
     start_date_project  = db.Column(db.Date, nullable=True)
     end_date_project    = db.Column(db.Date, nullable=True)
+    orcamento           = db.Column(db.Float, nullable=True, default=0.0)
 
     client       = db.relationship("Client",      back_populates="projects")
     teams        = db.relationship(
@@ -264,6 +447,58 @@ class Project(db.Model):
         db.Index("ix_project_fk_client",     "fk_client"),
         db.Index("ix_project_status_project","status_project"),
     )
+
+    # ── Aliases ─────────────────────────────────────────────────────
+    @hybrid_property
+    def id(self): return self.pk_id_project
+    @id.setter
+    def id(self, v): self.pk_id_project = v
+    @id.expression
+    def id(cls): return cls.pk_id_project
+
+    @hybrid_property
+    def cliente_id(self): return self.fk_client
+    @cliente_id.setter
+    def cliente_id(self, v): self.fk_client = v
+    @cliente_id.expression
+    def cliente_id(cls): return cls.fk_client
+
+    @property
+    def nome(self): return self.name_project
+    @nome.setter
+    def nome(self, v): self.name_project = v
+
+    @property
+    def descricao(self): return self.description_project
+    @descricao.setter
+    def descricao(self, v): self.description_project = v
+
+    @hybrid_property
+    def situacao(self): return self.status_project
+    @situacao.setter
+    def situacao(self, v): self.status_project = v
+    @situacao.expression
+    def situacao(cls): return cls.status_project
+
+    @hybrid_property
+    def prazo(self): return self.end_date_project
+    @prazo.setter
+    def prazo(self, v): self.end_date_project = v
+    @prazo.expression
+    def prazo(cls): return cls.end_date_project
+
+    @property
+    def cliente_rel(self): return self.client
+
+    @property
+    def lista_equipes(self): return self.teams
+    @lista_equipes.setter
+    def lista_equipes(self, v): self.teams = v
+
+    @property
+    def requisitos(self): return self.requirements
+    @requisitos.setter
+    def requisitos(self, v): self.requirements = v
 
     def __repr__(self):
         return f"<Project pk_id_project={self.pk_id_project} name_project={self.name_project!r}>"
@@ -298,6 +533,44 @@ class Requirement(db.Model):
         db.Index("ix_requirement_fk_project",        "fk_project"),
         db.Index("ix_requirement_status_requirement", "status_requirement"),
     )
+
+    # ── Aliases ─────────────────────────────────────────────────────
+    @property
+    def id(self): return self.pk_id_requirement
+    @id.setter
+    def id(self, v): self.pk_id_requirement = v
+
+    @hybrid_property
+    def projeto_id(self): return self.fk_project
+    @projeto_id.setter
+    def projeto_id(self, v): self.fk_project = v
+    @projeto_id.expression
+    def projeto_id(cls): return cls.fk_project
+
+    @property
+    def equipe_id(self): return self.fk_team
+    @equipe_id.setter
+    def equipe_id(self, v): self.fk_team = v
+
+    @property
+    def titulo(self): return self.name_requirement
+    @titulo.setter
+    def titulo(self, v): self.name_requirement = v
+
+    @property
+    def descricao(self): return self.description_requirement
+    @descricao.setter
+    def descricao(self, v): self.description_requirement = v
+
+    @property
+    def tipo(self): return self.type_requirement
+    @tipo.setter
+    def tipo(self, v): self.type_requirement = v
+
+    @property
+    def situacao(self): return self.status_requirement
+    @situacao.setter
+    def situacao(self, v): self.status_requirement = v
 
     def __repr__(self):
         return f"<Requirement pk_id_requirement={self.pk_id_requirement} name_requirement={self.name_requirement!r}>"
@@ -341,6 +614,54 @@ class Log(db.Model):
         db.Index("ix_log_date_log",   "date_log"),
     )
 
+    # ── Aliases ─────────────────────────────────────────────────────
+    @property
+    def id(self): return self.pk_id_log
+    @id.setter
+    def id(self, v): self.pk_id_log = v
+
+    @property
+    def usuario_id(self): return self.fk_user
+    @usuario_id.setter
+    def usuario_id(self, v): self.fk_user = v
+
+    @hybrid_property
+    def projeto_id(self): return self.fk_project
+    @projeto_id.setter
+    def projeto_id(self, v): self.fk_project = v
+    @projeto_id.expression
+    def projeto_id(cls): return cls.fk_project
+
+    @property
+    def equipe_id(self): return self.fk_team
+    @equipe_id.setter
+    def equipe_id(self, v): self.fk_team = v
+
+    @property
+    def descricao(self): return self.description_log
+    @descricao.setter
+    def descricao(self, v): self.description_log = v
+
+    @hybrid_property
+    def data(self): return self.date_log
+    @data.setter
+    def data(self, v): self.date_log = v
+    @data.expression
+    def data(cls): return cls.date_log
+
+    @property
+    def tipo(self): return self.type_log
+    @tipo.setter
+    def tipo(self, v): self.type_log = v
+
+    # `acao` was part of old Registro; redirect to type_log
+    @hybrid_property
+    def acao(self): return self.type_log
+    @acao.setter
+    def acao(self, v): self.type_log = v
+    @acao.expression
+    def acao(cls): return cls.type_log
+
     def __repr__(self):
         return f"<Log pk_id_log={self.pk_id_log} type_log={self.type_log!r} date_log={self.date_log}>"
 
@@ -376,6 +697,44 @@ class Document(db.Model):
         db.Index("ix_document_fk_team",    "fk_team"),
     )
 
+    # ── Aliases ─────────────────────────────────────────────────────
+    @property
+    def id(self): return self.pk_id_document
+    @id.setter
+    def id(self, v): self.pk_id_document = v
+
+    @hybrid_property
+    def projeto_id(self): return self.fk_project
+    @projeto_id.setter
+    def projeto_id(self, v): self.fk_project = v
+    @projeto_id.expression
+    def projeto_id(cls): return cls.fk_project
+
+    @property
+    def equipe_id(self): return self.fk_team
+    @equipe_id.setter
+    def equipe_id(self, v): self.fk_team = v
+
+    @property
+    def nome(self): return self.name_document
+    @nome.setter
+    def nome(self, v): self.name_document = v
+
+    @property
+    def caminho(self): return self.path_document
+    @caminho.setter
+    def caminho(self, v): self.path_document = v
+
+    @property
+    def tipo_arquivo(self): return self.type_document
+    @tipo_arquivo.setter
+    def tipo_arquivo(self, v): self.type_document = v
+
+    @property
+    def data_envio(self): return self.upload_date_document
+    @data_envio.setter
+    def data_envio(self, v): self.upload_date_document = v
+
     def __repr__(self):
         return f"<Document pk_id_document={self.pk_id_document} name_document={self.name_document!r}>"
 
@@ -410,6 +769,39 @@ class Diagram(db.Model):
         db.Index("ix_diagram_fk_team",    "fk_team"),
     )
 
+    # ── Aliases ─────────────────────────────────────────────────────
+    @property
+    def id(self): return self.pk_id_diagram
+    @id.setter
+    def id(self, v): self.pk_id_diagram = v
+
+    @hybrid_property
+    def projeto_id(self): return self.fk_project
+    @projeto_id.setter
+    def projeto_id(self, v): self.fk_project = v
+    @projeto_id.expression
+    def projeto_id(cls): return cls.fk_project
+
+    @property
+    def equipe_id(self): return self.fk_team
+    @equipe_id.setter
+    def equipe_id(self, v): self.fk_team = v
+
+    @property
+    def nome(self): return self.name_diagram
+    @nome.setter
+    def nome(self, v): self.name_diagram = v
+
+    @property
+    def tipo(self): return self.type_diagram
+    @tipo.setter
+    def tipo(self, v): self.type_diagram = v
+
+    @property
+    def caminho(self): return self.path_diagram
+    @caminho.setter
+    def caminho(self, v): self.path_diagram = v
+
     def __repr__(self):
         return f"<Diagram pk_id_diagram={self.pk_id_diagram} name_diagram={self.name_diagram!r}>"
 
@@ -442,6 +834,34 @@ class Gallery(db.Model):
         db.Index("ix_gallery_fk_project", "fk_project"),
         db.Index("ix_gallery_fk_team",    "fk_team"),
     )
+
+    # ── Aliases ─────────────────────────────────────────────────────
+    @property
+    def id(self): return self.pk_id_gallery
+    @id.setter
+    def id(self, v): self.pk_id_gallery = v
+
+    @hybrid_property
+    def projeto_id(self): return self.fk_project
+    @projeto_id.setter
+    def projeto_id(self, v): self.fk_project = v
+    @projeto_id.expression
+    def projeto_id(cls): return cls.fk_project
+
+    @property
+    def equipe_id(self): return self.fk_team
+    @equipe_id.setter
+    def equipe_id(self, v): self.fk_team = v
+
+    @property
+    def caminho(self): return self.path_gallery
+    @caminho.setter
+    def caminho(self, v): self.path_gallery = v
+
+    @property
+    def data(self): return self.date_gallery
+    @data.setter
+    def data(self, v): self.date_gallery = v
 
     def __repr__(self):
         return f"<Gallery pk_id_gallery={self.pk_id_gallery} path_gallery={self.path_gallery!r}>"
@@ -483,6 +903,44 @@ class Comment(db.Model):
         db.Index("ix_comment_fk_team",    "fk_team"),
         db.Index("ix_comment_date_comment","date_comment"),
     )
+
+    # ── Aliases ─────────────────────────────────────────────────────
+    @property
+    def id(self): return self.pk_id_comment
+    @id.setter
+    def id(self, v): self.pk_id_comment = v
+
+    @property
+    def usuario_id(self): return self.fk_user
+    @usuario_id.setter
+    def usuario_id(self, v): self.fk_user = v
+
+    @hybrid_property
+    def projeto_id(self): return self.fk_project
+    @projeto_id.setter
+    def projeto_id(self, v): self.fk_project = v
+    @projeto_id.expression
+    def projeto_id(cls): return cls.fk_project
+
+    @property
+    def equipe_id(self): return self.fk_team
+    @equipe_id.setter
+    def equipe_id(self, v): self.fk_team = v
+
+    @property
+    def conteudo(self): return self.content_comment
+    @conteudo.setter
+    def conteudo(self, v): self.content_comment = v
+
+    @hybrid_property
+    def data(self): return self.date_comment
+    @data.setter
+    def data(self, v): self.date_comment = v
+    @data.expression
+    def data(cls): return cls.date_comment
+
+    @property
+    def usuario_rel(self): return self.user
 
     def __repr__(self):
         return f"<Comment pk_id_comment={self.pk_id_comment} fk_user={self.fk_user} date_comment={self.date_comment}>"
