@@ -39,8 +39,10 @@ instance/
 *.sqlite
 *.sqlite3
 
-# ── Uploads de usuários (documentos, diagramas, galeria)
-static/uploads/
+# ── Uploads de usuários — pastas preservadas, conteúdo ignorado
+static/uploads/*
+!static/uploads/*/
+!static/uploads/*/.gitkeep
 
 # ── Pasta img/ na raiz (duplicada em static/img/)
 img/
