@@ -34,7 +34,7 @@
 
 <body>
 
-{% set user_name = current_user.nome if current_user.is_authenticated and current_user.nome else 'Usuário' %}
+{% set user_name = current_user.name_user if current_user.is_authenticated and current_user.name_user else 'Usuário' %}
 {% set user_initials = user_name[:2].upper() %}
 
 <div class="app-shell">
@@ -202,7 +202,7 @@
           </div>
 
           <div class="user-role">
-            {{ 'Administrador' if current_user.is_authenticated and current_user.tipo == 'admin' else 'Usuário' }}
+            {{ 'Administrador' if current_user.is_authenticated and current_user.type_user == 'admin' else 'Usuário' }}
           </div>
 
         </div>

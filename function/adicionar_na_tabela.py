@@ -23,6 +23,8 @@ def adicionar(app):
         # Tabela project / projeto
         _try("ALTER TABLE project ADD COLUMN prioridade VARCHAR(20)")
         _try("ALTER TABLE projeto ADD COLUMN prioridade VARCHAR(20)")
+        _try("ALTER TABLE project ADD COLUMN orcamento FLOAT DEFAULT 0")
+        _try("ALTER TABLE projeto ADD COLUMN orcamento FLOAT DEFAULT 0")
         # Tabela requirement / requisito
         _try("ALTER TABLE requirement ADD COLUMN tipo VARCHAR(50)")
         _try("ALTER TABLE requisito ADD COLUMN tipo VARCHAR(50)")

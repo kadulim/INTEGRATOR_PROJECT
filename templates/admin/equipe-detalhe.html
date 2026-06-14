@@ -1,7 +1,7 @@
 {% extends 'admin/base.html' %}
 {% set active_page = 'equipes' %}
 
-{% block title %}{{ equipe.nome }} — CoByte{% endblock %}
+{% block title %}{{ equipe.name_team }} — CoByte{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -508,9 +508,9 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         <span>Equipes</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-        <span style="color:var(--ac);">{{ equipe.nome }}</span>
+        <span style="color:var(--ac);">{{ equipe.name_team }}</span>
       </div>
-      <h1 class="page-title">{{ equipe.nome|upper }}</h1>
+      <h1 class="page-title">{{ equipe.name_team|upper }}</h1>
     </div>
     <div class="tb-right">
       <a href="{{ url_for('admin.equipes') }}" class="btn btn-outline btn-sm">
@@ -528,15 +528,15 @@
       <!-- Info -->
       <div class="team-info-main">
         <h1>
-          {{ equipe.nome|upper }}
+          {{ equipe.name_team|upper }}
           <span class="badge badge-purple" style="font-size: 11px; padding: 2px 8px; border-radius: 4px;">Ativa</span>
         </h1>
         <p class="team-description">
-          {{ equipe.descricao or 'Sem descrição cadastrada.' }}
+          {{ equipe.description_team or 'Sem descrição cadastrada.' }}
         </p>
         <div class="team-tags">
-          {% if equipe.funcao %}
-          <span class="badge badge-purple">{{ equipe.funcao }}</span>
+          {% if equipe.role_employee %}
+          <span class="badge badge-purple">{{ equipe.role_employee }}</span>
           {% endif %}
         </div>
       </div>
@@ -545,7 +545,7 @@
       <div class="team-meta-list">
         <div class="team-meta-item">
           <span class="team-meta-label"><i data-lucide="user" style="width:14px;"></i>Líder da equipe</span>
-          <span class="team-meta-value">{{ lider.usuario_rel.nome if lider and lider.usuario_rel else 'Não definido' }}</span>
+          <span class="team-meta-value">{{ lider.user.name_user if lider and lider.user else 'Não definido' }}</span>
         </div>
         <div class="team-meta-item">
           <span class="team-meta-label"><i data-lucide="users" style="width:14px;"></i>Membros</span>
@@ -635,18 +635,18 @@
           </div>
           <div class="members-list">
             {% for func in funcionarios %}
-            {% set nome_func = func.usuario_rel.nome if func.usuario_rel else 'Desconhecido' %}
+            {% set nome_func = func.user.name_user if func.user else 'Desconhecido' %}
               <div class="member-item">
                 <!-- Hover remove member form -->
-                <form action="{{ url_for('admin.equipe_remover_membro', equipe_id=equipe.id, funcionario_id=func.id) }}" method="POST" class="member-remove-form" onsubmit="return confirm('Tem certeza que deseja remover {{ nome_func }} desta equipe?');">
+                <form action="{{ url_for('admin.equipe_remover_membro', equipe_id=equipe.pk_id_team, funcionario_id=func.pk_id_employee) }}" method="POST" class="member-remove-form" onsubmit="return confirm('Tem certeza que deseja remover {{ nome_func }} desta equipe?');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button type="submit" class="btn-remove-member" title="Remover da Equipe">&times;</button>
                 </form>
-                <div class="member-avatar {% if lider and func.id == lider.id %}leader{% endif %}">
+                <div class="member-avatar {% if lider and func.pk_id_employee == lider.id %}leader{% endif %}">
                   {{ nome_func[:2].upper() }}
                 </div>
                 <span class="member-name">{{ nome_func }}</span>
-                <span class="member-role">{% if lider and func.id == lider.id %}Líder{% else %}Membro{% endif %}</span>
+                <span class="member-role">{% if lider and func.pk_id_employee == lider.id %}Líder{% else %}Membro{% endif %}</span>
               </div>
             {% else %}
               <p style="color: var(--tx2); font-size: 13px; padding: 24px;">Nenhum membro vinculado.</p>
@@ -661,13 +661,13 @@
             <a class="section-action">Ver todos</a>
           </div>
           <div>
-            {% for proj in projetos if proj.situacao == 'Em andamento' %}
+            {% for proj in projetos if proj.status_project == 'Em andamento' %}
               <div class="project-row">
                 <div class="project-info">
                   <div class="project-icon" style="color: #a855f7;"><i data-lucide="folder" style="width: 16px;"></i></div>
                   <div>
-                    <div style="font-weight: 600; font-size: 13px; color: var(--tx);">{{ proj.nome }}</div>
-                    <div style="font-size: 11px; color: var(--tx2);">{{ proj.descricao[:40] }}...</div>
+                    <div style="font-weight: 600; font-size: 13px; color: var(--tx);">{{ proj.name_project }}</div>
+                    <div style="font-size: 11px; color: var(--tx2);">{{ proj.description_project[:40] }}...</div>
                   </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 24px;">
@@ -679,7 +679,7 @@
                     </div>
                     <span class="progress-text">{{ pct }}%</span>
                   </div>
-                  <span style="font-size: 11px; color: var(--tx2);">Entrega: {{ proj.prazo }}</span>
+                  <span style="font-size: 11px; color: var(--tx2);">Entrega: {{ proj.end_date_project }}</span>
                 </div>
               </div>
             {% else %}
@@ -695,18 +695,18 @@
             <a class="section-action">Ver todos</a>
           </div>
           <div>
-            {% for proj in projetos if proj.situacao == 'Concluído' %}
+            {% for proj in projetos if proj.status_project == 'Concluído' %}
               <div class="project-row">
                 <div class="project-info">
                   <div class="project-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i data-lucide="check" style="width: 16px;"></i></div>
                   <div>
-                    <div style="font-weight: 600; font-size: 13px; color: var(--tx);">{{ proj.nome }}</div>
-                    <div style="font-size: 11px; color: var(--tx2);">{{ proj.descricao[:40] }}...</div>
+                    <div style="font-weight: 600; font-size: 13px; color: var(--tx);">{{ proj.name_project }}</div>
+                    <div style="font-size: 11px; color: var(--tx2);">{{ proj.description_project[:40] }}...</div>
                   </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 24px;">
                   <span class="badge badge-green" style="font-size: 10px; padding: 2px 6px; border-radius: 4px;">Concluído</span>
-                  <span style="font-size: 11px; color: var(--tx2);">{{ proj.prazo }}</span>
+                  <span style="font-size: 11px; color: var(--tx2);">{{ proj.end_date_project }}</span>
                 </div>
               </div>
             {% else %}
@@ -736,8 +736,8 @@
                 <i data-lucide="{% if loop.index == 1 %}code{% elif loop.index == 2 %}check{% elif loop.index == 3 %}git-branch{% elif loop.index == 4 %}git-merge{% elif loop.index == 5 %}alert-circle{% else %}activity{% endif %}" style="width: 14px;"></i>
               </div>
               <div class="timeline-content">
-                <div class="timeline-text">{{ log.descricao|safe }}</div>
-                <div class="timeline-meta">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
+                <div class="timeline-text">{{ log.description_log|safe }}</div>
+                <div class="timeline-meta">{{ log.date_log.strftime('%d/%m/%Y %H:%M') }}</div>
               </div>
             </div>
           {% else %}
@@ -759,7 +759,7 @@
       <h3>Adicionar Membro à Equipe</h3>
       <button class="modal-close" onclick="closeModal('modal-add-membro')">&times;</button>
     </div>
-    <form action="{{ url_for('admin.equipe_add_membro', equipe_id=equipe.id) }}" method="POST" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+    <form action="{{ url_for('admin.equipe_add_membro', equipe_id=equipe.pk_id_team) }}" method="POST" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
         <label class="form-label" style="color: var(--tx2); font-size: 11px; font-weight: 700; text-transform: uppercase;">Funcionário Ativo</label>
@@ -768,7 +768,7 @@
           {% set count = namespace(val=0) %}
           {% for func, user in todos_funcionarios %}
             {% if func not in funcionarios %}
-              <option value="{{ func.id }}">{{ user.nome }} ({{ func.cargo or 'Sem cargo' }})</option>
+              <option value="{{ func.pk_id_employee }}">{{ user.name_user }} ({{ func.role_employee or 'Sem cargo' }})</option>
               {% set count.val = count.val + 1 %}
             {% endif %}
           {% endfor %}
@@ -800,8 +800,8 @@
               <i data-lucide="activity" style="width: 14px;"></i>
             </div>
             <div class="timeline-content">
-              <div class="timeline-text">{{ log.descricao|safe }}</div>
-              <div class="timeline-meta">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
+              <div class="timeline-text">{{ log.description_log|safe }}</div>
+              <div class="timeline-meta">{{ log.date_log.strftime('%d/%m/%Y %H:%M') }}</div>
             </div>
           </div>
         {% else %}

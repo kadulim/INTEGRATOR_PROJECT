@@ -181,9 +181,9 @@
 
     <div class="sidebar-footer">
       <div class="user-chip">
-        <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">{{ current_user.nome[:2].upper() }}</div>
+        <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">{{ current_user.name_user[:2].upper() }}</div>
         <div class="user-info">
-          <div class="user-name" style="font-size: 13px; font-weight: 600; color: var(--text-primary);">{{ current_user.nome }}</div>
+          <div class="user-name" style="font-size: 13px; font-weight: 600; color: var(--text-primary);">{{ current_user.name_user }}</div>
           <div class="user-role" style="font-size: 11px; color: var(--text-muted);">Cliente</div>
         </div>
         <a href="{{ url_for('logout') }}" title="Sair" style="color: rgba(255,255,255,0.35); margin-left: auto; text-decoration: none; transition: color 0.2s;">
@@ -205,12 +205,12 @@
           </a>
           <div>
             <div style="font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 2px;">CoByte / Painel do Cliente</div>
-            <h1 style="font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px;">{{ projeto.nome }}</h1>
+            <h1 style="font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px;">{{ projeto.name_project }}</h1>
           </div>
         </div>
         <div>
-          <span class="badge {% if projeto.situacao == 'Em andamento' %}badge-em-andamento{% elif projeto.situacao == 'Concluído' %}badge-concluido{% elif projeto.situacao == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 20px;">
-            {{ projeto.situacao }}
+          <span class="badge {% if projeto.status_project == 'Em andamento' %}badge-em-andamento{% elif projeto.status_project == 'Concluído' %}badge-concluido{% elif projeto.status_project == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 20px;">
+            {{ projeto.status_project }}
           </span>
         </div>
       </div>
@@ -228,7 +228,7 @@
               Visão Geral do Projeto
             </h2>
             <p style="font-size: 14.5px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 24px;">
-              {{ projeto.descricao or 'Sem descrição cadastrada para este projeto.' }}
+              {{ projeto.description_project or 'Sem descrição cadastrada para este projeto.' }}
             </p>
             
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding-top: 24px; border-top: 1px solid var(--border);">
@@ -238,7 +238,7 @@
               </div>
               <div>
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Prazo Final</div>
-                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ projeto.prazo }}</div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ projeto.end_date_project }}</div>
               </div>
               <div>
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Orçamento</div>
@@ -257,17 +257,17 @@
             </h2>
             
             <div style="display: flex; flex-direction: column; gap: 14px;">
-              {% for req in projeto.requisitos %}
+              {% for req in projeto.requirements %}
               <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
                 <div style="flex: 1;">
                   <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <span style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">{{ req.titulo }}</span>
-                    <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(59,130,246,0.1); color: var(--blue);">{{ req.tipo or 'Funcional' }}</span>
+                    <span style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">{{ req.name_requirement }}</span>
+                    <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(59,130,246,0.1); color: var(--blue);">{{ req.type_requirement or 'Funcional' }}</span>
                   </div>
-                  <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">{{ req.descricao or 'Sem descrição.' }}</div>
+                  <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">{{ req.description_requirement or 'Sem descrição.' }}</div>
                 </div>
-                <span class="badge {% if req.situacao == 'Concluído' %}badge-green{% elif req.situacao == 'Em andamento' %}badge-blue{% else %}badge-gray{% endif %}" style="font-size: 11px; padding: 3px 8px;">
-                  {{ req.situacao }}
+                <span class="badge {% if req.status_requirement == 'Concluído' %}badge-green{% elif req.status_requirement == 'Em andamento' %}badge-blue{% else %}badge-gray{% endif %}" style="font-size: 11px; padding: 3px 8px;">
+                  {{ req.status_requirement }}
                 </span>
               </div>
               {% else %}
@@ -291,15 +291,15 @@
               {% for doc in documentos %}
               <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1;">
-                  <div style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: {% if doc.tipo_arquivo == 'pdf' %}rgba(239, 68, 68, 0.1); color: #ef4444;{% else %}rgba(59, 130, 246, 0.1); color: #3b82f6;{% endif %};">
-                    <i data-lucide="{% if doc.tipo_arquivo == 'pdf' %}file-text{% else %}file-down{% endif %}" style="width: 18px; height: 18px;"></i>
+                  <div style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: {% if doc.type_document == 'pdf' %}rgba(239, 68, 68, 0.1); color: #ef4444;{% else %}rgba(59, 130, 246, 0.1); color: #3b82f6;{% endif %};">
+                    <i data-lucide="{% if doc.type_document == 'pdf' %}file-text{% else %}file-down{% endif %}" style="width: 18px; height: 18px;"></i>
                   </div>
                   <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ doc.nome }}">{{ doc.nome }}</div>
-                    <div style="font-size: 11px; color: var(--text-muted);">{{ doc.tipo_arquivo.upper() }} • {{ doc.data_envio.strftime('%d/%m/%Y') }}</div>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ doc.name_document }}">{{ doc.name_document }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">{{ doc.type_document.upper() }} • {{ doc.upload_date_document.strftime('%d/%m/%Y') }}</div>
                   </div>
                 </div>
-                <a href="/static/{{ doc.caminho }}" download class="btn btn-ghost" style="padding: 8px; border-radius: 6px; min-width: auto;" title="Baixar arquivo">
+                <a href="/static/{{ doc.path_document }}" download class="btn btn-ghost" style="padding: 8px; border-radius: 6px; min-width: auto;" title="Baixar arquivo">
                   <i data-lucide="download" style="width: 16px; height: 16px;"></i>
                 </a>
               </div>
@@ -326,16 +326,16 @@
               {% for diag in diagramas %}
               <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
                 <div style="height: 120px; overflow: hidden; background: #000; position: relative;">
-                  <img src="/static/{{ diag.caminho }}" alt="{{ diag.nome }}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+                  <img src="/static/{{ diag.path_diagram }}" alt="{{ diag.name_diagram }}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
                   <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px;">Diagrama</span>
                 </div>
-                <div style="padding: 10px; font-size: 12px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ diag.nome }}</div>
+                <div style="padding: 10px; font-size: 12px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ diag.name_diagram }}</div>
               </div>
               {% endfor %}
               {% for item in galeria %}
               <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
                 <div style="height: 120px; overflow: hidden; background: #000; position: relative;">
-                  <img src="/static/{{ item.caminho }}" alt="{{ item.nome }}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+                  <img src="/static/{{ item.path_gallery }}" alt="{{ item.nome }}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
                   <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px;">Galeria</span>
                 </div>
                 <div style="padding: 10px; font-size: 12px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ item.nome }}</div>
@@ -362,21 +362,21 @@
               Equipes CoByte Alocadas
             </h2>
             
-            {% if projeto.lista_equipes %}
-            {% for eq in projeto.lista_equipes %}
+            {% if projeto.teams %}
+            {% for eq in projeto.teams %}
             <div style="margin-bottom: 16px; {% if not loop.last %}padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px;{% endif %}">
-              <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">{{ eq.nome }}</div>
+              <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">{{ eq.name_team }}</div>
               
               <div style="display: flex; flex-direction: column; gap: 12px;">
-                {% for membro in eq.membros_da_equipe %}
-                {% set nome_membro = membro.usuario_rel.nome if membro.usuario_rel else 'Desconhecido' %}
+                {% for membro in eq.employees %}
+                {% set nome_membro = membro.user.name_user if membro.user else 'Desconhecido' %}
                 <div style="display: flex; align-items: center; gap: 12px; padding: 8px 0;">
                   <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">
                     {{ nome_membro[:2].upper() }}
                   </div>
                   <div>
                     <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">{{ nome_membro }}</div>
-                    <div style="font-size: 11px; color: var(--text-muted);">{{ membro.cargo or 'Desenvolvedor' }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">{{ membro.role_employee or 'Desenvolvedor' }}</div>
                   </div>
                 </div>
                 {% else %}
@@ -416,8 +416,8 @@
             
             <div style="display: flex; flex-direction: column; gap: 14px; max-height: 350px; overflow-y: auto; padding-right: 4px;">
               {% for com in comentarios %}
-                {% set nome_com = com.usuario_rel.nome if com.usuario_rel else 'Desconhecido' %}
-                {% set tipo_com = com.usuario_rel.tipo if com.usuario_rel else 'desconhecido' %}
+                {% set nome_com = com.user.name_user if com.user else 'Desconhecido' %}
+                {% set tipo_com = com.user.type_user if com.user else 'desconhecido' %}
                 <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                     <div style="display: flex; align-items: center; gap: 6px;">
@@ -427,15 +427,15 @@
                       </div>
                       <div>
                         <span style="font-size: 12.5px; font-weight: 600; color: var(--text-primary);">
-                          {% if com.usuario_id == current_user.id %}Você{% else %}{{ nome_com }}{% endif %}
+                          {% if com.fk_user == current_user.pk_id_user %}Você{% else %}{{ nome_com }}{% endif %}
                         </span>
                         <span class="badge {% if tipo_com == 'admin' %}badge-red{% elif tipo_com == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size: 8px; padding: 1px 4px; margin-left: 4px;">
                           {{ tipo_com.upper() }}
                         </span>
                       </div>
                     </div>
-                    {% if current_user.nivel == 1 or com.usuario_id == current_user.id %}
-                    <form action="/projeto/delete-comentario/{{ com.id }}" method="POST" style="display:inline;">
+                    {% if current_user.admin and current_user.admin.level_admin == 1 or com.fk_user == current_user.pk_id_user %}
+                      <form action="/projeto/delete-comentario/{{ com.pk_id_comment }}" method="POST" style="display:inline;">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent; cursor:pointer;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir comentário">
                         <i data-lucide="trash-2" style="width:14px;"></i>
@@ -443,7 +443,7 @@
                     </form>
                     {% endif %}
                   </div>
-                  <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; word-break: break-word;">{{ com.conteudo }}</div>
+                  <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; word-break: break-word;">{{ com.content_comment }}</div>
                   <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px; text-align: right;">{{ com.data.strftime('%d/%m/%Y %H:%M') }}</div>
                 </div>
               {% else %}

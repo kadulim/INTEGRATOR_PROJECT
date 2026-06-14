@@ -818,7 +818,7 @@
               
               <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--b1); padding-top: 6px; margin-top: 4px; font-size: 11px; color: var(--tx3);">
                 <span>Equipe: <strong style="color: var(--tx2);">{{ last_log.equipe_nome }}</strong></span>
-                <span>Autor: <strong style="color: var(--gr);">{{ current_user.nome if current_user.is_authenticated else 'Administrador' }}</strong></span>
+                <span>Autor: <strong style="color: var(--gr);">{{ current_user.name_user if current_user.is_authenticated else 'Administrador' }}</strong></span>
               </div>
             </div>
           {% else %}
@@ -1024,7 +1024,7 @@
         </div>
 
         {% for proj in projetos_recentes %}
-        <div class="proj-row" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=proj.id) }}'">
+        <div class="proj-row" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=proj.pk_id_project) }}'">
           <div class="proj-ico">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
@@ -1034,13 +1034,13 @@
             </svg>
           </div>
           <div>
-            <div class="proj-name">{{ proj.nome }}</div>
-            <div class="proj-desc" style="margin-bottom:6px;">{{ proj.descricao[:40] if proj.descricao else 'Sem descrição' }}...</div>
-            <span class="badge badge-ac"><span class="badge-dot"></span>{{ proj.situacao or 'Pausado' }}</span>
+            <div class="proj-name">{{ proj.name_project }}</div>
+            <div class="proj-desc" style="margin-bottom:6px;">{{ proj.description_project[:40] if proj.description_project else 'Sem descrição' }}...</div>
+            <span class="badge badge-ac"><span class="badge-dot"></span>{{ proj.status_project or 'Pausado' }}</span>
           </div>
           <div class="proj-date">
             <div class="proj-date-lbl">Prazo</div>
-            <div class="proj-date-val">{{ proj.prazo }}</div>
+            <div class="proj-date-val">{{ proj.end_date_project }}</div>
           </div>
         </div>
         {% else %}
@@ -1293,8 +1293,8 @@
             item.style.textAlign = 'left';
             
             item.innerHTML = `
-              <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.nome}">${p.nome}</span>
-              <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.prazo}</span>
+              <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.name_project}">${p.name_project}</span>
+              <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.end_date_project}</span>
             `;
             listEl.appendChild(item);
           });
@@ -1346,22 +1346,22 @@
   const monthlyProjectsData = {
     concluido: [
       {% for p in current_month_projects.concluido %}
-        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('admin.projeto_detalhe', id=p.id) }}" },
+        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
       {% endfor %}
     ],
     em_andamento: [
       {% for p in current_month_projects.em_andamento %}
-        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('admin.projeto_detalhe', id=p.id) }}" },
+        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
       {% endfor %}
     ],
     pausado: [
       {% for p in current_month_projects.pausado %}
-        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('admin.projeto_detalhe', id=p.id) }}" },
+        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
       {% endfor %}
     ],
     cancelado: [
       {% for p in current_month_projects.cancelado %}
-        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('admin.projeto_detalhe', id=p.id) }}" },
+        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
       {% endfor %}
     ]
   };
@@ -1403,12 +1403,12 @@
         return `
           <div onclick="location.href='${p.url}'" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--s2); border: 1px solid var(--b1); border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--s3)'; this.style.borderColor='${themeColor}'" onmouseout="this.style.background='var(--s2)'; this.style.borderColor='var(--b1)'">
             <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0; padding-right: 12px;">
-              <span style="font-size: 13px; font-weight: 700; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.nome}</span>
+              <span style="font-size: 13px; font-weight: 700; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name_project}</span>
               <span style="font-size: 10.5px; color: var(--tx2);">Clique para gerenciar</span>
             </div>
             <div style="text-align: right; flex-shrink: 0;">
               <span style="font-size: 8.5px; color: var(--tx2); text-transform: uppercase; display: block; letter-spacing: 0.3px;">Prazo</span>
-              <span style="font-size: 11.5px; font-weight: 700; color: ${themeColor};">${p.prazo}</span>
+              <span style="font-size: 11.5px; font-weight: 700; color: ${themeColor};">${p.end_date_project}</span>
             </div>
           </div>
         `;

@@ -62,9 +62,9 @@
 
     <div class="sidebar-footer">
       <div class="user-chip">
-        <div class="avatar sm avatar-green">{{ current_user.nome[:2].upper() }}</div>
+        <div class="avatar sm avatar-green">{{ current_user.name_user[:2].upper() }}</div>
         <div class="user-info">
-          <div class="user-name">{{ current_user.nome }}</div>
+          <div class="user-name">{{ current_user.name_user }}</div>
           <div class="user-role">Funcionário</div>
         </div>
         <a href="{{ url_for('logout') }}" title="Sair" style="color:rgba(255,255,255,0.35);margin-left:auto;text-decoration:none;">

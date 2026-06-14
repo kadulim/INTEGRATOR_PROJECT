@@ -11,7 +11,7 @@
 from flask import Blueprint, render_template, abort, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from database import database
-from models import Usuario, Cliente, Funcionario, Projeto, Equipes, Habilidade, membros_equipe, equipes_projeto, Registro, Requisito, Documento, Diagrama, Galeria, Comentario
+from models import User, Client, Employee, Project, Team, Skill, team_members, project_teams, Log, Requirement, Document, Diagram, Gallery, Comment
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import extract
 import functools
@@ -53,21 +53,21 @@ def registrar_log(tipo, acao, descricao, projeto_id=None):
 @admin_bp.route('/dashboard')
 def dashboard():
     # Métricas principais
-    total_projetos   = Projeto.query.count()
-    total_equipe     = Funcionario.query.count()
-    total_clientes   = Cliente.query.count()
-    projetos_recentes = Projeto.query.filter_by(situacao='Em andamento').all()
+    total_projetos   = Project.query.count()
+    total_equipe     = Employee.query.count()
+    total_clientes   = Client.query.count()
+    projetos_recentes = Project.query.filter_by(status_project='Em andamento').all()
     for proj in projetos_recentes:
-        ultimo_registro = Registro.query.filter_by(projeto_id=proj.id).order_by(Registro.data.desc()).first()
-        proj.ultimo_registro = ultimo_registro.descricao if ultimo_registro else "Sem alterações recentes"
+        ultimo_registro = Log.query.filter_by(fk_project=proj.pk_id_project).order_by(Log.date_log.desc()).first()
+        proj.ultimo_registro = ultimo_registro.description_log if ultimo_registro else "Sem alterações recentes"
 
     orcamento_total = database.session.query(
-        database.func.sum(Projeto.orcamento)
+        database.func.sum(Project.orcamento)
     ).scalar() or 0
     funcionarios_painel = (
-        Funcionario.query
-        .join(Usuario, Funcionario.usuario_id == Usuario.id)
-        .add_entity(Usuario)
+        Employee.query
+        .join(User, Employee.fk_user == User.pk_id_user)
+        .add_entity(User)
         .limit(4)
         .all()
     )
@@ -80,8 +80,8 @@ def dashboard():
         'Cancelado':    '#6b7280'
     }
     status_rows = database.session.query(
-        Projeto.situacao, database.func.count(Projeto.id)
-    ).group_by(Projeto.situacao).all()
+        Project.status_project, database.func.count(Project.pk_id_project)
+    ).group_by(Project.status_project).all()
 
     status_counts = {s: 0 for s in status_cores.keys()}
     for s, c in status_rows:
@@ -96,12 +96,12 @@ def dashboard():
     ]
 
     # ── Gráfico de Atividade Mensal (barras por status) ────────────────
-    mes_expr = database.func.extract('month', Projeto.prazo)
+    mes_expr = database.func.extract('month', Project.end_date_project)
     monthly_status_rows = database.session.query(
         mes_expr.label('mes'),
-        Projeto.situacao,
-        database.func.count(Projeto.id).label('total')
-    ).filter(Projeto.prazo.isnot(None)).group_by(mes_expr, Projeto.situacao).all()
+        Project.status_project,
+        database.func.count(Project.pk_id_project).label('total')
+    ).filter(Project.end_date_project.isnot(None)).group_by(mes_expr, Project.status_project).all()
 
     monthly_map = {m: {'Em andamento': 0, 'Concluído': 0, 'Pausado': 0, 'Cancelado': 0} for m in range(1, 13)}
     
@@ -109,7 +109,7 @@ def dashboard():
         if r.mes is None:
             continue
         m_int = int(r.mes)
-        status_str = r.situacao or 'Pausado'
+        status_str = r.status_project or 'Pausado'
         if status_str == 'Pendente':
             status_str = 'Pausado'
         if status_str not in ['Em andamento', 'Concluído', 'Pausado', 'Cancelado']:
@@ -127,30 +127,30 @@ def dashboard():
     ]
 
     # ── Logs recentes e completos ──────────────────────────────────
-    logs_query = database.session.query(Registro, Projeto).outerjoin(Projeto, Registro.projeto_id == Projeto.id).order_by(Registro.data.desc()).limit(10).all()
+    logs_query = database.session.query(Log, Project).outerjoin(Project, Log.fk_project == Project.pk_id_project).order_by(Log.date_log.desc()).limit(10).all()
     
     logs_data = []
     for log, projeto in logs_query:
-        equipe_nome = projeto.nome if projeto else 'Geral'
-        if projeto and projeto.lista_equipes:
-            equipe_nome = ', '.join([eq.nome for eq in projeto.lista_equipes])
+        equipe_nome = projeto.name_project if projeto else 'Geral'
+        if projeto and projeto.teams:
+            equipe_nome = ', '.join([eq.name_team for eq in projeto.teams])
         logs_data.append({
-            'acao': log.acao,
-            'descricao': log.descricao,
-            'data': log.data,
+            'acao': log.type_log,
+            'descricao': log.description_log,
+            'data': log.date_log,
             'equipe_nome': equipe_nome
         })
 
-    todos_logs_query = database.session.query(Registro, Projeto).outerjoin(Projeto, Registro.projeto_id == Projeto.id).order_by(Registro.data.desc()).all()
+    todos_logs_query = database.session.query(Log, Project).outerjoin(Project, Log.fk_project == Project.pk_id_project).order_by(Log.date_log.desc()).all()
     todos_logs_data = []
     for log, projeto in todos_logs_query:
-        equipe_nome = projeto.nome if projeto else 'Geral'
-        if projeto and projeto.lista_equipes:
-            equipe_nome = ', '.join([eq.nome for eq in projeto.lista_equipes])
+        equipe_nome = projeto.name_project if projeto else 'Geral'
+        if projeto and projeto.teams:
+            equipe_nome = ', '.join([eq.name_team for eq in projeto.teams])
         todos_logs_data.append({
-            'acao': log.acao,
-            'descricao': log.descricao,
-            'data': log.data,
+            'acao': log.type_log,
+            'descricao': log.description_log,
+            'data': log.date_log,
             'equipe_nome': equipe_nome
         })
 
@@ -169,20 +169,20 @@ def dashboard():
         'cancelado': []
     }
 
-    logs_criacao = Registro.query.filter(
-        Registro.acao == 'Projeto criado',
-        extract('year', Registro.data) == current_year,
-        extract('month', Registro.data) == current_month_num
+    logs_criacao = Log.query.filter(
+        Log.type_log == 'Projeto criado',
+        extract('year', Log.date_log) == current_year,
+        extract('month', Log.date_log) == current_month_num
     ).all()
 
     projeto_ids_mes = set()
     for log_entry in logs_criacao:
-        if log_entry.projeto_id:
-            projeto_ids_mes.add(log_entry.projeto_id)
+        if log_entry.fk_project:
+            projeto_ids_mes.add(log_entry.fk_project)
 
-    projetos_do_mes = Projeto.query.filter(Projeto.id.in_(projeto_ids_mes)).all() if projeto_ids_mes else []
+    projetos_do_mes = Project.query.filter(Project.pk_id_project.in_(projeto_ids_mes)).all() if projeto_ids_mes else []
     for proj in projetos_do_mes:
-        status_str = proj.situacao or 'Pausado'
+        status_str = proj.status_project or 'Pausado'
         if status_str == 'Pendente':
             status_str = 'Pausado'
         if status_str == 'Em andamento':
@@ -201,15 +201,15 @@ def dashboard():
         'pausado': [],
         'cancelado': []
     }
-    for proj in Projeto.query.all():
-        status_str = proj.situacao or 'Pausado'
+    for proj in Project.query.all():
+        status_str = proj.status_project or 'Pausado'
         if status_str == 'Pendente':
             status_str = 'Pausado'
         
         proj_data = {
-            'nome': proj.nome,
-            'prazo': proj.prazo.strftime('%d/%m/%Y') if proj.prazo else 'Sem prazo',
-            'url': url_for('admin.projeto_detalhe', id=proj.id)
+            'nome': proj.name_project,
+            'prazo': proj.end_date_project.strftime('%d/%m/%Y') if proj.end_date_project else 'Sem prazo',
+            'url': url_for('admin.projeto_detalhe', id=proj.pk_id_project)
         }
         
         if status_str == 'Em andamento':
@@ -247,9 +247,9 @@ def dashboard():
 # ---------------------------------------------------------------------------
 @admin_bp.route('/projetos')
 def projetos():
-    todos_projetos = Projeto.query.all()
-    todos_clientes = Cliente.query.join(Usuario).all()
-    todas_equipes = Equipes.query.all()
+    todos_projetos = Project.query.all()
+    todos_clientes = Client.query.join(User).all()
+    todas_equipes = Team.query.all()
     return render_template(
         'admin/projetos.html',
         projetos = todos_projetos,
@@ -275,23 +275,23 @@ def add_projeto():
     except:
         prazo_date = None
 
-    projeto = Projeto(
-        nome=nome,
-        descricao=descricao,
-        situacao="Em andamento",
-        prazo=prazo_date,
+    projeto = Project(
+        name_project=nome,
+        description_project=descricao,
+        status_project="Em andamento",
+        end_date_project=prazo_date,
         orcamento=float(orcamento) if orcamento else 0.0,
-        cliente_id=cliente_id if cliente_id else None
+        fk_client=cliente_id if cliente_id else None
     )
     
     if equipes_ids:
-        equipes = Equipes.query.filter(Equipes.id.in_(equipes_ids)).all()
-        projeto.lista_equipes.extend(equipes)
+        equipes = Team.query.filter(Team.pk_id_team.in_(equipes_ids)).all()
+        projeto.teams.extend(equipes)
     
     database.session.add(projeto)
     database.session.commit()
     
-    registrar_log('projeto', 'Projeto criado', f"O projeto '{nome}' foi criado com sucesso.", projeto.id)
+    registrar_log('projeto', 'Projeto criado', f"O projeto '{nome}' foi criado com sucesso.", projeto.pk_id_project)
     
     return redirect(url_for('admin.projetos'))
 
@@ -304,26 +304,26 @@ def projeto_detalhe():
     if not projeto_id:
         return redirect(url_for('admin.projetos'))
     
-    projeto = Projeto.query.get_or_404(projeto_id)
-    cliente = projeto.cliente_rel
-    equipes = projeto.lista_equipes
+    projeto = Project.query.get_or_404(projeto_id)
+    cliente = projeto.client
+    equipes = projeto.teams
     
     membros = []
-    equipes_ids = [eq.id for eq in equipes]
+    equipes_ids = [eq.pk_id_team for eq in equipes]
     if equipes_ids:
         membros = (
-            database.session.query(Funcionario, Usuario)
-            .join(membros_equipe, Funcionario.id == membros_equipe.c.fk_employee)
-            .filter(membros_equipe.c.fk_team.in_(equipes_ids))
-            .join(Usuario, Funcionario.usuario_id == Usuario.id)
+            database.session.query(Employee, User)
+            .join(team_members, Employee.pk_id_employee == team_members.c.fk_employee)
+            .filter(team_members.c.fk_team.in_(equipes_ids))
+            .join(User, Employee.fk_user == User.pk_id_user)
             .distinct()
             .all()
         )
         
-    documentos = Documento.query.filter_by(projeto_id=projeto_id).all()
-    diagramas = Diagrama.query.filter_by(projeto_id=projeto_id).all()
-    galeria = Galeria.query.filter_by(projeto_id=projeto_id).all()
-    comentarios = Comentario.query.filter_by(projeto_id=projeto_id).order_by(Comentario.data.asc()).all()
+    documentos = Document.query.filter_by(fk_project=projeto_id).all()
+    diagramas = Diagram.query.filter_by(fk_project=projeto_id).all()
+    galeria = Gallery.query.filter_by(fk_project=projeto_id).all()
+    comentarios = Comment.query.filter_by(fk_project=projeto_id).order_by(Comment.date_comment.asc()).all()
     
     return render_template(
         'admin/projeto-detalhe.html',
@@ -331,9 +331,9 @@ def projeto_detalhe():
         cliente=cliente,
         equipes=equipes,
         membros=membros,
-        requisitos=projeto.requisitos,
-        todas_equipes=Equipes.query.all(),
-        todos_clientes=Cliente.query.all(),
+        requisitos=projeto.requirements,
+        todas_equipes=Team.query.all(),
+        todos_clientes=Client.query.all(),
         documentos=documentos,
         diagramas=diagramas,
         galeria=galeria,
@@ -349,13 +349,13 @@ def vincular_equipes_projeto():
     equipes_ids = [int(x) for x in request.form.getlist('check_equipes') if x.isdigit()]
     
     if projeto_id and equipes_ids:
-        projeto = Projeto.query.get_or_404(projeto_id)
-        equipes = Equipes.query.filter(Equipes.id.in_(equipes_ids)).all()
-        projeto.lista_equipes = equipes
+        projeto = Project.query.get_or_404(projeto_id)
+        equipes = Team.query.filter(Team.pk_id_team.in_(equipes_ids)).all()
+        projeto.teams = equipes
         database.session.commit()
         
-        nomes = ', '.join([eq.nome for eq in equipes])
-        registrar_log('projeto', 'Equipes vinculadas', f"As equipes '{nomes}' foram vinculadas ao projeto '{projeto.nome}'.", projeto.id)
+        nomes = ', '.join([eq.name_team for eq in equipes])
+        registrar_log('projeto', 'Equipes vinculadas', f"As equipes '{nomes}' foram vinculadas ao projeto '{projeto.name_project}'.", projeto.pk_id_project)
     
     return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
 
@@ -365,42 +365,42 @@ def vincular_equipes_projeto():
 @admin_bp.route('/editar-projeto', methods=['POST'])
 def editar_projeto():
     projeto_id = request.form.get('projeto_id', type=int)
-    projeto = Projeto.query.get_or_404(projeto_id)
+    projeto = Project.query.get_or_404(projeto_id)
     
     nome = request.form.get('nome')
     if not nome:
         flash("O nome do projeto é obrigatório.", "erro")
         return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
     
-    projeto.nome = nome
-    projeto.situacao = request.form.get('situacao')
+    projeto.name_project = nome
+    projeto.status_project = request.form.get('situacao')
 
     orcamento_raw = request.form.get('orcamento', type=float)
     projeto.orcamento = orcamento_raw if orcamento_raw else 0.0
     from datetime import date
 
-    projeto.situacao = request.form.get('status')
+    projeto.status_project = request.form.get('status')
 
     prazo_str = request.form.get('prazo_str')
 
     try:
-        projeto.prazo = date.fromisoformat(prazo_str) if prazo_str else None
+        projeto.end_date_project = date.fromisoformat(prazo_str) if prazo_str else None
     except ValueError:
-        projeto.prazo = None
+        projeto.end_date_project = None
 
-    projeto.descricao = request.form.get('descricao')
-    projeto.cliente_id = request.form.get('cliente_id', type=int)
+    projeto.description_project = request.form.get('descricao')
+    projeto.fk_client = request.form.get('cliente_id', type=int)
     
     equipes_ids = [int(x) for x in request.form.getlist('check_equipes') if x.isdigit()]
     if equipes_ids:
-        equipes = Equipes.query.filter(Equipes.id.in_(equipes_ids)).all()
-        projeto.lista_equipes = equipes
+        equipes = Team.query.filter(Team.pk_id_team.in_(equipes_ids)).all()
+        projeto.teams = equipes
     else:
-        projeto.lista_equipes = []
+        projeto.teams = []
     
     try:
         database.session.commit()
-        registrar_log('projeto', 'Projeto atualizado', f"As informações do projeto '{projeto.nome}' foram atualizadas.", projeto.id)
+        registrar_log('projeto', 'Projeto atualizado', f"As informações do projeto '{projeto.name_project}' foram atualizadas.", projeto.pk_id_project)
         flash("Projeto atualizado com sucesso.", "sucesso")
     except Exception as e:
         database.session.rollback()
@@ -412,11 +412,11 @@ def editar_projeto():
 # ---------------------------------------------------------------------------
 @admin_bp.route('/excluir-projeto/<int:id>', methods=['POST'])
 def excluir_projeto(id):
-    projeto = Projeto.query.get_or_404(id)
-    nome_projeto = projeto.nome
+    projeto = Project.query.get_or_404(id)
+    nome_projeto = projeto.name_project
     try:
-        Registro.query.filter_by(projeto_id=id).delete()
-        Requisito.query.filter_by(projeto_id=id).delete()
+        Log.query.filter_by(fk_project=id).delete()
+        Requirement.query.filter_by(fk_project=id).delete()
         
         database.session.delete(projeto)
         database.session.commit()
@@ -441,19 +441,19 @@ def add_requisito():
     descricao = request.form.get('descricao')
     tipo = request.form.get('tipo')
     
-    projeto = Projeto.query.get_or_404(projeto_id)
+    projeto = Project.query.get_or_404(projeto_id)
     
-    novo_req = Requisito(
-        projeto_id=projeto_id,
-        titulo=titulo,
-        descricao=descricao,
-        tipo=tipo,
-        situacao='Pendente'
+    novo_req = Requirement(
+        fk_project=projeto_id,
+        name_requirement=titulo,
+        description_requirement=descricao,
+        type_requirement=tipo,
+        status_requirement='Pendente'
     )
     database.session.add(novo_req)
     database.session.commit()
     
-    registrar_log('requisito', 'Requisito adicionado', f"Novo requisito '{titulo}' adicionado ao projeto '{projeto.nome}'.", projeto.id)
+    registrar_log('requisito', 'Requisito adicionado', f"Novo requisito '{titulo}' adicionado ao projeto '{projeto.name_project}'.", projeto.pk_id_project)
     
     return redirect(url_for('admin.projeto_detalhe', id=projeto_id))
 
@@ -462,9 +462,9 @@ def add_requisito():
 # ---------------------------------------------------------------------------
 @admin_bp.route('/excluir-requisito/<int:id>', methods=['POST'])
 def excluir_requisito(id):
-    req = Requisito.query.get_or_404(id)
-    projeto_id = req.projeto_id
-    titulo = req.titulo
+    req = Requirement.query.get_or_404(id)
+    projeto_id = req.fk_project
+    titulo = req.name_requirement
     
     try:
         database.session.delete(req)
@@ -486,7 +486,7 @@ def excluir_requisito(id):
 # ---------------------------------------------------------------------------
 @admin_bp.route('/clientes')
 def clientes():
-    todos_clientes = Cliente.query.join(Usuario).all()
+    todos_clientes = Client.query.join(User).all()
     return render_template(
         'admin/clientes.html',
         clientes = todos_clientes
@@ -536,24 +536,23 @@ def add_cliente():
 
     contador = 1
 
-    while Usuario.query.filter_by(email=email).first():
+    while User.query.filter_by(email_user=email).first():
         email = f'{base_nome}.{contador}@cobyte_cliente.com'
         contador += 1
 
-    usuario = Usuario(
-        nome=nome,
-        email=email,
-        senha=generate_password_hash(senha),
-        tipo='cliente',
-        nivel=3
+    usuario = User(
+        name_user=nome,
+        email_user=email,
+        password_user=generate_password_hash(senha),
+        type_user='cliente'
     )
 
     database.session.add(usuario)
     database.session.flush()
 
-    cliente = Cliente(
-        usuario_id=usuario.id,
-        empresa=empresa
+    cliente = Client(
+        fk_user=usuario.pk_id_user,
+        company_client=empresa
     )
 
     database.session.add(cliente)
@@ -565,12 +564,12 @@ def add_cliente():
 # ---------------------------------------------------------------------------
 @admin_bp.route('/cliente/excluir/<int:id>', methods=['POST'])
 def excluir_cliente(id):
-    cliente = Cliente.query.get_or_404(id)
-    usuario = Usuario.query.get(cliente.usuario_id)
-    nome = usuario.nome if usuario else "Cliente"
+    cliente = Client.query.get_or_404(id)
+    usuario = User.query.get(cliente.fk_user)
+    nome = usuario.name_user if usuario else "Cliente"
     
     try:
-        Projeto.query.filter_by(cliente_id=id).update({Projeto.cliente_id: None})
+        Project.query.filter_by(fk_client=id).update({Project.fk_client: None})
         database.session.delete(cliente)
         if usuario:
             database.session.delete(usuario)
@@ -587,8 +586,8 @@ def excluir_cliente(id):
 # ---------------------------------------------------------------------------
 @admin_bp.route('/cliente/editar/<int:id>', methods=['POST'])
 def editar_cliente(id):
-    cliente = Cliente.query.get_or_404(id)
-    usuario = Usuario.query.get_or_404(cliente.usuario_id)
+    cliente = Client.query.get_or_404(id)
+    usuario = User.query.get_or_404(cliente.fk_user)
     
     nome = request.form.get('nome')
     email = request.form.get('email')
@@ -598,18 +597,18 @@ def editar_cliente(id):
         flash("Nome e email são obrigatórios.", "erro")
         return redirect(url_for('admin.clientes'))
     
-    email_existente = Usuario.query.filter(Usuario.email == email, Usuario.id != usuario.id).first()
+    email_existente = User.query.filter(User.email_user == email, User.pk_id_user != usuario.pk_id_user).first()
     if email_existente:
         flash("Este email já está em uso por outro usuário.", "erro")
         return redirect(url_for('admin.clientes'))
     
-    usuario.nome = nome
-    usuario.email = email
-    cliente.empresa = empresa
+    usuario.name_user = nome
+    usuario.email_user = email
+    cliente.company_client = empresa
     
     senha = request.form.get('senha')
     if senha:
-        usuario.senha = generate_password_hash(senha)
+        usuario.password_user = generate_password_hash(senha)
     
     try:
         database.session.commit()
@@ -627,9 +626,9 @@ def editar_cliente(id):
 # ---------------------------------------------------------------------------
 @admin_bp.route('/equipes')
 def equipes():
-    todas_equipes = Equipes.query.all()
-    todos_funcionarios = Funcionario.query.join(Usuario).all()
-    todos_projetos = Projeto.query.all()
+    todas_equipes = Team.query.all()
+    todos_funcionarios = Employee.query.join(User).all()
+    todos_projetos = Project.query.all()
     return render_template(
         'admin/equipes.html',
         equipes = todas_equipes,
@@ -649,15 +648,15 @@ def add_equipe():
     funcionarios_ids = [int(x) for x in request.form.getlist('check_funcionarios') if x.isdigit()]
     projetos_ids = [int(x) for x in request.form.getlist('check_projetos') if x.isdigit()]
     
-    equipe = Equipes(nome=nome, descricao=descricao, funcao=funcao, lider_equipe=lider_equipe)
+    equipe = Team(name_team=nome, description_team=descricao, funcao=funcao, lider_equipe=lider_equipe)
     
     if funcionarios_ids:
-        membros = Funcionario.query.filter(Funcionario.id.in_(funcionarios_ids)).all()
-        equipe.membros_da_equipe.extend(membros)
+        membros = Employee.query.filter(Employee.pk_id_employee.in_(funcionarios_ids)).all()
+        equipe.employees.extend(membros)
 
     if projetos_ids:
-        projs = Projeto.query.filter(Projeto.id.in_(projetos_ids)).all()
-        equipe.projetos.extend(projs)
+        projs = Project.query.filter(Project.pk_id_project.in_(projetos_ids)).all()
+        equipe.projects.extend(projs)
 
     database.session.add(equipe)
     database.session.commit()
@@ -668,11 +667,11 @@ def add_equipe():
 # ---------------------------------------------------------------------------
 @admin_bp.route('/equipes/excluir/<int:id>', methods=['POST'])
 def excluir_equipe(id):
-    equipe = Equipes.query.get_or_404(id)
-    nome = equipe.nome
+    equipe = Team.query.get_or_404(id)
+    nome = equipe.name_team
     try:
-        database.session.execute(equipes_projeto.delete().where(equipes_projeto.c.fk_team == id))
-        equipe.membros_da_equipe = []
+        database.session.execute(project_teams.delete().where(project_teams.c.fk_team == id))
+        equipe.employees = []
         database.session.delete(equipe)
         database.session.commit()
         registrar_log('equipe', 'Equipe excluída', f"A equipe '{nome}' foi removida do sistema.")
@@ -687,7 +686,7 @@ def excluir_equipe(id):
 # ---------------------------------------------------------------------------
 @admin_bp.route('/equipes/editar/<int:id>', methods=['POST'])
 def editar_equipe(id):
-    equipe = Equipes.query.get_or_404(id)
+    equipe = Team.query.get_or_404(id)
     nome = request.form.get('nome')
     descricao = request.form.get('descricao')
     funcao = request.form.get('funcao')
@@ -699,22 +698,22 @@ def editar_equipe(id):
         flash("O nome da equipe é obrigatório.", "erro")
         return redirect(url_for('admin.equipes'))
     
-    equipe.nome = nome
-    equipe.descricao = descricao
+    equipe.name_team = nome
+    equipe.description_team = descricao
     equipe.funcao = funcao
     equipe.lider_equipe = lider_equipe
     
     if funcionarios_ids:
-        membros = Funcionario.query.filter(Funcionario.id.in_(funcionarios_ids)).all()
-        equipe.membros_da_equipe = membros
+        membros = Employee.query.filter(Employee.pk_id_employee.in_(funcionarios_ids)).all()
+        equipe.employees = membros
     else:
-        equipe.membros_da_equipe = []
+        equipe.employees = []
     
     if projetos_ids:
-        projs = Projeto.query.filter(Projeto.id.in_(projetos_ids)).all()
-        equipe.projetos = projs
+        projs = Project.query.filter(Project.pk_id_project.in_(projetos_ids)).all()
+        equipe.projects = projs
     else:
-        equipe.projetos = []
+        equipe.projects = []
     
     try:
         database.session.commit()
@@ -730,23 +729,23 @@ def editar_equipe(id):
 # ---------------------------------------------------------------------------
 @admin_bp.route('/equipes/<int:id>')
 def equipe_detalhe(id):
-    equipe = Equipes.query.get_or_404(id)
-    funcionarios = equipe.membros_da_equipe
-    projetos = equipe.projetos
+    equipe = Team.query.get_or_404(id)
+    funcionarios = equipe.employees
+    projetos = equipe.projects
     
     lider = None
     if equipe.lider_equipe:
-        lider = Funcionario.query.get(equipe.lider_equipe)
+        lider = Employee.query.get(equipe.lider_equipe)
     
-    projeto_ids = [p.id for p in projetos]
+    projeto_ids = [p.pk_id_project for p in projetos]
     logs = []
     if projeto_ids:
-        logs = Registro.query.filter(Registro.projeto_id.in_(projeto_ids)).order_by(Registro.data.desc()).all()
+        logs = Log.query.filter(Log.fk_project.in_(projeto_ids)).order_by(Log.date_log.desc()).all()
     
     todos_funcionarios = (
-        Funcionario.query
-        .join(Usuario, Funcionario.usuario_id == Usuario.id)
-        .add_entity(Usuario)
+        Employee.query
+        .join(User, Employee.fk_user == User.pk_id_user)
+        .add_entity(User)
         .all()
     )
     
@@ -763,17 +762,17 @@ def equipe_detalhe(id):
 # ---------------------------------------------------------------------------
 @admin_bp.route('/equipes/<int:equipe_id>/add-membro', methods=['POST'])
 def equipe_add_membro(equipe_id):
-    equipe = Equipes.query.get_or_404(equipe_id)
+    equipe = Team.query.get_or_404(equipe_id)
     funcionario_id = request.form.get('funcionario_id')
     if funcionario_id:
-        funcionario = Funcionario.query.get(int(funcionario_id))
-        if funcionario and funcionario not in equipe.membros_da_equipe:
-            equipe.membros_da_equipe.append(funcionario)
+        funcionario = Employee.query.get(int(funcionario_id))
+        if funcionario and funcionario not in equipe.employees:
+            equipe.employees.append(funcionario)
             
-            nome_func = funcionario.usuario_rel.nome if funcionario.usuario_rel else 'Desconhecido'
+            nome_func = funcionario.user.name_user if funcionario.user else 'Desconhecido'
             registro = Log(
                 type_log="Membro adicionado",
-                description_log=f"Funcionário {nome_func} foi adicionado à equipe {equipe.nome}.",
+                description_log=f"Funcionário {nome_func} foi adicionado à equipe {equipe.name_team}.",
             )
             database.session.add(registro)
             database.session.commit()
@@ -785,15 +784,15 @@ def equipe_add_membro(equipe_id):
 # ---------------------------------------------------------------------------
 @admin_bp.route('/equipes/<int:equipe_id>/remover-membro/<int:funcionario_id>', methods=['POST'])
 def equipe_remover_membro(equipe_id, funcionario_id):
-    equipe = Equipes.query.get_or_404(equipe_id)
-    funcionario = Funcionario.query.get_or_404(funcionario_id)
-    if funcionario in equipe.membros_da_equipe:
-        equipe.membros_da_equipe.remove(funcionario)
+    equipe = Team.query.get_or_404(equipe_id)
+    funcionario = Employee.query.get_or_404(funcionario_id)
+    if funcionario in equipe.employees:
+        equipe.employees.remove(funcionario)
         
-        nome_func = funcionario.usuario_rel.nome if funcionario.usuario_rel else 'Desconhecido'
+        nome_func = funcionario.user.name_user if funcionario.user else 'Desconhecido'
         registro = Log(
             type_log="Membro removido",
-            description_log=f"Funcionário {nome_func} foi removido da equipe {equipe.nome}.",
+            description_log=f"Funcionário {nome_func} foi removido da equipe {equipe.name_team}.",
         )
         database.session.add(registro)
         database.session.commit()
@@ -814,13 +813,13 @@ def equipe_remover_membro(equipe_id, funcionario_id):
 @admin_bp.route('/funcionarios')
 def funcionarios():
     funcionarios = (
-        Funcionario.query
-        .join(Usuario, Funcionario.usuario_id == Usuario.id)
-        .add_entity(Usuario)
+        Employee.query
+        .join(User, Employee.fk_user == User.pk_id_user)
+        .add_entity(User)
         .all()
     )
-    total = Funcionario.query.count()
-    equipes = Equipes.query.all()
+    total = Employee.query.count()
+    equipes = Team.query.all()
     return render_template(
         'admin/funcionarios.html',
         funcionarios = funcionarios,
@@ -833,7 +832,7 @@ def funcionarios():
 # ---------------------------------------------------------------------------
 @admin_bp.route('/funcionario/<int:id>')
 def funcionario_perfil(id):
-    funcionario = Funcionario.query.get_or_404(id)
+    funcionario = Employee.query.get_or_404(id)
     return render_template('admin/funcionario-perfil.html', funcionario=funcionario)
 
 # ---------------------------------------------------------------------------
@@ -857,33 +856,32 @@ def add_funcionario():
     email = f'{nome_formatado}@cobyte_funcionario.com'
     contador = 1
 
-    while Usuario.query.filter_by(email=email).first():
+    while User.query.filter_by(email_user=email).first():
         email = f'{nome_formatado}.{contador}@cobyte_funcionario.com'
         contador += 1
 
-    usuario = Usuario(
-        nome=nome,
-        email=email,
-        senha=generate_password_hash(senha),
-        tipo='funcionario',
-        nivel=2
+    usuario = User(
+        name_user=nome,
+        email_user=email,
+        password_user=generate_password_hash(senha),
+        type_user='funcionario'
     )
     database.session.add(usuario)
     database.session.flush()
 
-    funcionario = Funcionario(
-        usuario_id=usuario.id,
-        cargo=cargo
+    funcionario = Employee(
+        fk_user=usuario.pk_id_user,
+        role_employee=cargo
     )
 
     if habilidades_str:
         for hab_nome in [s.strip() for s in habilidades_str.split(',')]:
-            habilidade = Habilidade.query.filter_by(nome=hab_nome).first()
+            habilidade = Skill.query.filter_by(name_skill=hab_nome).first()
             if not habilidade:
-                habilidade = Habilidade(nome=hab_nome)
+                habilidade = Skill(name_skill=hab_nome)
                 database.session.add(habilidade)
                 database.session.flush()
-            funcionario.lista_habilidades.append(habilidade)
+            funcionario.skills.append(habilidade)
 
     database.session.add(funcionario)
     database.session.commit()
@@ -895,8 +893,8 @@ def add_funcionario():
 # ---------------------------------------------------------------------------
 @admin_bp.route('/funcionario/editar/<int:id>', methods=['POST'])
 def editar_funcionario(id):
-    funcionario = Funcionario.query.get_or_404(id)
-    usuario = Usuario.query.get(funcionario.usuario_id)
+    funcionario = Employee.query.get_or_404(id)
+    usuario = User.query.get(funcionario.fk_user)
     if not usuario:
         flash("Usuário vinculado ao funcionário não encontrado.", "erro")
         return redirect(url_for('admin.funcionarios'))
@@ -909,26 +907,26 @@ def editar_funcionario(id):
         flash("Nome, email e cargo são obrigatórios.", "erro")
         return redirect(url_for('admin.funcionario_perfil', id=id))
     
-    email_existente = Usuario.query.filter(Usuario.email == email, Usuario.id != usuario.id).first()
+    email_existente = User.query.filter(User.email_user == email, User.pk_id_user != usuario.pk_id_user).first()
     if email_existente:
         flash("Este email já está em uso por outro usuário.", "erro")
         return redirect(url_for('admin.funcionario_perfil', id=id)) 
     
-    usuario.nome = nome
-    usuario.email = email
-    funcionario.cargo = cargo
+    usuario.name_user = nome
+    usuario.email_user = email
+    funcionario.role_employee = cargo
     habilidades_str = request.form.get('habilidades', '')
 
-    funcionario.lista_habilidades = []
+    funcionario.skills = []
     if habilidades_str:
         for hab_nome in [s.strip() for s in habilidades_str.split(',')]:
-            habilidade = Habilidade.query.filter_by(nome=hab_nome).first()
+            habilidade = Skill.query.filter_by(name_skill=hab_nome).first()
             if not habilidade:
-                habilidade = Habilidade(nome=hab_nome)
+                habilidade = Skill(name_skill=hab_nome)
                 database.session.add(habilidade)
                 database.session.flush()
-            if habilidade not in funcionario.lista_habilidades:
-                funcionario.lista_habilidades.append(habilidade)
+            if habilidade not in funcionario.skills:
+                funcionario.skills.append(habilidade)
 
     try:
         database.session.commit()
@@ -944,12 +942,12 @@ def editar_funcionario(id):
 # ---------------------------------------------------------------------------
 @admin_bp.route('/funcionario/excluir/<int:id>', methods=['POST'])
 def excluir_funcionario(id):
-    membro = Funcionario.query.get_or_404(id)
-    usuario = Usuario.query.get(membro.usuario_id)
-    nome = usuario.nome if usuario else "Funcionário"
+    membro = Employee.query.get_or_404(id)
+    usuario = User.query.get(membro.fk_user)
+    nome = usuario.name_user if usuario else "Funcionário"
     try:
-        membro.lista_equipes = []
-        membro.lista_habilidades = []
+        membro.teams = []
+        membro.skills = []
         
         database.session.delete(membro)
         if usuario:
@@ -992,11 +990,11 @@ def salvar_senha():
         flash('As senhas não coincidem!', 'danger')
         return redirect(url_for('admin.configuracoes') + '#seguranca')
         
-    if not check_password_hash(current_user.senha, senha_atual):
+    if not check_password_hash(current_user.password_user, senha_atual):
         flash('Senha atual incorreta!', 'danger')
         return redirect(url_for('admin.configuracoes') + '#seguranca')
         
-    current_user.senha = generate_password_hash(nova_senha)
+    current_user.password_user = generate_password_hash(nova_senha)
     database.session.commit()
     flash('Senha atualizada com sucesso!', 'success')
     return redirect(url_for('admin.configuracoes') + '#seguranca')

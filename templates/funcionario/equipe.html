@@ -64,7 +64,7 @@
         <div class="card" style="padding: 0; overflow: hidden;">
             <div class="card-header" style="background: rgba(255, 51, 102, 0.05); padding: 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
                 <div>
-                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">{{ info.nome }}</h3>
+                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">{{ info.name_team }}</h3>
                     <p style="color: var(--text-muted); font-size: 13px;">Equipe Atribuída</p>
                 </div>
                 <div style="width: 48px; height: 48px; background: var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff;">
@@ -75,12 +75,12 @@
                 <h4 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Membros ({{ info.membros|length }})</h4>
                 <div class="members-list" style="display: flex; flex-direction: column; gap: 16px;">
                     {% for m in info.membros %}
-                    {% set nome_membro = m.usuario_rel.nome if m.usuario_rel else 'Desconhecido' %}
+                    {% set nome_membro = m.user.name_user if m.user else 'Desconhecido' %}
                     <div style="display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border);">
                         <div class="avatar sm avatar-blue">{{ nome_membro[:2].upper() }}</div>
                         <div style="flex: 1;">
-                            <div style="font-weight: 600; font-size: 15px;">{{ nome_membro }} {% if m.usuario_id == current_user.id %}<span style="color: var(--accent); font-size: 11px; margin-left: 5px;">(Você)</span>{% endif %}</div>
-                            <div style="font-size: 12px; color: var(--text-muted);">{{ m.cargo }}</div>
+                            <div style="font-weight: 600; font-size: 15px;">{{ nome_membro }} {% if m.fk_user == current_user.pk_id_user %}<span style="color: var(--accent); font-size: 11px; margin-left: 5px;">(Você)</span>{% endif %}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">{{ m.role_employee }}</div>
                         </div>
                         <div style="text-align: right;">
                             <span class="badge badge-gray" style="font-size: 10px;">Ativo</span>

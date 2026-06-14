@@ -1,7 +1,7 @@
 {% extends 'admin/base.html' %}
 {% set active_page = 'projetos' %}
 
-{% block title %}{{ projeto.nome }} — CoByte{% endblock %}
+{% block title %}{{ projeto.name_project }} — CoByte{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/projeto-detalhe.css') }}">
@@ -26,28 +26,28 @@
 </style>
 {% endblock %}
 
-{% block topbar_title %}{{ projeto.nome }}{% endblock %}
+{% block topbar_title %}{{ projeto.name_project }}{% endblock %}
 
 {% block content %}
 <div class="proj-header">
   <div class="proj-header-inner" style="display:flex; justify-content:space-between; align-items:center;">
     <div class="proj-header-info">
-      <div class="proj-header-name">{{ projeto.nome }}</div>
+      <div class="proj-header-name">{{ projeto.name_project }}</div>
       <div class="proj-header-meta">
         {% set badge_status = {'Em andamento': 'badge-em-andamento', 'Concluído': 'badge-concluido', 'Pausado': 'badge-pausado', 'Cancelado': 'badge-cancelado'} %}
         {% set badge_prioridade = {'Alta': 'badge-red', 'Média': 'badge-yellow', 'Baixa': 'badge-green'} %}
-        <span class="badge {{ badge_status.get(projeto.situacao, 'badge-gray') }}">{{ projeto.situacao }}</span>
-        {% if projeto.situacao %}
-        <span class="badge {{ badge_prioridade.get(projeto.situacao, 'badge-blue') }}">{{ cliente.usuario_rel.nome if cliente.usuario_rel else 'Desconhecido' }} — {{ cliente.empresa }}</span>
+        <span class="badge {{ badge_status.get(projeto.status_project, 'badge-gray') }}">{{ projeto.status_project }}</span>
+        {% if projeto.status_project %}
+        <span class="badge {{ badge_prioridade.get(projeto.status_project, 'badge-blue') }}">{{ cliente.user.name_user if cliente.user else 'Desconhecido' }} — {{ cliente.company_client }}</span>
         {% endif %}
-        <span style="font-size:12px;color:var(--text-muted);">Prazo: {{ projeto.prazo }}</span>
+        <span style="font-size:12px;color:var(--text-muted);">Prazo: {{ projeto.end_date_project }}</span>
       </div>
     </div>
     <a href="{{ url_for('admin.projetos') }}" class="btn btn-outline btn-sm">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="margin-right:6px;"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
       Voltar
     </a>
-    <form action="{{ url_for('admin.excluir_projeto', id=projeto.id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.');" style="display:inline;">
+    <form action="{{ url_for('admin.excluir_projeto', id=projeto.pk_id_project) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.');" style="display:inline;">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" class="btn btn-outline btn-sm" style="color:var(--accent); border-color:var(--accent);">
         <i data-lucide="trash-2" style="width:14px; margin-right:6px;"></i>
@@ -79,7 +79,7 @@
             </div>
             <div>
               <div class="kpi-label">Prazo</div>
-              <div class="kpi-value">{{ projeto.prazo }}</div>
+              <div class="kpi-value">{{ projeto.end_date_project }}</div>
             </div>
           </div>
           <div class="kpi-card fade-up fade-up-2">
@@ -95,11 +95,11 @@
         <div class="card">
           <div class="card-body">
             <h3>Sobre o Projeto</h3>
-            <p>{{ projeto.descricao or 'Sem descrição cadastrada.' }}</p>
+            <p>{{ projeto.description_project or 'Sem descrição cadastrada.' }}</p>
             {% if cliente %}
             <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
               <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Cliente</div>
-              <div style="font-weight:600;">{{ cliente.usuario_rel.nome if cliente.usuario_rel else 'Desconhecido' }} — {{ cliente.empresa }}</div>
+              <div style="font-weight:600;">{{ cliente.user.name_user if cliente.user else 'Desconhecido' }} — {{ cliente.company_client }}</div>
             </div>
             {% endif %}
           </div>
@@ -112,16 +112,16 @@
         <div class="card" style="margin-bottom: 16px;">
           <div class="card-body">
             <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-              <span class="badge badge-purple" style="font-size: 13px;">{{ equipe.nome }}</span>
-              <span style="font-size: 12px; color: var(--text-muted);">{{ equipe.membros_da_equipe|length }} membro(s)</span>
+              <span class="badge badge-purple" style="font-size: 13px;">{{ equipe.name_team }}</span>
+              <span style="font-size: 12px; color: var(--text-muted);">{{ equipe.employees|length }} membro(s)</span>
             </h4>
-            {% for func in equipe.membros_da_equipe %}
-            {% set nome_f = func.usuario_rel.nome if func.usuario_rel else 'Desconhecido' %}
+            {% for func in equipe.employees %}
+            {% set nome_f = func.user.name_user if func.user else 'Desconhecido' %}
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
               <div class="avatar sm {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ nome_f[:2].upper() }}</div>
               <div>
                 <div style="font-weight:600; font-size:14px; color:#fff;">{{ nome_f }}</div>
-                <div style="font-size:12px; color:var(--text-muted);">{{ func.cargo }}</div>
+                <div style="font-size:12px; color:var(--text-muted);">{{ func.role_employee }}</div>
               </div>
             </div>
             {% else %}
@@ -143,29 +143,29 @@
         <div class="card-body">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
             <div>
-              <h3 style="margin-bottom:4px;">{{ equipe.nome }}</h3>
+              <h3 style="margin-bottom:4px;">{{ equipe.name_team }}</h3>
               <p style="color:var(--text-muted); font-size:13px;">
-                {{ equipe.descricao or 'Sem descrição' }} · 
-                {{ equipe.membros_da_equipe|length }} membro(s)
+                {{ equipe.description_team or 'Sem descrição' }} · 
+                {{ equipe.employees|length }} membro(s)
               </p>
             </div>
-            {% if equipe.funcao %}
-            <span class="badge badge-purple" style="font-size:12px; padding:6px 14px;">{{ equipe.funcao }}</span>
+            {% if equipe.role_employee %}
+            <span class="badge badge-purple" style="font-size:12px; padding:6px 14px;">{{ equipe.role_employee }}</span>
             {% endif %}
           </div>
 
-          {% if equipe.membros_da_equipe %}
+          {% if equipe.employees %}
           <div class="proj-team-grid">
-            {% for func in equipe.membros_da_equipe %}
-            {% set nome_f = func.usuario_rel.nome if func.usuario_rel else 'Desconhecido' %}
+            {% for func in equipe.employees %}
+            {% set nome_f = func.user.name_user if func.user else 'Desconhecido' %}
             <div class="proj-member-card">
               <div class="avatar {{ avatar_colors[loop.index0 % avatar_colors|length] }}">{{ nome_f[:2].upper() }}</div>
               <div class="pmc-info">
                 <div class="pmc-name">{{ nome_f }}</div>
-                <div class="pmc-role">{{ func.cargo }}</div>
+                <div class="pmc-role">{{ func.role_employee }}</div>
                 <div class="pmc-skills">
-                  {% for skill in func.lista_habilidades[:3] %}
-                  <span class="pmc-skill">{{ skill.nome }}</span>
+                  {% for skill in func.skills[:3] %}
+                  <span class="pmc-skill">{{ skill.name_skill }}</span>
                   {% endfor %}
                 </div>
               </div>
@@ -214,15 +214,15 @@
           <div class="req-col">
             <h4 style="font-size:12px; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;">Funcionais</h4>
             <div class="requisitos-list">
-              {% set func_reqs = requisitos|selectattr('tipo', 'equalto', 'Funcional')|list %}
+              {% set func_reqs = requisitos|selectattr('type_requirement', 'equalto', 'Funcional')|list %}
               {% if func_reqs %}
                 {% for req in func_reqs %}
                 <div class="requisito-item" style="padding:16px; border:1px solid var(--border); border-radius:12px; margin-bottom:12px; background:rgba(255,255,255,0.01); display:flex; justify-content:space-between; align-items:center;">
                   <div style="flex:1;">
-                    <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ req.titulo }}</div>
-                    <div style="font-size:12px; color:var(--text-muted);">{{ req.descricao }}</div>
+                    <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ req.name_requirement }}</div>
+                    <div style="font-size:12px; color:var(--text-muted);">{{ req.description_requirement }}</div>
                   </div>
-                  <button type="button" onclick="abrirModalExcluirRequisito('{{ url_for('admin.excluir_requisito', id=req.id) }}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:8px; border-radius:8px; transition:0.2s;" onmouseover="this.style.color='var(--accent)'; this.style.background='rgba(233,69,96,0.1)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='transparent';">
+                  <button type="button" onclick="abrirModalExcluirRequisito('{{ url_for('admin.excluir_requisito', id=req.pk_id_requirement) }}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:8px; border-radius:8px; transition:0.2s;" onmouseover="this.style.color='var(--accent)'; this.style.background='rgba(233,69,96,0.1)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='transparent';">
                     <i data-lucide="trash-2" style="width:16px;"></i>
                   </button>
                 </div>
@@ -236,15 +236,15 @@
           <div class="req-col">
             <h4 style="font-size:12px; font-weight:700; color:var(--purple); text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;">Não Funcionais</h4>
             <div class="requisitos-list">
-              {% set non_func_reqs = requisitos|selectattr('tipo', 'equalto', 'Não-Funcional')|list %}
+              {% set non_func_reqs = requisitos|selectattr('type_requirement', 'equalto', 'Não-Funcional')|list %}
               {% if non_func_reqs %}
                 {% for req in non_func_reqs %}
                 <div class="requisito-item" style="padding:16px; border:1px solid var(--border); border-radius:12px; margin-bottom:12px; background:rgba(255,255,255,0.01); display:flex; justify-content:space-between; align-items:center;">
                   <div style="flex:1;">
-                    <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ req.titulo }}</div>
-                    <div style="font-size:12px; color:var(--text-muted);">{{ req.descricao }}</div>
+                    <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ req.name_requirement }}</div>
+                    <div style="font-size:12px; color:var(--text-muted);">{{ req.description_requirement }}</div>
                   </div>
-                  <button type="button" onclick="abrirModalExcluirRequisito('{{ url_for('admin.excluir_requisito', id=req.id) }}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:8px; border-radius:8px; transition:0.2s;" onmouseover="this.style.color='var(--accent)'; this.style.background='rgba(233,69,96,0.1)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='transparent';">
+                  <button type="button" onclick="abrirModalExcluirRequisito('{{ url_for('admin.excluir_requisito', id=req.pk_id_requirement) }}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:8px; border-radius:8px; transition:0.2s;" onmouseover="this.style.color='var(--accent)'; this.style.background='rgba(233,69,96,0.1)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='transparent';">
                     <i data-lucide="trash-2" style="width:16px;"></i>
                   </button>
                 </div>
@@ -272,7 +272,7 @@
             <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
               <i data-lucide="upload" style="width:16px;"></i>
               Enviar Documento
-              <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.id }}/upload-documento')">
+              <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.pk_id_project }}/upload-documento')">
             </label>
           </div>
         </div>
@@ -285,30 +285,30 @@
         {% if documentos %}
         <div class="docs-grid">
           {% for doc in documentos %}
-          <div class="doc-card" onclick="window.open('/static/{{ doc.caminho }}', '_blank')">
+          <div class="doc-card" onclick="window.open('/static/{{ doc.path_document }}', '_blank')">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div class="doc-icon" style="background:{% if doc.tipo_arquivo == 'pdf' %}rgba(239, 68, 68, 0.1);color:#ef4444;{% else %}rgba(59, 130, 246, 0.1);color:#3b82f6;{% endif %}">
-                {% if doc.tipo_arquivo == 'pdf' %}
+              <div class="doc-icon" style="background:{% if doc.type_document == 'pdf' %}rgba(239, 68, 68, 0.1);color:#ef4444;{% else %}rgba(59, 130, 246, 0.1);color:#3b82f6;{% endif %}">
+                {% if doc.type_document == 'pdf' %}
                 <i data-lucide="file-text"></i>
                 {% else %}
                 <i data-lucide="file-down"></i>
                 {% endif %}
               </div>
-              <form action="/projeto/delete-documento/{{ doc.id }}" method="POST" onclick="event.stopPropagation();" style="display:inline;">
+              <form action="/projeto/delete-documento/{{ doc.pk_id_document }}" method="POST" onclick="event.stopPropagation();" style="display:inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir arquivo">
                   <i data-lucide="trash-2" style="width:16px;"></i>
                 </button>
               </form>
             </div>
-            <div class="doc-title" style="word-break: break-all;">{{ doc.nome }}</div>
-            <div class="doc-cat">{{ doc.tipo_arquivo.upper() }}</div>
+            <div class="doc-title" style="word-break: break-all;">{{ doc.name_document }}</div>
+            <div class="doc-cat">{{ doc.type_document.upper() }}</div>
             <div class="doc-footer">
               <div class="doc-meta">
                 <i data-lucide="calendar" style="width:12px;"></i>
-                <span>{{ doc.data_envio.strftime('%d/%m/%Y') }}</span>
+                <span>{{ doc.upload_date_document.strftime('%d/%m/%Y') }}</span>
               </div>
-              <a href="/static/{{ doc.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px;">
+              <a href="/static/{{ doc.path_document }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px;">
                 <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
               </a>
             </div>
@@ -341,7 +341,7 @@
             <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
               <i data-lucide="upload" style="width:16px;"></i>
               Enviar Diagrama
-              <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.id }}/upload-diagrama')">
+              <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.pk_id_project }}/upload-diagrama')">
             </label>
           </div>
         </div>
@@ -355,9 +355,9 @@
         <div class="diagrams-grid">
           {% for diag in diagramas %}
           <div class="diagram-card">
-            <div class="diagram-preview" onclick="window.open('/static/{{ diag.caminho }}', '_blank')" style="position:relative;">
-              <img src="/static/{{ diag.caminho }}" alt="{{ diag.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
-              <form action="/projeto/delete-diagrama/{{ diag.id }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
+            <div class="diagram-preview" onclick="window.open('/static/{{ diag.path_diagram }}', '_blank')" style="position:relative;">
+              <img src="/static/{{ diag.path_diagram }}" alt="{{ diag.name_diagram }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+              <form action="/projeto/delete-diagrama/{{ diag.pk_id_diagram }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="close-btn" style="background:rgba(0,0,0,0.6); color:#fff; border:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Excluir diagrama">
                   <i data-lucide="trash-2" style="width:14px;"></i>
@@ -366,10 +366,10 @@
             </div>
             <div class="diagram-info">
               <div>
-                <div class="diagram-name">{{ diag.nome }}</div>
-                <div class="diagram-type">Upload em {{ diag.data_envio.strftime('%d/%m/%Y') }}</div>
+                <div class="diagram-name">{{ diag.name_diagram }}</div>
+                <div class="diagram-type">Upload em {{ diag.date_diagram.strftime('%d/%m/%Y') }}</div>
               </div>
-              <a href="/static/{{ diag.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
+              <a href="/static/{{ diag.path_diagram }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                 <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
               </a>
             </div>
@@ -402,7 +402,7 @@
             <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
               <i data-lucide="upload" style="width:16px;"></i>
               Enviar Imagem
-              <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.id }}/upload-galeria')">
+              <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.pk_id_project }}/upload-galeria')">
             </label>
           </div>
         </div>
@@ -416,9 +416,9 @@
         <div class="diagrams-grid">
           {% for item in galeria %}
           <div class="diagram-card">
-            <div class="diagram-preview" onclick="window.open('/static/{{ item.caminho }}', '_blank')" style="position:relative;">
-              <img src="/static/{{ item.caminho }}" alt="{{ item.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
-              <form action="/projeto/delete-galeria/{{ item.id }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
+            <div class="diagram-preview" onclick="window.open('/static/{{ item.path_gallery }}', '_blank')" style="position:relative;">
+              <img src="/static/{{ item.path_gallery }}" alt="{{ item.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+              <form action="/projeto/delete-galeria/{{ item.pk_id_gallery }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="close-btn" style="background:rgba(0,0,0,0.6); color:#fff; border:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Excluir imagem">
                   <i data-lucide="trash-2" style="width:14px;"></i>
@@ -428,9 +428,9 @@
             <div class="diagram-info">
               <div>
                 <div class="diagram-name">{{ item.nome }}</div>
-                <div class="diagram-type">Upload em {{ item.data_envio.strftime('%d/%m/%Y') }}</div>
+                <div class="diagram-type">Upload em {{ item.date_gallery.strftime('%d/%m/%Y') }}</div>
               </div>
-              <a href="/static/{{ item.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
+              <a href="/static/{{ item.path_gallery }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                 <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
               </a>
             </div>
@@ -457,7 +457,7 @@
         <div class="card" style="margin-bottom:20px;">
           <div class="card-body" style="padding:24px;">
             <h4 style="margin-bottom:16px;">Novo Comentário</h4>
-            <form action="/projeto/{{ projeto.id }}/add-comentario" method="POST" class="comment-input-area">
+            <form action="/projeto/{{ projeto.pk_id_project }}/add-comentario" method="POST" class="comment-input-area">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <textarea name="conteudo" required class="comment-textarea" placeholder="Deixe um comentário para a equipe ou para o cliente..."></textarea>
               <div style="display:flex; justify-content:flex-end;">
@@ -471,8 +471,8 @@
 
         {% if comentarios %}
           {% for com in comentarios %}
-          {% set nome_com = com.usuario_rel.nome if com.usuario_rel else 'Desconhecido' %}
-          {% set tipo_com = com.usuario_rel.tipo if com.usuario_rel else 'desconhecido' %}
+          {% set nome_com = com.user.name_user if com.user else 'Desconhecido' %}
+          {% set tipo_com = com.user.type_user if com.user else 'desconhecido' %}
           <div class="comment-card" style="margin-bottom:16px;">
             <div class="comment-header">
               <div class="comment-meta">
@@ -485,11 +485,11 @@
                   <span class="badge {% if tipo_com == 'admin' %}badge-red{% elif tipo_com == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size:10px; margin-left:6px; padding:2px 6px;">
                     {{ tipo_com.upper() }}
                   </span>
-                  <div class="comment-time">{{ com.data.strftime('%d/%m/%Y %H:%M') }}</div>
+                  <div class="comment-time">{{ com.date_comment.strftime('%d/%m/%Y %H:%M') }}</div>
                 </div>
               </div>
-              {% if current_user.nivel == 1 or com.usuario_id == current_user.id %}
-              <form action="/projeto/delete-comentario/{{ com.id }}" method="POST" style="display:inline;">
+              {% if current_user.admin and current_user.admin.level_admin == 1 or com.fk_user == current_user.pk_id_user %}
+              <form action="/projeto/delete-comentario/{{ com.pk_id_comment }}" method="POST" style="display:inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent; cursor:pointer;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir comentário">
                   <i data-lucide="trash-2" style="width:16px;"></i>
@@ -498,7 +498,7 @@
               {% endif %}
             </div>
             <div class="comment-body">
-              {{ com.conteudo }}
+              {{ com.content_comment }}
             </div>
           </div>
           {% endfor %}
@@ -517,10 +517,10 @@
         <div class="comment-filter-card">
           <div class="csf-title">Informações de Contato</div>
           <div style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-top:12px;">
-            {% if cliente and cliente.usuario_rel %}
-            <strong>Cliente:</strong> {{ cliente.usuario_rel.nome }}<br>
-            <strong>Empresa:</strong> {{ cliente.empresa }}<br>
-            <strong>Email:</strong> {{ cliente.usuario_rel.email }}<br>
+            {% if cliente and cliente.user %}
+            <strong>Cliente:</strong> {{ cliente.user.name_user }}<br>
+            <strong>Empresa:</strong> {{ cliente.company_client }}<br>
+            <strong>Email:</strong> {{ cliente.user.email_user }}<br>
             {% else %}
             Sem cliente associado.
             {% endif %}
@@ -554,20 +554,20 @@
 
         <form action="{{ url_for('admin.editar_projeto') }}" method="POST" id="form-editar-projeto">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
+          <input type="hidden" name="projeto_id" value="{{ projeto.pk_id_project }}">
           
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
             <div class="form-group">
               <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Nome do Projeto</label>
-              <input type="text" name="nome" value="{{ projeto.nome }}" class="form-input" required>
+              <input type="text" name="nome" value="{{ projeto.name_project }}" class="form-input" required>
             </div>
             <div class="form-group">
               <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Status</label>
               <select name="status" class="form-input">
-                <option value="Pausado" {% if projeto.situacao == 'Pausado' %}selected{% endif %}>Pausado</option>
-                <option value="Em andamento" {% if projeto.situacao == 'Em andamento' %}selected{% endif %}>Em andamento</option>
-                <option value="Concluído" {% if projeto.situacao == 'Concluído' %}selected{% endif %}>Concluído</option>
-                <option value="Cancelado" {% if projeto.situacao == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+                <option value="Pausado" {% if projeto.status_project == 'Pausado' %}selected{% endif %}>Pausado</option>
+                <option value="Em andamento" {% if projeto.status_project == 'Em andamento' %}selected{% endif %}>Em andamento</option>
+                <option value="Concluído" {% if projeto.status_project == 'Concluído' %}selected{% endif %}>Concluído</option>
+                <option value="Cancelado" {% if projeto.status_project == 'Cancelado' %}selected{% endif %}>Cancelado</option>
               </select>
             </div>
           </div>
@@ -579,7 +579,7 @@
             </div>
             <div class="form-group">
               <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Prazo</label>
-              <input type="date" name="prazo_str" value="{{ projeto.prazo }}" placeholder="Ex: 30 de Outubro, 2026" class="form-input" required>
+              <input type="date" name="prazo_str" value="{{ projeto.end_date_project }}" placeholder="Ex: 30 de Outubro, 2026" class="form-input" required>
             </div>
           </div>
 
@@ -589,8 +589,8 @@
               <select name="cliente_id" class="form-input">
                 <option value="">Sem Cliente</option>
                 {% for cl in todos_clientes %}
-                <option value="{{ cl.id }}" {% if projeto.cliente_id == cl.id %}selected{% endif %}>
-                  {{ cl.usuario_rel.nome if cl.usuario_rel else 'Desconhecido' }} ({{ cl.empresa }})
+                <option value="{{ cl.pk_id_client }}" {% if projeto.fk_client == cl.pk_id_client %}selected{% endif %}>
+                  {{ cl.user.name_user if cl.user else 'Desconhecido' }} ({{ cl.company_client }})
                 </option>
                 {% endfor %}
               </select>
@@ -600,8 +600,8 @@
               <div style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;padding:8px;border:1px solid var(--border);border-radius:8px;">
                 {% for eq in todas_equipes %}
                 <label class="check-label" style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-                  <input type="checkbox" name="check_equipes" value="{{ eq.id }}" style="accent-color:var(--accent);"
-                    {% if eq in projeto.lista_equipes %}checked{% endif %}> {{ eq.nome }}
+                  <input type="checkbox" name="check_equipes" value="{{ eq.pk_id_team }}" style="accent-color:var(--accent);"
+                    {% if eq in projeto.teams %}checked{% endif %}> {{ eq.name_team }}
                 </label>
                 {% endfor %}
               </div>
@@ -610,7 +610,7 @@
 
           <div class="form-group" style="margin-bottom: 32px;">
             <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Descrição do Projeto</label>
-            <textarea name="descricao" rows="4" class="form-input">{{ projeto.descricao }}</textarea>
+            <textarea name="descricao" rows="4" class="form-input">{{ projeto.description_project }}</textarea>
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 16px;">
@@ -658,7 +658,7 @@
     </div>
     <form action="{{ url_for('admin.vincular_equipes_projeto') }}" method="POST">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
+      <input type="hidden" name="projeto_id" value="{{ projeto.pk_id_project }}">
       <div style="padding: 32px;">
         <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">
           Selecione as equipes que serão responsáveis por este projeto.
@@ -668,8 +668,8 @@
           <div style="display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;">
             {% for eq in todas_equipes %}
             <label class="check-label" style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-              <input type="checkbox" name="check_equipes" value="{{ eq.id }}" style="accent-color:var(--accent);"
-                {% if eq in equipes %}checked{% endif %}> {{ eq.nome }}
+              <input type="checkbox" name="check_equipes" value="{{ eq.pk_id_team }}" style="accent-color:var(--accent);"
+                {% if eq in equipes %}checked{% endif %}> {{ eq.name_team }}
             </label>
             {% endfor %}
           </div>
@@ -692,7 +692,7 @@
     </div>
     <form action="{{ url_for('admin.add_requisito') }}" method="POST" style="padding:32px;">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
+      <input type="hidden" name="projeto_id" value="{{ projeto.pk_id_project }}">
       <div class="form-group" style="margin-bottom:20px;">
         <label style="display:block; font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Título</label>
         <input type="text" name="titulo" class="form-input" placeholder="Ex: Login com Google" required>

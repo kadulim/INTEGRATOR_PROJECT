@@ -312,9 +312,9 @@
 
     <div class="sidebar-footer">
       <div class="user-chip">
-        <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">{{ current_user.nome[:2].upper() }}</div>
+        <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">{{ current_user.name_user[:2].upper() }}</div>
         <div class="user-info">
-          <div class="user-name" style="font-size: 13px; font-weight: 600; color: var(--text-primary);">{{ current_user.nome }}</div>
+          <div class="user-name" style="font-size: 13px; font-weight: 600; color: var(--text-primary);">{{ current_user.name_user }}</div>
           <div class="user-role" style="font-size: 11px; color: var(--text-muted);">Cliente</div>
         </div>
         <a href="{{ url_for('logout') }}" title="Sair" style="color: rgba(255,255,255,0.35); margin-left: auto; text-decoration: none; transition: color 0.2s;">
@@ -331,7 +331,7 @@
       <!-- Seção de Boas-vindas -->
       <div class="client-welcome" style="margin-bottom: 36px;">
         <div class="cw-text">
-          <h2 style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px;">Olá, {{ current_user.nome.split(' ')[0] }}!</h2>
+          <h2 style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px;">Olá, {{ current_user.name_user.split(' ')[0] }}!</h2>
           <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6;">Bem-vindo ao Portal do Cliente CoByte. Acompanhe a entrega dos seus projetos de ponta a ponta.</p>
         </div>
       </div>
@@ -573,8 +573,8 @@
             item.style.textAlign = 'left';
             
             item.innerHTML = `
-              <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.nome}">${p.nome}</span>
-              <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.prazo}</span>
+              <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.name_project}">${p.name_project}</span>
+              <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.end_date_project}</span>
             `;
             listEl.appendChild(item);
           });

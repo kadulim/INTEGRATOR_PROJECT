@@ -1,7 +1,7 @@
 {% extends 'funcionario/base.html' %}
 {% set active_page = 'projetos' %}
 
-{% block title %}{{ projeto.nome }} — CoByte{% endblock %}
+{% block title %}{{ projeto.name_project }} — CoByte{% endblock %}
 {% block topbar_title %}Detalhes do Projeto{% endblock %}
 
 {% block extra_css %}
@@ -33,11 +33,11 @@
 <div class="card" style="margin-bottom: 24px;">
     <div class="card-body" style="padding: 32px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">{{ projeto.nome }}</h2>
+            <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">{{ projeto.name_project }}</h2>
             <div style="display: flex; gap: 12px; align-items: center;">
                 {% set badge_status = {'Em andamento': 'badge-em-andamento', 'Concluído': 'badge-concluido', 'Pausado': 'badge-pausado', 'Cancelado': 'badge-cancelado'} %}
-                <span class="badge {{ badge_status.get(projeto.situacao, 'badge-gray') }}">{{ projeto.situacao }}</span>
-                <span style="font-size: 13px; color: var(--text-muted);">Prazo: <strong>{{ projeto.prazo }}</strong></span>
+                <span class="badge {{ badge_status.get(projeto.status_project, 'badge-gray') }}">{{ projeto.status_project }}</span>
+                <span style="font-size: 13px; color: var(--text-muted);">Prazo: <strong>{{ projeto.end_date_project }}</strong></span>
             </div>
         </div>
         <a href="{{ url_for('funcionario.projetos') }}" class="btn btn-ghost" style="border: 1px solid var(--border);">Voltar</a>
@@ -58,7 +58,7 @@
     <!-- Aba Visão Geral -->
     <div id="tab-visao-geral" class="tab-pane active">
         <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Descrição do Projeto</h3>
-        <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 32px;">{{ projeto.descricao or 'Sem descrição disponível.' }}</p>
+        <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 32px;">{{ projeto.description_project or 'Sem descrição disponível.' }}</p>
         
         <div class="overview-stats" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
             <div class="card" style="padding: 20px; background: rgba(255,255,255,0.02);">
@@ -67,7 +67,7 @@
             </div>
             <div class="card" style="padding: 20px; background: rgba(255,255,255,0.02);">
                 <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">Cliente</div>
-                <div style="font-size: 16px; font-weight: 600;">{{ projeto.cliente_rel.usuario_rel.nome if projeto.cliente_rel and projeto.cliente_rel.usuario_rel else 'Nenhum' }}</div>
+                <div style="font-size: 16px; font-weight: 600;">{{ projeto.client.user.name_user if projeto.client and projeto.client.user else 'Nenhum' }}</div>
             </div>
         </div>
     </div>
@@ -83,10 +83,10 @@
             <div class="req-col">
                 <h4 style="font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px;">Funcionais</h4>
                 <div class="req-list">
-                    {% for r in requisitos if r.tipo == 'Funcional' %}
+                    {% for r in requisitos if r.type_requirement == 'Funcional' %}
                     <div class="req-item-mini" style="padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px;">
-                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">{{ r.titulo }}</div>
-                        <div style="font-size: 12px; color: var(--text-muted);">{{ r.descricao }}</div>
+                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">{{ r.name_requirement }}</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">{{ r.description_requirement }}</div>
                     </div>
                     {% endfor %}
                 </div>
@@ -94,10 +94,10 @@
             <div class="req-col">
                 <h4 style="font-size: 13px; font-weight: 700; color: var(--purple); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px;">Não Funcionais</h4>
                 <div class="req-list">
-                    {% for r in requisitos if r.tipo == 'Não-Funcional' %}
+                    {% for r in requisitos if r.type_requirement == 'Não-Funcional' %}
                     <div class="req-item-mini" style="padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px;">
-                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">{{ r.titulo }}</div>
-                        <div style="font-size: 12px; color: var(--text-muted);">{{ r.descricao }}</div>
+                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">{{ r.name_requirement }}</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">{{ r.description_requirement }}</div>
                     </div>
                     {% endfor %}
                 </div>
@@ -110,12 +110,12 @@
         <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">Membros do Time</h3>
         <div class="proj-team-grid">
             {% for m in membros %}
-            {% set nome_m = m.usuario_rel.nome if m.usuario_rel else 'Desconhecido' %}
+            {% set nome_m = m.user.name_user if m.user else 'Desconhecido' %}
             <div class="proj-member-card">
                 <div class="avatar avatar-blue">{{ nome_m[:2].upper() }}</div>
                 <div class="pmc-info">
                     <div class="pmc-name">{{ nome_m }}</div>
-                    <div class="pmc-role">{{ m.cargo }}</div>
+                    <div class="pmc-role">{{ m.role_employee }}</div>
                 </div>
             </div>
             {% endfor %}
@@ -146,10 +146,10 @@
         {% if documentos %}
         <div class="docs-grid">
             {% for doc in documentos %}
-            <div class="doc-card" onclick="window.open('/static/{{ doc.caminho }}', '_blank')">
+            <div class="doc-card" onclick="window.open('/static/{{ doc.path_document }}', '_blank')">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div class="doc-icon" style="background:{% if doc.tipo_arquivo == 'pdf' %}rgba(239, 68, 68, 0.1);color:#ef4444;{% else %}rgba(59, 130, 246, 0.1);color:#3b82f6;{% endif %}">
-                        {% if doc.tipo_arquivo == 'pdf' %}
+                    <div class="doc-icon" style="background:{% if doc.type_document == 'pdf' %}rgba(239, 68, 68, 0.1);color:#ef4444;{% else %}rgba(59, 130, 246, 0.1);color:#3b82f6;{% endif %}">
+                        {% if doc.type_document == 'pdf' %}
                         <i data-lucide="file-text"></i>
                         {% else %}
                         <i data-lucide="file-down"></i>
@@ -162,14 +162,14 @@
                         </button>
                     </form>
                 </div>
-                <div class="doc-title" style="word-break: break-all;">{{ doc.nome }}</div>
-                <div class="doc-cat">{{ doc.tipo_arquivo.upper() }}</div>
+                <div class="doc-title" style="word-break: break-all;">{{ doc.name_document }}</div>
+                <div class="doc-cat">{{ doc.type_document.upper() }}</div>
                 <div class="doc-footer">
                     <div class="doc-meta">
                         <i data-lucide="calendar" style="width:12px;"></i>
-                        <span>{{ doc.data_envio.strftime('%d/%m/%Y') }}</span>
+                        <span>{{ doc.upload_date_document.strftime('%d/%m/%Y') }}</span>
                     </div>
-                    <a href="/static/{{ doc.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px;">
+                    <a href="/static/{{ doc.path_document }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:11px;">
                         <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
                     </a>
                 </div>
@@ -212,8 +212,8 @@
         <div class="diagrams-grid">
             {% for diag in diagramas %}
             <div class="diagram-card">
-                <div class="diagram-preview" onclick="window.open('/static/{{ diag.caminho }}', '_blank')" style="position:relative;">
-                    <img src="/static/{{ diag.caminho }}" alt="{{ diag.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+                <div class="diagram-preview" onclick="window.open('/static/{{ diag.path_diagram }}', '_blank')" style="position:relative;">
+                    <img src="/static/{{ diag.path_diagram }}" alt="{{ diag.name_diagram }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
                     <form action="/projeto/delete-diagrama/{{ diag.id }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="close-btn" style="background:rgba(0,0,0,0.6); color:#fff; border:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Excluir diagrama">
@@ -223,10 +223,10 @@
                 </div>
                 <div class="diagram-info">
                     <div>
-                        <div class="diagram-name">{{ diag.nome }}</div>
-                        <div class="diagram-type">Upload em {{ diag.data_envio.strftime('%d/%m/%Y') }}</div>
+                        <div class="diagram-name">{{ diag.name_diagram }}</div>
+                        <div class="diagram-type">Upload em {{ diag.upload_date_diagram.strftime('%d/%m/%Y') }}</div>
                     </div>
-                    <a href="/static/{{ diag.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
+                    <a href="/static/{{ diag.path_diagram }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                         <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
                     </a>
                 </div>
@@ -269,8 +269,8 @@
         <div class="diagrams-grid">
             {% for item in galeria %}
             <div class="diagram-card">
-                <div class="diagram-preview" onclick="window.open('/static/{{ item.caminho }}', '_blank')" style="position:relative;">
-                    <img src="/static/{{ item.caminho }}" alt="{{ item.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+                <div class="diagram-preview" onclick="window.open('/static/{{ item.path_gallery }}', '_blank')" style="position:relative;">
+                    <img src="/static/{{ item.path_gallery }}" alt="{{ item.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
                     <form action="/projeto/delete-galeria/{{ item.id }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="close-btn" style="background:rgba(0,0,0,0.6); color:#fff; border:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Excluir imagem">
@@ -281,9 +281,9 @@
                 <div class="diagram-info">
                     <div>
                         <div class="diagram-name">{{ item.nome }}</div>
-                        <div class="diagram-type">Upload em {{ item.data_envio.strftime('%d/%m/%Y') }}</div>
+                        <div class="diagram-type">Upload em {{ item.date_gallery.strftime('%d/%m/%Y') }}</div>
                     </div>
-                    <a href="/static/{{ item.caminho }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
+                    <a href="/static/{{ item.path_gallery }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                         <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
                     </a>
                 </div>
@@ -322,8 +322,8 @@
 
                 {% if comentarios %}
                     {% for com in comentarios %}
-                    {% set nome_com = com.usuario_rel.nome if com.usuario_rel else 'Desconhecido' %}
-                    {% set tipo_com = com.usuario_rel.tipo if com.usuario_rel else 'desconhecido' %}
+                    {% set nome_com = com.user.name_user if com.user else 'Desconhecido' %}
+                    {% set tipo_com = com.user.type_user if com.user else 'desconhecido' %}
                     <div class="comment-card" style="margin-bottom:16px;">
                         <div class="comment-header">
                             <div class="comment-meta">
@@ -336,11 +336,11 @@
                                     <span class="badge {% if tipo_com == 'admin' %}badge-red{% elif tipo_com == 'funcionario' %}badge-purple{% else %}badge-blue{% endif %}" style="font-size:10px; margin-left:6px; padding:2px 6px;">
                                         {{ tipo_com.upper() }}
                                     </span>
-                                    <div class="comment-time">{{ com.data.strftime('%d/%m/%Y %H:%M') }}</div>
+                                    <div class="comment-time">{{ com.date_comment.strftime('%d/%m/%Y %H:%M') }}</div>
                                 </div>
                             </div>
-                            {% if current_user.nivel == 1 or com.usuario_id == current_user.id %}
-                            <form action="/projeto/delete-comentario/{{ com.id }}" method="POST" style="display:inline;">
+                            {% if current_user.admin and current_user.admin.level_admin == 1 or com.fk_user == current_user.pk_id_user %}
+                                <form action="/projeto/delete-comentario/{{ com.pk_id_comment }}" method="POST" style="display:inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent; cursor:pointer;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir comentário">
                                     <i data-lucide="trash-2" style="width:16px;"></i>
@@ -349,7 +349,7 @@
                             {% endif %}
                         </div>
                         <div class="comment-body">
-                            {{ com.conteudo }}
+                            {{ com.content_comment }}
                         </div>
                     </div>
                     {% endfor %}
@@ -368,11 +368,11 @@
                 <div class="comment-filter-card">
                     <div class="csf-title">Informações de Contato</div>
                     <div style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-top:12px;">
-                        {% set cliente = projeto.cliente_rel %}
-                        {% if cliente and cliente.usuario_rel %}
-                        <strong>Cliente:</strong> {{ cliente.usuario_rel.nome }}<br>
-                        <strong>Empresa:</strong> {{ cliente.empresa }}<br>
-                        <strong>Email:</strong> {{ cliente.usuario_rel.email }}<br>
+                        {% set cliente = projeto.client %}
+                        {% if cliente and cliente.user %}
+                        <strong>Cliente:</strong> {{ cliente.user.name_user }}<br>
+                        <strong>Empresa:</strong> {{ cliente.company_client }}<br>
+                        <strong>Email:</strong> {{ cliente.user.email_user }}<br>
                         {% else %}
                         Sem cliente associado.
                         {% endif %}
@@ -410,7 +410,7 @@
         </div>
         <form action="{{ url_for('funcionario.add_requisito') }}" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="projeto_id" value="{{ projeto.id }}">
+            <input type="hidden" name="projeto_id" value="{{ projeto.pk_id_project }}">
             <div style="padding: 32px;">
                 <div class="form-group-modern" style="margin-bottom: 24px;">
                     <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Título do Requisito</label>

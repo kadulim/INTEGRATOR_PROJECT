@@ -520,7 +520,7 @@
     <!-- ═══ STATS ═══ -->
     {% set total_projetos = namespace(count=0) %}
     {% for c in clientes %}
-      {% set total_projetos.count = total_projetos.count + c.projetos|length %}
+      {% set total_projetos.count = total_projetos.count + c.projects|length %}
     {% endfor %}
     <div class="stats-row">
       <div class="scard scard-total">
@@ -544,7 +544,7 @@
         <div class="scard-top">
           <div>
             <div class="scard-lbl">Clientes Ativos</div>
-            <div class="scard-val" style="color:var(--gr);">{{ clientes|selectattr("projetos")|list|length }}</div>
+            <div class="scard-val" style="color:var(--gr);">{{ clientes|selectattr("projects")|list|length }}</div>
             <div class="scard-sub">
               <span class="tag tag-gr">Com projetos</span> ativos
             </div>
@@ -629,27 +629,27 @@
       <div class="proj-grid">
         {% if clientes %}
           {% for c in clientes %}
-          {% set in_project = c.projetos|length > 0 %}
+          {% set in_project = c.projects|length > 0 %}
           <div class="pcard cliente-card-item" data-status="{% if in_project %}Em projeto{% else %}Disponível{% endif %}">
             <div class="pcard-strip {% if in_project %}pcard-strip-ac{% else %}pcard-strip-gr{% endif %}"></div>
             <div class="pcard-body">
 
               <div class="pcard-top">
                 <div class="pcard-ico-wrap avatar-color-{{ loop.index0 % 5 }}">
-                  {{ c.usuario_rel.nome[:2].upper() }}
+                  {{ c.user.name_user[:2].upper() }}
                 </div>
                 <div class="pcard-actions">
                   <button class="pcard-menu pcard-menu-edit" title="Editar Cliente" 
-                    data-id="{{ c.id }}"
-                    data-nome="{{ c.usuario_rel.nome }}"
-                    data-email="{{ c.usuario_rel.email }}"
-                    data-empresa="{{ c.empresa }}"
+                    data-id="{{ c.pk_id_client }}"
+                    data-nome="{{ c.user.name_user }}"
+                    data-email="{{ c.user.email_user }}"
+                    data-empresa="{{ c.company_client }}"
                     onclick="handleEditClienteClick(this)">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </button>
                   <button class="pcard-menu pcard-menu-delete" title="Excluir Cliente" 
-                    data-id="{{ c.id }}"
-                    data-nome="{{ c.usuario_rel.nome }}"
+                    data-id="{{ c.pk_id_client }}"
+                    data-nome="{{ c.user.name_user }}"
                     onclick="handleDeleteClienteClick(this)">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -658,19 +658,19 @@
                 </div>
               </div>
 
-              <div class="pcard-name">{{ c.usuario_rel.nome }}</div>
+              <div class="pcard-name">{{ c.user.name_user }}</div>
               <div class="pcard-client" style="margin-bottom: 12px; color: var(--ac); font-weight: 500;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="stroke: var(--ac);">
                   <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
                 </svg>
-                {{ c.empresa }}
+                {{ c.company_client }}
               </div>
               
               <div class="pcard-client" style="margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
                 </svg>
-                {{ c.usuario_rel.email }}
+                {{ c.user.email_user }}
               </div>
 
               <div class="pcard-tags" style="margin-bottom: 20px;">
@@ -680,7 +680,7 @@
                 </span>
                 {% if in_project %}
                 <span class="ptag ptag-user">
-                  Projetos Totais: {{ c.projetos|length }}
+                  Projetos Totais: {{ c.projects|length }}
                 </span>
                 {% endif %}
               </div>
@@ -691,15 +691,15 @@
               <div class="pcard-date" style="color: var(--tx2); line-height: 1.4; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">
                 Projetos Vinculados: 
                 <strong style="color: var(--tx);">
-                  {% for pr in c.projetos %}
-                    {{ pr.nome }}{% if not loop.last %}, {% endif %}
+                  {% for pr in c.projects %}
+                    {{ pr.name_project }}{% if not loop.last %}, {% endif %}
                   {% else %}
                     Nenhum
                   {% endfor %}
                 </strong>
               </div>
               <div class="pcard-team">
-                <div class="team-avatar">{{ c.empresa[:2].upper() }}</div>
+                <div class="team-avatar">{{ c.company_client[:2].upper() }}</div>
               </div>
             </div>
           </div>
@@ -728,34 +728,34 @@
           <tbody>
             {% if clientes %}
               {% for c in clientes %}
-              <tr class="cliente-row" data-status="{% if c.projetos|length > 0 %}Em projeto{% else %}Disponível{% endif %}">
+              <tr class="cliente-row" data-status="{% if c.projects|length > 0 %}Em projeto{% else %}Disponível{% endif %}">
                 <td>
-                  <div style="font-weight: 700; color: var(--tx);">{{ c.usuario_rel.nome }}</div>
+                  <div style="font-weight: 700; color: var(--tx);">{{ c.user.name_user }}</div>
                 </td>
                 <td>
-                  <div style="font-weight: 500; color: var(--ac);">{{ c.empresa }}</div>
+                  <div style="font-weight: 500; color: var(--ac);">{{ c.company_client }}</div>
                 </td>
                 <td>
-                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">{{ c.usuario_rel.email }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">{{ c.user.email_user }}</span>
                 </td>
                 <td>
-                  <span class="tag {% if c.projetos|length > 0 %}tag-ac{% else %}tag-gr{% endif %}">
-                    {{ c.projetos|length }} projeto(s)
+                  <span class="tag {% if c.projects|length > 0 %}tag-ac{% else %}tag-gr{% endif %}">
+                    {{ c.projects|length }} projeto(s)
                   </span>
                 </td>
                 <td>
                   <div style="display:flex; justify-content: flex-end; gap:8px;">
                     <button class="pcard-menu pcard-menu-edit" title="Editar Cliente"
-                      data-id="{{ c.id }}"
-                      data-nome="{{ c.usuario_rel.nome }}"
-                      data-email="{{ c.usuario_rel.email }}"
-                      data-empresa="{{ c.empresa }}"
+                      data-id="{{ c.pk_id_client }}"
+                      data-nome="{{ c.user.name_user }}"
+                      data-email="{{ c.user.email_user }}"
+                      data-empresa="{{ c.company_client }}"
                       onclick="handleEditClienteClick(this)">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
                     <button class="pcard-menu pcard-menu-delete" title="Excluir Cliente"
-                      data-id="{{ c.id }}"
-                      data-nome="{{ c.usuario_rel.nome }}"
+                      data-id="{{ c.pk_id_client }}"
+                      data-nome="{{ c.user.name_user }}"
                       onclick="handleDeleteClienteClick(this)">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>

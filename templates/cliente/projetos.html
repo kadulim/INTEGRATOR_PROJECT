@@ -180,9 +180,9 @@
 
     <div class="sidebar-footer">
       <div class="user-chip">
-        <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">{{ current_user.nome[:2].upper() }}</div>
+        <div class="avatar sm avatar-blue" style="background: var(--blue-soft) !important; color: var(--blue) !important; font-weight: 600;">{{ current_user.name_user[:2].upper() }}</div>
         <div class="user-info">
-          <div class="user-name" style="font-size: 13px; font-weight: 600; color: var(--text-primary);">{{ current_user.nome }}</div>
+          <div class="user-name" style="font-size: 13px; font-weight: 600; color: var(--text-primary);">{{ current_user.name_user }}</div>
           <div class="user-role" style="font-size: 11px; color: var(--text-muted);">Cliente</div>
         </div>
         <a href="{{ url_for('logout') }}" title="Sair" style="color: rgba(255,255,255,0.35); margin-left: auto; text-decoration: none; transition: color 0.2s;">
@@ -211,15 +211,15 @@
         <div class="client-proj-card" onclick="window.location.href='{{ url_for('cliente_projeto_detalhe', projeto_id=projeto.id) }}'" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: all 0.22s; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer;">
           <div class="cpc-header" style="padding: 24px; border-bottom: 1px solid var(--border); position: relative;">
             <div class="cpc-accent-bar" style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--blue);"></div>
-            <h3 class="cpc-title" style="font-size: 16px; font-weight: 700; margin-bottom: 8px; padding-left: 8px; color: var(--text-primary);">{{ projeto.nome }}</h3>
+            <h3 class="cpc-title" style="font-size: 16px; font-weight: 700; margin-bottom: 8px; padding-left: 8px; color: var(--text-primary);">{{ projeto.name_project }}</h3>
             <div class="cpc-badges" style="padding-left: 8px;">
-              <span class="badge {% if projeto.situacao == 'Em andamento' %}badge-em-andamento{% elif projeto.situacao == 'Concluído' %}badge-concluido{% elif projeto.situacao == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">{{ projeto.situacao }}</span>
+              <span class="badge {% if projeto.status_project == 'Em andamento' %}badge-em-andamento{% elif projeto.status_project == 'Concluído' %}badge-concluido{% elif projeto.status_project == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">{{ projeto.status_project }}</span>
             </div>
           </div>
           
           <div class="cpc-body" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
             <div style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 4px;">
-              {{ projeto.descricao or 'Sem descrição cadastrada para este projeto.' }}
+              {{ projeto.description_project or 'Sem descrição cadastrada para este projeto.' }}
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
@@ -229,7 +229,7 @@
               </div>
               <div>
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 4px;">Prazo Final</div>
-                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ projeto.prazo }}</div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ projeto.end_date_project }}</div>
               </div>
             </div>
           </div>
