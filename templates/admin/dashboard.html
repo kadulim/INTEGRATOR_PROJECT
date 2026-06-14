@@ -36,16 +36,18 @@
     --vi: #A855F7;
     --vi-d: rgba(168, 85, 247, 0.10);
     --am-anda: #f59e0b;
+    --cn: #6b7280;
+    --cn-d: rgba(107, 114, 128, 0.12);
   }
 
   .light-mode {
-    --bg: #F3F4F6;
+    --bg: #f4f5f7;
     --s1: var(--surface);
     --s2: #F8FAFC;
     --s3: #E2E8F0;
-    --b1: rgba(15, 23, 42, 0.05);
-    --b2: rgba(15, 23, 42, 0.08);
-    --b3: rgba(15, 23, 42, 0.12);
+    --b1: rgba(15, 23, 42, 0.12);
+    --b2: rgba(15, 23, 42, 0.18);
+    --b3: rgba(15, 23, 42, 0.22);
     --tx: #0F172A;
     --tx2: #475569;
     --tx3: #94A3B8;
@@ -56,47 +58,109 @@
   .light-mode .scard,
   .light-mode .card,
   .light-mode .mcard {
-    box-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.045), 0 2px 6px -1px rgba(15, 23, 42, 0.015) !important;
-    border-color: rgba(15, 23, 42, 0.085) !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
   }
 
   .light-mode .hero {
-    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.02) !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
   }
 
   .light-mode .scard:hover,
   .light-mode .mcard:hover {
-    border-color: rgba(15, 23, 42, 0.16) !important;
-    box-shadow: 0 14px 32px -4px rgba(15, 23, 42, 0.09), 0 6px 14px -2px rgba(15, 23, 42, 0.04) !important;
+    border-color: rgba(15, 23, 42, 0.22) !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
   }
 
-  /* Soft and gorgeous light gradients for monthly cards */
+  /* Monthly cards light mode */
   .light-mode .mcard-gr {
-    border-color: rgba(0, 229, 160, 0.24) !important;
-    background: linear-gradient(160deg, rgba(0, 229, 160, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+    border-color: rgba(16, 185, 129, 0.25) !important;
+    background: var(--s1) !important;
+  }
+  .light-mode .mcard-gr .mcard-icon {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
   }
   .light-mode .mcard-ac {
-    border-color: rgba(0, 207, 255, 0.28) !important;
-    background: linear-gradient(160deg, rgba(0, 207, 255, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+    border-color: rgba(245, 158, 11, 0.25) !important;
+    background: var(--s1) !important;
+  }
+  .light-mode .mcard-ac .mcard-icon {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
   }
   .light-mode .mcard-am {
-    border-color: rgba(255, 176, 32, 0.24) !important;
-    background: linear-gradient(160deg, rgba(255, 176, 32, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+    border-color: rgba(255, 85, 119, 0.25) !important;
+    background: var(--s1) !important;
   }
-  .light-mode .mcard-rd {
-    border-color: rgba(239, 68, 68, 0.24) !important;
-    background: linear-gradient(160deg, rgba(239, 68, 68, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+  .light-mode .mcard-am .mcard-icon {
+    background: rgba(255, 85, 119, 0.1);
+    border: 1px solid rgba(255, 85, 119, 0.2);
+  }
+  .light-mode .mcard-cn {
+    border-color: rgba(107, 114, 128, 0.22) !important;
+    background: var(--s1) !important;
+  }
+  .light-mode .mcard-cn .mcard-icon {
+    background: rgba(107, 114, 128, 0.1);
+    border: 1px solid rgba(107, 114, 128, 0.2);
   }
 
   .light-mode .latest-change-box {
-    background: rgba(255, 255, 255, 0.85) !important;
-    border-color: rgba(15, 23, 42, 0.08) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02) !important;
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
   }
 
   .light-mode .proj-row:hover,
   .light-mode .act-row:hover {
-    background: rgba(15, 23, 42, 0.016) !important;
+    background: #f8fafc !important;
+  }
+
+  /* Dashboard rows borders */
+  .light-mode .proj-row {
+    border-bottom-color: rgba(15, 23, 42, 0.1) !important;
+  }
+  .light-mode .act-row {
+    border-bottom-color: rgba(15, 23, 42, 0.1) !important;
+  }
+  .light-mode .card-hdr {
+    border-bottom-color: rgba(15, 23, 42, 0.1) !important;
+  }
+  .light-mode .big-stat {
+    border-bottom-color: rgba(15, 23, 42, 0.1) !important;
+  }
+
+  /* Dashboard topbar light */
+  .light-mode .topbar-custom {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-bottom-color: rgba(15, 23, 42, 0.12) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  /* Scard icon & waves */
+  .light-mode .scard-ico {
+    border: 1px solid rgba(15, 23, 42, 0.1);
+  }
+  .light-mode .proj-ico {
+    border-color: rgba(15, 23, 42, 0.12) !important;
+    background: #f8fafc !important;
+  }
+  .light-mode .act-ico {
+    border-color: rgba(0, 229, 160, 0.25) !important;
+    background: rgba(0, 229, 160, 0.08) !important;
+  }
+
+  /* Modal light */
+  .light-mode .modal-ov {
+    background: rgba(15, 23, 42, 0.3) !important;
+  }
+  .light-mode .modal-box {
+    border: 1px solid rgba(15, 23, 42, 0.12) !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1) !important;
+  }
+  .light-mode .modal-head {
+    border-bottom-color: rgba(15, 23, 42, 0.1) !important;
   }
 
   .light-mode .ring-track {
@@ -336,6 +400,7 @@
   .tag-gr { background: var(--gr-d); color: var(--gr); }
   .tag-am { background: var(--am-d); color: var(--am); }
   .tag-vi { background: var(--vi-d); color: var(--vi); }
+  .tag-cn { background: var(--cn-d); color: var(--cn); }
 
   /* ─── SCARD WAVES ANIMATION ─── */
   .scard {
@@ -467,10 +532,10 @@
   .act-desc { font-size: 11.5px; color: var(--tx2); line-height: 1.5; }
   .act-time { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--tx3); margin-top: 2px; }
 
-  /* ─── MONTHLY ─── */
+  /* ── MONTHLY ── */
   .monthly {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     flex-shrink: 0;
   }
@@ -479,52 +544,156 @@
     background: var(--s1);
     border: 1px solid var(--b1);
     border-radius: var(--r);
-    padding: 30px 26px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; cursor: pointer; gap: 14px;
-    transition: border-color 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
-    position: relative; overflow: hidden;
-    min-height: 160px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: border-color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
     animation: slideInUp 0.5s ease-out forwards;
     opacity: 0;
   }
   .mcard:nth-child(1) { animation-delay: 0.1s; }
   .mcard:nth-child(2) { animation-delay: 0.2s; }
   .mcard:nth-child(3) { animation-delay: 0.3s; }
+  .mcard:nth-child(4) { animation-delay: 0.4s; }
   @keyframes slideInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-  .mcard:hover { 
-    border-color: var(--b2); 
-    transform: translateY(-8px); 
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  .mcard:hover {
+    border-color: var(--b2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
   }
 
-  .mcard::before {
-    content: ''; position: absolute;
-    top: -50px; left: 50%; transform: translateX(-50%);
-    width: 160px; height: 160px;
-    border-radius: 50%;
-    opacity: 0.1;
-    pointer-events: none;
-    transition: opacity 0.3s;
+  /* Card inner layout */
+  .mcard-inner {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 24px;
+    position: relative;
+    z-index: 1;
   }
-  .mcard:hover::before {
-    opacity: 0.18;
-  }
-  .mcard-ac::before { background: var(--am-anda); }
-  .mcard-gr::before { background: var(--gr-conclu); }
-  .mcard-am::before { background: var(--rd); }
-  .mcard-rd::before { background: #ec0000; }
 
-  /* Default / Dark Mode Monthly Cards & latest-change-box border definitions */
+  /* Icon container */
+  .mcard-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .mcard-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+  .mcard:hover .mcard-icon {
+    transform: scale(1.08);
+  }
+
+  /* Icon variants */
+  .mcard-gr .mcard-icon {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--gr-conclu);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+  .mcard-gr:hover .mcard-icon {
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
+  }
+  .mcard-ac .mcard-icon {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--am-anda);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+  .mcard-ac:hover .mcard-icon {
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.2);
+  }
+  .mcard-am .mcard-icon {
+    background: rgba(255, 85, 119, 0.12);
+    color: var(--rd);
+    box-shadow: 0 0 0 0 rgba(255, 85, 119, 0);
+  }
+  .mcard-am:hover .mcard-icon {
+    box-shadow: 0 0 16px rgba(255, 85, 119, 0.2);
+  }
+  .mcard-cn .mcard-icon {
+    background: rgba(107, 114, 128, 0.12);
+    color: var(--cn);
+    box-shadow: 0 0 0 0 rgba(107, 114, 128, 0);
+  }
+  .mcard-cn:hover .mcard-icon {
+    box-shadow: 0 0 16px rgba(107, 114, 128, 0.2);
+  }
+
+  /* Text area */
+  .mcard-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mcard-lbl {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.1px;
+    color: var(--tx);
+    margin-bottom: 3px;
+    transition: color 0.3s;
+  }
+
+  .mcard-sub {
+    font-size: 11.5px;
+    color: var(--tx3);
+    transition: color 0.3s;
+  }
+  .mcard:hover .mcard-sub {
+    color: var(--tx2);
+  }
+
+  /* Number */
+  .mcard-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .mcard:hover .mcard-num {
+    transform: scale(1.08);
+  }
+
+  /* Bottom accent bar */
+  .mcard-bar {
+    height: 3px;
+    width: 100%;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+  }
+  .mcard:hover .mcard-bar {
+    opacity: 1;
+  }
+  .mcard-gr .mcard-bar { background: linear-gradient(90deg, var(--gr-conclu), rgba(16, 185, 129, 0.1)); }
+  .mcard-ac .mcard-bar { background: linear-gradient(90deg, var(--am-anda), rgba(245, 158, 11, 0.1)); }
+  .mcard-am .mcard-bar { background: linear-gradient(90deg, var(--rd), rgba(255, 85, 119, 0.1)); }
+  .mcard-cn .mcard-bar { background: linear-gradient(90deg, var(--cn), rgba(107, 114, 128, 0.1)); }
+
+  /* Border accents */
+  .mcard-gr { border-color: rgba(16, 185, 129, 0.1) !important; }
+  .mcard-ac { border-color: rgba(245, 158, 11, 0.1) !important; }
+  .mcard-am { border-color: rgba(255, 85, 119, 0.1) !important; }
+  .mcard-cn { border-color: rgba(107, 114, 128, 0.12) !important; }
+
+  /* latest-change-box */
   .latest-change-box {
     background: var(--s2);
     border: 1px solid var(--b1);
@@ -534,45 +703,6 @@
     flex-direction: column;
     gap: 6px;
     transition: all 0.2s;
-  }
-  .mcard-gr {
-    border-color: rgba(16, 185, 129, 0.15) !important;
-  }
-  .mcard-ac {
-    border-color: rgba(245, 158, 11, 0.15) !important;
-    background: linear-gradient(160deg, #0d1a2e 0%, #0B1220 100%) !important;
-  }
-  .mcard-am {
-    border-color: rgba(255, 85, 119, 0.15) !important;
-  }
-  .mcard-rd {
-    border-color: rgba(236, 0, 0, 0.15) !important;
-  }
-
-  .mcard-lbl {
-    font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px;
-    text-transform: uppercase;
-    transition: all 0.3s;
-  }
-  .mcard:hover .mcard-lbl {
-    letter-spacing: 2px;
-  }
-  .mcard-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 52px; font-weight: 600; line-height: 1;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .mcard:hover .mcard-num {
-    font-size: 58px;
-    transform: scale(1.05);
-  }
-  .mcard-sub { 
-    font-size: 11.5px; 
-    color: var(--tx2); 
-    transition: all 0.3s;
-  }
-  .mcard:hover .mcard-sub {
-    color: var(--tx);
   }
 
   /* ─── DONUT ANIMATION ─── */
@@ -770,6 +900,17 @@
           </div>
           <div class="bs-num" style="color:var(--rd);" id="breakdownPausado">0</div>
         </div>
+
+        <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('cancelado')">
+          <div class="bs-left">
+            <div class="bs-bar" style="background:var(--cn);box-shadow:0 0 10px rgba(107,114,128,0.3);"></div>
+            <div>
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Cancelado</div>
+              <div class="bs-name">Cancelados</div>
+            </div>
+          </div>
+          <div class="bs-num" style="color:var(--cn);" id="breakdownCancelado">0</div>
+        </div>
       </div>
     </div>
 
@@ -946,21 +1087,59 @@
     <div class="monthly">
 
       <div class="mcard mcard-gr" onclick="openProjectsModal('concluido')">
-          <div class="mcard-lbl" style="color:var(--gr-conclu);">Concluídos</div>
+        <div class="mcard-inner">
+          <div class="mcard-icon">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="mcard-info">
+            <div class="mcard-lbl">Concluídos</div>
+            <div class="mcard-sub">Projetos finalizados</div>
+          </div>
           <div class="mcard-num" style="color:var(--gr-conclu);">{{ current_month_projects.concluido|length }}</div>
-          <div class="mcard-sub">projetos finalizados</div>
+        </div>
+        <div class="mcard-bar"></div>
       </div>
 
       <div class="mcard mcard-ac" onclick="openProjectsModal('em_andamento')">
-        <div class="mcard-lbl" style="color:var(--am-anda);">Desenvolvimento</div>
-        <div class="mcard-num" style="color:var(--am-anda);">{{ current_month_projects.em_andamento|length }}</div>
-        <div class="mcard-sub">projeto em andamento</div>
+        <div class="mcard-inner">
+          <div class="mcard-icon">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+          </div>
+          <div class="mcard-info">
+            <div class="mcard-lbl">Desenvolvimento</div>
+            <div class="mcard-sub">Em andamento</div>
+          </div>
+          <div class="mcard-num" style="color:var(--am-anda);">{{ current_month_projects.em_andamento|length }}</div>
+        </div>
+        <div class="mcard-bar"></div>
       </div>
 
       <div class="mcard mcard-am" onclick="openProjectsModal('pausado')">
-        <div class="mcard-lbl" style="color:var(--rd);">Pausado</div>
-        <div class="mcard-num" style="color:var(--rd);">{{ current_month_projects.pausado|length }}</div>
-        <div class="mcard-sub">parados</div>
+        <div class="mcard-inner">
+          <div class="mcard-icon">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
+          </div>
+          <div class="mcard-info">
+            <div class="mcard-lbl">Pausados</div>
+            <div class="mcard-sub">Projetos parados</div>
+          </div>
+          <div class="mcard-num" style="color:var(--rd);">{{ current_month_projects.pausado|length }}</div>
+        </div>
+        <div class="mcard-bar"></div>
+      </div>
+
+      <div class="mcard mcard-cn" onclick="openProjectsModal('cancelado')">
+        <div class="mcard-inner">
+          <div class="mcard-icon">
+            <svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <div class="mcard-info">
+            <div class="mcard-lbl">Cancelados</div>
+            <div class="mcard-sub">Encerrados</div>
+          </div>
+          <div class="mcard-num" style="color:var(--cn);">{{ current_month_projects.cancelado|length }}</div>
+        </div>
+        <div class="mcard-bar"></div>
       </div>
 
     </div>
@@ -1027,10 +1206,12 @@
     const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
     const concluidoVal   = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
     const pausadoVal     = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
+    const canceladoVal   = parseInt(statusData.find(d => d.label === 'Cancelado')?.val || 0);
 
     document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
     document.getElementById('breakdownConcluido').textContent = concluidoVal;
     document.getElementById('breakdownPausado').textContent   = pausadoVal;
+    document.getElementById('breakdownCancelado').textContent = canceladoVal;
 
     const SEGS = statusData.filter(s => s.val > 0).map(s => ({
       label: s.label, val: s.val, color: s.color
@@ -1091,7 +1272,8 @@
         const keyMap = {
           'Em andamento': 'em_andamento',
           'Concluído': 'concluido',
-          'Pausado': 'pausado'
+          'Pausado': 'pausado',
+          'Cancelado': 'cancelado'
         };
         const statusKey = keyMap[seg.label];
         const projs = projetosStatus[statusKey] || [];
@@ -1176,6 +1358,11 @@
       {% for p in current_month_projects.pausado %}
         { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('admin.projeto_detalhe', id=p.id) }}" },
       {% endfor %}
+    ],
+    cancelado: [
+      {% for p in current_month_projects.cancelado %}
+        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('admin.projeto_detalhe', id=p.id) }}" },
+      {% endfor %}
     ]
   };
 
@@ -1197,6 +1384,9 @@
     } else if (statusKey === 'pausado') {
       title = 'Projetos Pausados em {{ current_month_name }}';
       themeColor = 'var(--am)';
+    } else if (statusKey === 'cancelado') {
+      title = 'Projetos Cancelados em {{ current_month_name }}';
+      themeColor = 'var(--cn)';
     }
     
     titleEl.innerHTML = `<span style="color: ${themeColor}; font-weight: 800; font-size: 14.5px;">${title}</span>`;

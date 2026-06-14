@@ -66,24 +66,31 @@
 /* ── Roberto's Light Mode Overrides ── */
 .light-mode {
   color-scheme: light;
-  --bg:          #f9fafb; /* Cinza mais claro como solicitado */
+  --bg:          #f4f5f7;
   --surface:     #ffffff;
   --surface-solid:#ffffff;
-  --surface-2:   rgba(0, 0, 0, 0.04);
-  --border:      rgba(0, 0, 0, 0.06);
-  --border-md:   rgba(0, 0, 0, 0.1);
+  --surface-2:   rgba(0, 0, 0, 0.035);
+  --border:      rgba(0, 0, 0, 0.12);
+  --border-md:   rgba(0, 0, 0, 0.18);
 
-  --text-primary:   #000000;
-  --text-secondary: #111827;
-  --text-muted:     #6b7280;
+  --text-primary:   #0f172a;
+  --text-secondary: #1e293b;
+  --text-muted:     #64748b;
 
   --brand:        #0f172a;
   --brand-mid:    #f8fafc;
   --brand-accent: #3B82F6;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05);
 }
+
+/* ── Sidebar ── */
 .light-mode .sidebar { 
   background: #ffffff; 
-  border-right: 1px solid var(--border-md);
+  border-right: 1px solid var(--border);
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 }
 .light-mode .sidebar .nav-label {
   color: rgba(0, 0, 0, 0.4);
@@ -109,23 +116,219 @@
   background: rgba(0, 0, 0, 0.04);
 }
 .light-mode .sidebar-footer {
-  border-top: 1px solid var(--border-md);
+  border-top: 1px solid var(--border);
 }
 .light-mode .sidebar-logo {
-  border-bottom: 1px solid var(--border-md);
+  border-bottom: 1px solid var(--border);
 }
 
-.light-mode .topbar { background: rgba(255, 255, 255, 0.9); border-bottom: 1px solid var(--border-md); color: #000; }
-.light-mode .topbar-title { color: #000; }
-.light-mode .card { background: #ffffff; backdrop-filter: none; border: 1px solid var(--border-md); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+/* ── Topbar ── */
+.light-mode .topbar {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid var(--border);
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.light-mode .topbar-title { color: #0f172a; }
+
+/* ── Cards ── */
+.light-mode .card {
+  background: #ffffff;
+  backdrop-filter: none;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.light-mode .card:hover {
+  border-color: var(--border-md);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Stat Cards ── */
+.light-mode .stat-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.light-mode .stat-card:hover {
+  border-color: var(--border-md);
+  box-shadow: var(--shadow-md);
+}
 .light-mode .stat-label { color: var(--text-muted); }
-.light-mode .stat-value { color: #000; }
-.light-mode .form-label { color: #000; }
-.light-mode .form-input { background: #fff; color: #000; border-color: #d1d5db; }
+.light-mode .stat-value { color: #0f172a; }
+.light-mode .stat-icon {
+  border: 1px solid var(--border);
+}
+
+/* ── Forms ── */
+.light-mode .form-label { color: #374151; }
+.light-mode .form-input {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.light-mode .form-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+.light-mode .form-input:disabled {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
 
 .light-mode select.form-input, .light-mode .filter-select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(0,0,0,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-color: #ffffff;
+}
+
+/* ── Tables ── */
+.light-mode .data-table th {
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border);
+  color: #475569;
+}
+.light-mode .data-table td {
+  border-bottom: 1px solid var(--border);
+}
+.light-mode .data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* ── Buttons ── */
+.light-mode .btn-outline {
+  border-color: var(--border-md);
+}
+.light-mode .btn-outline:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+.light-mode .btn-ghost:hover {
+  background: #f1f5f9;
+}
+.light-mode .icon-btn {
+  border: 1px solid var(--border);
+}
+.light-mode .icon-btn:hover {
+  background: #f1f5f9;
+  border-color: var(--border-md);
+}
+
+/* ── Badges ── */
+.light-mode .badge-green  { background: rgba(34, 197, 94, 0.1);  color: #16a34a; border: 1px solid rgba(34, 197, 94, 0.2); }
+.light-mode .badge-yellow { background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2); }
+.light-mode .badge-blue   { background: rgba(59, 130, 246, 0.1); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.2); }
+.light-mode .badge-purple { background: rgba(168, 85, 247, 0.1); color: #9333ea; border: 1px solid rgba(168, 85, 247, 0.2); }
+.light-mode .badge-red    { background: rgba(239, 68, 68, 0.1);  color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2); }
+.light-mode .badge-gray   { background: #f1f5f9; color: #475569; border: 1px solid var(--border); }
+
+/* ── Modals ── */
+.light-mode .modal-backdrop {
+  background: rgba(15, 23, 42, 0.3);
+}
+.light-mode .modal {
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ── Progress Bar ── */
+.light-mode .progress-bar {
+  background: #e2e8f0;
+  border: 1px solid var(--border);
+}
+
+/* ── Search Box ── */
+.light-mode .search-box {
+  background: #ffffff;
+  border-color: var(--border-md);
+  box-shadow: var(--shadow-sm);
+}
+.light-mode .search-box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ── View Toggle ── */
+.light-mode .view-toggle {
+  border-color: var(--border-md);
+  background: #ffffff;
+}
+
+/* ── Kanban ── */
+.light-mode .kanban-col {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+}
+.light-mode .kanban-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.light-mode .kanban-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+.light-mode .kanban-count {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+/* ── Project Cards ── */
+.light-mode .proj-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.light-mode .proj-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Member Cards ── */
+.light-mode .member-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.light-mode .member-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+.light-mode .skill-tag {
+  background: #f1f5f9;
+  border: 1px solid var(--border);
+  color: #475569;
+}
+
+/* ── Filter Select ── */
+.light-mode .filter-select {
+  background-color: #ffffff;
+  border-color: var(--border-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Sections & Panels ── */
+.light-mode .settings-section {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Tooltip, Popover ── */
+.light-mode .toggle-slider {
+  background: #cbd5e1;
+}
+.light-mode .toggle-switch input:checked + .toggle-slider {
+  background: var(--accent);
+}
+
+/* ── Action Buttons ── */
+.light-mode .action-btn {
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+.light-mode .action-btn:hover {
+  background: #f1f5f9;
+  border-color: var(--border-md);
 }
 
 /* ── Custom Scrollbar ── */

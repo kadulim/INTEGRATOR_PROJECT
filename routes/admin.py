@@ -78,7 +78,7 @@ def dashboard():
         'Em andamento': '#f59e0b',
         'Concluído':    '#10b981',
         'Pausado':      '#FF5577',
-        'Cancelado':    '#ec0000'
+        'Cancelado':    '#6b7280'
     }
     status_rows = database.session.query(
         Projeto.situacao, database.func.count(Projeto.id)
@@ -88,8 +88,6 @@ def dashboard():
     for s, c in status_rows:
         if s == 'Pendente':
             status_counts['Pausado'] += c
-        elif s == 'Cancelado':
-            continue
         elif s in status_counts:
             status_counts[s] += c
 
@@ -106,7 +104,7 @@ def dashboard():
         database.func.count(Projeto.id).label('total')
     ).filter(Projeto.prazo.isnot(None)).group_by(mes_expr, Projeto.situacao).all()
 
-    monthly_map = {m: {'Em andamento': 0, 'Concluído': 0, 'Pausado': 0} for m in range(1, 13)}
+    monthly_map = {m: {'Em andamento': 0, 'Concluído': 0, 'Pausado': 0, 'Cancelado': 0} for m in range(1, 13)}
     
     for r in monthly_status_rows:
         if r.mes is None:
@@ -115,9 +113,7 @@ def dashboard():
         status_str = r.situacao or 'Pausado'
         if status_str == 'Pendente':
             status_str = 'Pausado'
-        if status_str == 'Cancelado':
-            continue
-        if status_str not in ['Em andamento', 'Concluído', 'Pausado']:
+        if status_str not in ['Em andamento', 'Concluído', 'Pausado', 'Cancelado']:
             status_str = 'Pausado'
         if m_int in monthly_map:
             monthly_map[m_int][status_str] = r.total
@@ -170,7 +166,8 @@ def dashboard():
     current_month_projects = {
         'em_andamento': [],
         'concluido': [],
-        'pausado': []
+        'pausado': [],
+        'cancelado': []
     }
 
     logs_criacao = Registro.query.filter(
@@ -189,12 +186,12 @@ def dashboard():
         status_str = proj.situacao or 'Pausado'
         if status_str == 'Pendente':
             status_str = 'Pausado'
-        if status_str == 'Cancelado':
-            continue
         if status_str == 'Em andamento':
             current_month_projects['em_andamento'].append(proj)
         elif status_str == 'Concluído':
             current_month_projects['concluido'].append(proj)
+        elif status_str == 'Cancelado':
+            current_month_projects['cancelado'].append(proj)
         else:
             current_month_projects['pausado'].append(proj)
 
@@ -202,14 +199,13 @@ def dashboard():
     projetos_por_status = {
         'em_andamento': [],
         'concluido': [],
-        'pausado': []
+        'pausado': [],
+        'cancelado': []
     }
     for proj in Projeto.query.all():
         status_str = proj.situacao or 'Pausado'
         if status_str == 'Pendente':
             status_str = 'Pausado'
-        if status_str == 'Cancelado':
-            continue
         
         proj_data = {
             'nome': proj.nome,
@@ -221,6 +217,8 @@ def dashboard():
             projetos_por_status['em_andamento'].append(proj_data)
         elif status_str == 'Concluído':
             projetos_por_status['concluido'].append(proj_data)
+        elif status_str == 'Cancelado':
+            projetos_por_status['cancelado'].append(proj_data)
         else:
             projetos_por_status['pausado'].append(proj_data)
 

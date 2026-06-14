@@ -593,7 +593,7 @@
         <div class="scard-top">
           <div>
             <div class="scard-lbl">Membros por Equipe</div>
-            <div class="scard-val" style="color:var(--gr);">{% if equipes|length > 0 %}{{ (funcionarios|length / equipes|length)|round(1) }}{% else %}0{% endif %}</div>
+            <div class="scard-val" style="color:var(--gr);">{% if equipes|length > 0 %}{{ (funcionarios|length / equipes|length)|int }}{% else %}0{% endif %}</div>
             <div class="scard-sub">
               <span class="tag tag-gr">Média de Membros</span>
             </div>

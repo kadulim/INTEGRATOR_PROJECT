@@ -550,3 +550,120 @@
   padding: 18px;
 }
 
+/* ── Light Mode Overrides ── */
+.light-mode .proj-header {
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.light-mode .proj-tab-nav {
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+}
+.light-mode .proj-tab:hover {
+  background: #f8fafc;
+}
+.light-mode .kpi-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.light-mode .kpi-icon {
+  border: 1px solid var(--border);
+}
+.light-mode .doc-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.light-mode .doc-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.light-mode .doc-icon {
+  border: 1px solid var(--border);
+}
+.light-mode .doc-footer {
+  border-top: 1px solid var(--border);
+}
+.light-mode .diagram-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.light-mode .diagram-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.light-mode .diagram-preview {
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border);
+}
+.light-mode .diagram-info {
+  border-top: 1px solid var(--border);
+}
+.light-mode .proj-member-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.light-mode .proj-member-card:hover {
+  border-color: var(--accent);
+}
+.light-mode .pmc-skill {
+  border: 1px solid var(--border);
+  background: #f8fafc;
+}
+.light-mode .req-stat {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.light-mode .req-row {
+  border-bottom-color: var(--border);
+}
+.light-mode .req-row:hover {
+  background: #f8fafc;
+}
+.light-mode .comment-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.light-mode .comment-filter-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+.light-mode .comment-stats-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+.light-mode .comment-textarea {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+}
+.light-mode .comment-reply-box {
+  background: #f8fafc;
+  border-left: 3px solid var(--accent);
+}
+.light-mode .resp-table-wrap {
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+.light-mode .csf-item:hover {
+  background: #f8fafc;
+}
+.light-mode .modal-overlay {
+  background: rgba(15, 23, 42, 0.3);
+}
+.light-mode .modal-content {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+}
+.light-mode .modal-header {
+  border-bottom: 1px solid var(--border);
+}
+.light-mode .timeline-item {
+  border-bottom-color: var(--border);
+}

@@ -36,6 +36,8 @@
     --rl: 16px;
     --vi: #A855F7;
     --vi-d: rgba(168, 85, 247, 0.10);
+    --cn: #6b7280;
+    --cn-d: rgba(107, 114, 128, 0.12);
   }
 
   .light-mode {
@@ -86,6 +88,10 @@
   .light-mode .mcard-rd {
     border-color: rgba(239, 68, 68, 0.24) !important;
     background: linear-gradient(160deg, rgba(239, 68, 68, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+  }
+  .light-mode .mcard-cn {
+    border-color: rgba(107, 114, 128, 0.22) !important;
+    background: linear-gradient(160deg, rgba(107, 114, 128, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
   }
 
   .light-mode .latest-change-box {
@@ -327,6 +333,7 @@
   .tag-gr { background: var(--gr-d); color: var(--gr); }
   .tag-am { background: var(--am-d); color: var(--am); }
   .tag-vi { background: var(--vi-d); color: var(--vi); }
+  .tag-cn { background: var(--cn-d); color: var(--cn); }
 
   /* waves integration */
   .scard-waves {
@@ -498,6 +505,7 @@
   .mcard-gr::before { background: var(--gr); }
   .mcard-am::before { background: var(--am); }
   .mcard-rd::before { background: #ef4444; }
+  .mcard-cn::before { background: var(--cn); }
 
   /* Default / Dark Mode Monthly Cards & latest-change-box border definitions */
   .latest-change-box {
@@ -522,6 +530,9 @@
   }
   .mcard-rd {
     border-color: rgba(239, 68, 68, 0.08) !important;
+  }
+  .mcard-cn {
+    border-color: rgba(107, 114, 128, 0.12) !important;
   }
 
   .mcard-lbl {
@@ -718,6 +729,17 @@
           </div>
           <div class="bs-num" style="color:var(--rd);" id="breakdownPausado">0</div>
         </div>
+
+        <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('cancelado')">
+          <div class="bs-left">
+            <div class="bs-bar" style="background:var(--cn);box-shadow:0 0 10px rgba(107,114,128,0.3);"></div>
+            <div>
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Cancelado</div>
+              <div class="bs-name">Cancelados</div>
+            </div>
+          </div>
+          <div class="bs-num" style="color:var(--cn);" id="breakdownCancelado">0</div>
+        </div>
       </div>
 
     </div>
@@ -892,7 +914,7 @@
     <!-- ═══ ATIVIDADE DO MÊS ═══ -->
     <div class="section-lbl">Atividade de {{ current_month_name }}</div>
 
-    <div class="monthly">
+    <div class="monthly" style="grid-template-columns: repeat(4, 1fr);">
 
       <div class="mcard mcard-gr" onclick="openProjectsModal('concluido')">
         <div class="mcard-lbl" style="color:var(--gr);">Concluídos</div>
@@ -910,6 +932,12 @@
         <div class="mcard-lbl" style="color:var(--am);">Pausado</div>
         <div class="mcard-num" style="color:var(--am);">{{ current_month_projects.pausado|length }}</div>
         <div class="mcard-sub">parados</div>
+      </div>
+
+      <div class="mcard mcard-cn" onclick="openProjectsModal('cancelado')">
+        <div class="mcard-lbl" style="color:var(--cn);">Cancelados</div>
+        <div class="mcard-num" style="color:var(--cn);">{{ current_month_projects.cancelado|length }}</div>
+        <div class="mcard-sub">encerrados</div>
       </div>
 
     </div>
@@ -969,10 +997,12 @@
     const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
     const concluidoVal   = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
     const pausadoVal     = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
+    const canceladoVal   = parseInt(statusData.find(d => d.label === 'Cancelado')?.val || 0);
 
     document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
     document.getElementById('breakdownConcluido').textContent = concluidoVal;
     document.getElementById('breakdownPausado').textContent   = pausadoVal;
+    document.getElementById('breakdownCancelado').textContent = canceladoVal;
 
     const SEGS = statusData.filter(s => s.val > 0).map(s => ({
       label: s.label, val: s.val, color: s.color
@@ -1033,7 +1063,8 @@
         const keyMap = {
           'Em andamento': 'em_andamento',
           'Concluído': 'concluido',
-          'Pausado': 'pausado'
+          'Pausado': 'pausado',
+          'Cancelado': 'cancelado'
         };
         const statusKey = keyMap[seg.label];
         const projs = projetosStatus[statusKey] || [];
@@ -1118,6 +1149,11 @@
       {% for p in current_month_projects.pausado %}
         { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.id) }}" },
       {% endfor %}
+    ],
+    cancelado: [
+      {% for p in current_month_projects.cancelado %}
+        { id: "{{ p.id }}", nome: "{{ p.nome|e }}", prazo: "{{ p.prazo }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.id) }}" },
+      {% endfor %}
     ]
   };
 
@@ -1139,6 +1175,9 @@
     } else if (statusKey === 'pausado') {
       title = 'Projetos Pausados em {{ current_month_name }}';
       themeColor = 'var(--am)';
+    } else if (statusKey === 'cancelado') {
+      title = 'Projetos Cancelados em {{ current_month_name }}';
+      themeColor = 'var(--cn)';
     }
     
     titleEl.innerHTML = `<span style="color: ${themeColor}; font-weight: 800; font-size: 14.5px;">${title}</span>`;
