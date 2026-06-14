@@ -106,6 +106,7 @@ def process_analysis(files):
 def analyze():
     data = request.get_json(silent=True) or {}
     repo_url = data.get("repo", "")
+    github_token = data.get("github_token", "") or Config.GITHUB_TOKEN
 
     if not repo_url:
         return jsonify({"error": "repo URL is required"}), 400
@@ -124,7 +125,7 @@ def analyze():
     try:
         while queue and len(files) < Config.MAX_FILES:
             current_path = queue.pop(0)
-            items = list_repo_files(owner, repo, current_path)
+            items = list_repo_files(owner, repo, current_path, token=github_token)
             for item in items:
                 if len(files) >= Config.MAX_FILES:
                     break
@@ -133,7 +134,7 @@ def analyze():
                 elif item["type"] == "file":
                     if is_included(item["name"]):
                         try:
-                            content = get_file_content(owner, repo, item["path"])
+                            content = get_file_content(owner, repo, item["path"], token=github_token)
                             entry = build_file_entry(item["path"], content)
                             files.append(entry)
                         except Exception as e:

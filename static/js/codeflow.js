@@ -31,7 +31,7 @@ function cfAnalyze() {
   fetch(CODEFLOW_API_URL + '/api/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ repo }),
+    body: JSON.stringify({ repo, github_token: CODEFLOW_GITHUB_TOKEN || undefined }),
   })
     .then(r => r.json())
     .then(data => {

@@ -14,32 +14,36 @@
         {% if projetos %}
             <div class="projects-list-table">
                 {% for p in projetos %}
-                <a href="{{ url_for('funcionario.projeto_detalhe', projeto_id=p.id) }}" style="text-decoration: none; color: inherit; display: block;">
-                    <div class="p-row" style="display: grid; grid-template-columns: 1fr 180px 180px 100px; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); transition: 0.2s;">
+                {% set equipes_projeto = projeto_equipes_map.get(p.pk_id_project, []) %}
+                <div class="p-row" style="display: grid; grid-template-columns: 1fr 180px 180px 120px; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); transition: 0.2s; cursor: pointer;" onclick="window.location.href='{{ url_for('funcionario.projeto_detalhe', projeto_id=p.pk_id_project) }}'">
                     <div style="display: flex; align-items: center; gap: 16px;">
                         <div style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--blue);">
                             <i data-lucide="folder"></i>
                         </div>
                         <div>
-                            <div style="font-weight: 600; font-size: 15px; margin-bottom: 2px;">{{ p.nome }}</div>
-                            <div style="font-size: 12px; color: var(--text-muted); max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ p.descricao or 'Sem descrição' }}</div>
+                            <div style="font-weight: 600; font-size: 15px; margin-bottom: 2px;">{{ p.name_project }}</div>
+                            <div style="font-size: 12px; color: var(--text-muted); max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ p.description_project or 'Sem descrição' }}</div>
+                            <div style="display: flex; gap: 6px; margin-top: 6px;">
+                                {% for eq in equipes_projeto %}
+                                <span style="font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(168, 85, 247, 0.15); color: #a855f7; font-weight: 600;">{{ eq.name_team }}</span>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                     <div>
                         <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px;">Status</div>
-                        <span class="badge {% if p.situacao == 'Em andamento' %}badge-em-andamento{% elif p.situacao == 'Concluído' %}badge-concluido{% elif p.situacao == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 11px;">{{ p.situacao }}</span>
+                        <span class="badge {% if p.status_project == 'Em andamento' %}badge-em-andamento{% elif p.status_project == 'Concluído' %}badge-concluido{% elif p.status_project == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 11px;">{{ p.status_project }}</span>
                     </div>
                     <div>
                         <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px;">Prazo Final</div>
-                        <div style="font-size: 14px; font-weight: 500;">{{ p.prazo }}</div>
+                        <div style="font-size: 14px; font-weight: 500;">{{ p.end_date_project }}</div>
                     </div>
                     <div style="text-align: right;">
-                        <button class="btn btn-ghost btn-sm" title="Ver Detalhes">
+                        <button class="btn btn-ghost btn-sm" title="Acessar Projeto">
                             <i data-lucide="chevron-right"></i>
                         </button>
                     </div>
                 </div>
-                </a>
                 {% endfor %}
             </div>
         {% else %}

@@ -8,13 +8,13 @@
 # ---------------------------------------------------------------------------
 # Imports
 # ---------------------------------------------------------------------------
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import database
 import json
 import datetime
-from models import Usuario, Funcionario, Projeto, Equipes, Requisito, Registro, Cliente, equipes_projeto, Documento, Diagrama, Galeria, Comentario
+from models import User, Employee, Project, Team, Requirement, Log, Client, project_teams, Document, Diagram, Gallery, Comment
 
 funcionario_bp = Blueprint('funcionario', __name__, url_prefix='/funcionario')
 
@@ -24,46 +24,46 @@ funcionario_bp = Blueprint('funcionario', __name__, url_prefix='/funcionario')
 @funcionario_bp.route('/dashboard')
 @login_required
 def dashboard():
-    if current_user.tipo != 'funcionario':
+    if current_user.type_user != 'employee':
         return redirect(url_for('page_login'))
     
-    funcionario = Funcionario.query.filter_by(usuario_id=current_user.id).first()
+    funcionario = Employee.query.filter_by(fk_user=current_user.pk_id_user).first()
     if not funcionario:
         return "Perfil de funcionário não encontrado", 404
     
-    equipes = funcionario.lista_equipes
+    equipes = funcionario.teams
     
     # Projetos associados às equipes do funcionário
     projetos = []
-    equipes_ids = [eq.id for eq in equipes]
+    equipes_ids = [eq.pk_id_team for eq in equipes]
     if equipes_ids:
-        projetos = Projeto.query.join(equipes_projeto, Projeto.id == equipes_projeto.c.projeto_id).filter(equipes_projeto.c.equipe_id.in_(equipes_ids)).all()
+        projetos = Project.query.join(project_teams, Project.pk_id_project == project_teams.c.fk_project).filter(project_teams.c.fk_team.in_(equipes_ids)).all()
     
     # Métricas
     total_projetos = len(projetos)
     
     membros_ids = set()
     for eq in equipes:
-        for m in eq.membros_da_equipe:
-            membros_ids.add(m.id)
+        for m in eq.employees:
+            membros_ids.add(m.pk_id_employee)
     total_equipe = len(membros_ids)
     
     cliente_ids = set()
     for p in projetos:
-        if p.cliente_id:
-            cliente_ids.add(p.cliente_id)
+        if p.fk_client:
+            cliente_ids.add(p.fk_client)
     total_clientes = len(cliente_ids)
     
-    orcamento_total = sum(p.orcamento for p in projetos if p.orcamento) or 0
+    orcamento_total = 0
     
     requisitos_pendentes = 0
     for proj in projetos:
-        for req in proj.requisitos:
-            if req.situacao == 'Pendente':
+        for req in proj.requirements:
+            if req.status_requirement == 'Pendente':
                 requisitos_pendentes += 1
                 
     stats = {
-        'projetos_ativos': len([p for p in projetos if p.situacao == 'Em andamento']),
+        'projetos_ativos': len([p for p in projetos if p.status_project == 'Em andamento']),
         'equipes_count': len(equipes),
         'requisitos_pendentes': requisitos_pendentes
     }
@@ -77,7 +77,7 @@ def dashboard():
     }
     status_counts = {s: 0 for s in status_cores.keys()}
     for p in projetos:
-        s = p.situacao or 'Pausado'
+        s = p.status_project or 'Pausado'
         if s == 'Pendente':
             s = 'Pausado'
         if s in status_counts:
@@ -91,11 +91,11 @@ def dashboard():
     # ── Gráfico de Atividade Mensal ──────────────────
     monthly_map = {m: {'Em andamento': 0, 'Concluído': 0, 'Pausado': 0, 'Cancelado': 0} for m in range(1, 13)}
     for p in projetos:
-        if p.prazo:
+        if p.end_date_project:
             try:
-                # prazo é um objeto date
-                m = p.prazo.month if hasattr(p.prazo, 'month') else int(str(p.prazo)[5:7])
-                st = p.situacao or 'Pausado'
+                # end_date_project é um objeto date
+                m = p.end_date_project.month if hasattr(p.end_date_project, 'month') else int(str(p.end_date_project)[5:7])
+                st = p.status_project or 'Pausado'
                 if st == 'Pendente':
                     st = 'Pausado'
                 if st not in monthly_map[m]:
@@ -117,48 +117,52 @@ def dashboard():
     logs_data = []
     todos_logs_data = []
     if projetos:
-        proj_ids = [p.id for p in projetos]
+        proj_ids = [p.pk_id_project for p in projetos]
         logs_query = (
-            database.session.query(Registro, Projeto)
-            .outerjoin(Projeto, Registro.projeto_id == Projeto.id)
-            .filter(Registro.projeto_id.in_(proj_ids))
-            .order_by(Registro.data.desc())
+            database.session.query(Log, Project, User)
+            .outerjoin(Project, Log.fk_project == Project.pk_id_project)
+            .outerjoin(User, Log.fk_user == User.pk_id_user)
+            .filter(Log.fk_project.in_(proj_ids))
+            .order_by(Log.date_log.desc())
             .limit(10)
             .all()
         )
-        for log, proj_obj in logs_query:
-            equipe_nome = proj_obj.nome if proj_obj else 'Geral'
-            if proj_obj and proj_obj.lista_equipes:
-                equipe_nome = ', '.join([eq.nome for eq in proj_obj.lista_equipes])
+        for log, proj_obj, usuario in logs_query:
+            project_name = proj_obj.name_project if proj_obj else '—'
+            equipe_nome = log.team.name_team if log.team else (', '.join([eq.name_team for eq in proj_obj.teams]) if proj_obj and proj_obj.teams else '—')
+            user_name = usuario.name_user if usuario else 'Sistema'
             logs_data.append({
-                'acao': log.acao,
-                'descricao': log.descricao,
-                'data': log.data,
-                'equipe_nome': equipe_nome
+                'description_log': log.description_log,
+                'date_log': log.date_log,
+                'project_name': project_name,
+                'equipe_nome': equipe_nome,
+                'user_name': user_name
             })
             
         todos_logs_query = (
-            database.session.query(Registro, Projeto)
-            .outerjoin(Projeto, Registro.projeto_id == Projeto.id)
-            .filter(Registro.projeto_id.in_(proj_ids))
-            .order_by(Registro.data.desc())
+            database.session.query(Log, Project, User)
+            .outerjoin(Project, Log.fk_project == Project.pk_id_project)
+            .outerjoin(User, Log.fk_user == User.pk_id_user)
+            .filter(Log.fk_project.in_(proj_ids))
+            .order_by(Log.date_log.desc())
             .all()
         )
-        for log, proj_obj in todos_logs_query:
-            equipe_nome = proj_obj.nome if proj_obj else 'Geral'
-            if proj_obj and proj_obj.lista_equipes:
-                equipe_nome = ', '.join([eq.nome for eq in proj_obj.lista_equipes])
+        for log, proj_obj, usuario in todos_logs_query:
+            project_name = proj_obj.name_project if proj_obj else '—'
+            equipe_nome = log.team.name_team if log.team else (', '.join([eq.name_team for eq in proj_obj.teams]) if proj_obj and proj_obj.teams else '—')
+            user_name = usuario.name_user if usuario else 'Sistema'
             todos_logs_data.append({
-                'acao': log.acao,
-                'descricao': log.descricao,
-                'data': log.data,
-                'equipe_nome': equipe_nome
+                'description_log': log.description_log,
+                'date_log': log.date_log,
+                'project_name': project_name,
+                'equipe_nome': equipe_nome,
+                'user_name': user_name
             })
             
     # Último registro de cada projeto para o painel de atividades
     for proj in projetos:
-        ultimo_registro = Registro.query.filter_by(projeto_id=proj.id).order_by(Registro.data.desc()).first()
-        proj.ultimo_registro = ultimo_registro.descricao if ultimo_registro else "Sem alterações recentes"
+        ultimo_registro = Log.query.filter_by(fk_project=proj.pk_id_project).order_by(Log.date_log.desc()).first()
+        proj.ultimo_registro = ultimo_registro.description_log if ultimo_registro else "Sem alterações recentes"
             
     # ── Projetos do mês atual ──────────────────
     now = datetime.datetime.now()
@@ -176,16 +180,16 @@ def dashboard():
     current_year = now.year
     
     for proj in projetos:
-        if proj.prazo:
+        if proj.end_date_project:
             try:
-                # prazo é objeto date
-                m = proj.prazo.month if hasattr(proj.prazo, 'month') else int(str(proj.prazo)[5:7])
-                y = proj.prazo.year if hasattr(proj.prazo, 'year') else int(str(proj.prazo)[0:4])
+                # end_date_project é objeto date
+                m = proj.end_date_project.month if hasattr(proj.end_date_project, 'month') else int(str(proj.end_date_project)[5:7])
+                y = proj.end_date_project.year if hasattr(proj.end_date_project, 'year') else int(str(proj.end_date_project)[0:4])
                 is_match = (m == current_month_num and y == current_year)
             except (ValueError, AttributeError):
                 is_match = False
             if is_match:
-                status_str = proj.situacao or 'Pausado'
+                status_str = proj.status_project or 'Pausado'
                 if status_str == 'Pendente':
                     status_str = 'Pausado'
                 if status_str == 'Em andamento':
@@ -199,9 +203,9 @@ def dashboard():
                     
     # Widget de funcionários
     funcionarios_painel = (
-        Funcionario.query
-        .join(Usuario, Funcionario.usuario_id == Usuario.id)
-        .add_entity(Usuario)
+        Employee.query
+        .join(User, Employee.fk_user == User.pk_id_user)
+        .add_entity(User)
         .limit(4)
         .all()
     )
@@ -214,14 +218,14 @@ def dashboard():
         'cancelado': []
     }
     for proj in projetos:
-        status_str = proj.situacao or 'Pausado'
+        status_str = proj.status_project or 'Pausado'
         if status_str == 'Pendente':
             status_str = 'Pausado'
         
         proj_data = {
-            'nome': proj.nome,
-            'prazo': proj.prazo.strftime('%d/%m/%Y') if proj.prazo else 'Sem prazo',
-            'url': url_for('funcionario.projeto_detalhe', projeto_id=proj.id)
+            'nome': proj.name_project,
+            'prazo': proj.end_date_project.strftime('%d/%m/%Y') if proj.end_date_project else 'Sem prazo',
+            'url': url_for('funcionario.projeto_detalhe', projeto_id=proj.pk_id_project)
         }
         
         if status_str == 'Em andamento':
@@ -264,19 +268,25 @@ def dashboard():
 @funcionario_bp.route('/projetos')
 @login_required
 def projetos():
-    if current_user.tipo != 'funcionario':
+    if current_user.type_user != 'employee':
         return redirect(url_for('page_login'))
-    funcionario = Funcionario.query.filter_by(usuario_id=current_user.id).first()
+    funcionario = Employee.query.filter_by(fk_user=current_user.pk_id_user).first()
     if not funcionario:
         return "Perfil de funcionário não encontrado", 404
-    equipes = funcionario.lista_equipes
-    equipes_ids = [eq.id for eq in equipes]
+    equipes = funcionario.teams
+    equipes_ids = [eq.pk_id_team for eq in equipes]
     
     projetos = []
+    projeto_equipes_map = {}
     if equipes_ids:
-        projetos = Projeto.query.join(equipes_projeto, Projeto.id == equipes_projeto.c.projeto_id).filter(equipes_projeto.c.equipe_id.in_(equipes_ids)).all()
+        projetos = Project.query.join(project_teams, Project.pk_id_project == project_teams.c.fk_project).filter(project_teams.c.fk_team.in_(equipes_ids)).all()
+        for p in projetos:
+            project_team_ids = [t.pk_id_team for t in p.teams]
+            func_team_ids = [eid for eid in equipes_ids if eid in project_team_ids]
+            func_teams = Team.query.filter(Team.pk_id_team.in_(func_team_ids)).all()
+            projeto_equipes_map[p.pk_id_project] = func_teams
         
-    return render_template('funcionario/projetos.html', projetos=projetos)
+    return render_template('funcionario/projetos.html', projetos=projetos, projeto_equipes_map=projeto_equipes_map)
 
 # ---------------------------------------------------------------------------
 # Detalhes de um projeto (com verificação de acesso por equipe)
@@ -284,35 +294,55 @@ def projetos():
 @funcionario_bp.route('/projeto-detalhe/<int:projeto_id>')
 @login_required
 def projeto_detalhe(projeto_id):
-    if current_user.tipo != 'funcionario':
+    if current_user.type_user != 'employee':
         return redirect(url_for('page_login'))
-    projeto = Projeto.query.get_or_404(projeto_id)
+    projeto = Project.query.get_or_404(projeto_id)
     
-    funcionario = Funcionario.query.filter_by(usuario_id=current_user.id).first()
+    funcionario = Employee.query.filter_by(fk_user=current_user.pk_id_user).first()
     if not funcionario:
         return "Perfil de funcionário não encontrado", 404
-    equipes_ids = [eq.id for eq in funcionario.lista_equipes]
-    projeto_equipes_ids = [eq.id for eq in projeto.lista_equipes]
+    equipes_ids = [eq.pk_id_team for eq in funcionario.teams]
+    projeto_equipes_ids = [eq.pk_id_team for eq in projeto.teams]
     if not any(eq_id in projeto_equipes_ids for eq_id in equipes_ids):
         return "Acesso negado", 403
     
+    # teams do funcionario que estao no projeto
+    func_projeto_teams = Team.query.filter(Team.pk_id_team.in_(projeto_equipes_ids)).filter(Team.pk_id_team.in_(equipes_ids)).all()
+    
+    # requisitos sao globais — todos veem todos os requisitos do projeto
+    requisitos = Requirement.query.filter_by(fk_project=projeto_id).all()
+
+    equipe_id = request.args.get('equipe', type=int)
+    if equipe_id:
+        if equipe_id not in [t.pk_id_team for t in func_projeto_teams]:
+            return "Acesso negado a esta equipe", 403
+    elif len(func_projeto_teams) == 1:
+        return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id, equipe=func_projeto_teams[0].pk_id_team))
+    
     membros = (
-        Funcionario.query
-        .join(Funcionario.lista_equipes)
-        .filter(Equipes.id.in_(projeto_equipes_ids))
+        Employee.query
+        .join(Employee.teams)
+        .filter(Team.pk_id_team.in_(projeto_equipes_ids))
         .all()
     )
     
-    documentos = Documento.query.filter_by(projeto_id=projeto_id).all()
-    diagramas = Diagrama.query.filter_by(projeto_id=projeto_id).all()
-    galeria = Galeria.query.filter_by(projeto_id=projeto_id).all()
-    comentarios = Comentario.query.filter_by(projeto_id=projeto_id).order_by(Comentario.data.asc()).all()
+    if equipe_id:
+        documentos = Document.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
+        diagramas = Diagram.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
+        galeria = Gallery.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
+    else:
+        documentos = []
+        diagramas = []
+        galeria = []
+    comentarios = Comment.query.filter_by(fk_project=projeto_id).order_by(Comment.date_comment.asc()).all()
     
     return render_template(
         'funcionario/projeto-detalhe.html',
         projeto=projeto,
         membros=membros,
-        requisitos=projeto.requisitos,
+        requisitos=requisitos,
+        equipe_atual=equipe_id,
+        equipes_disponiveis=func_projeto_teams,
         documentos=documentos,
         diagramas=diagramas,
         galeria=galeria,
@@ -329,50 +359,61 @@ def add_requisito():
     titulo = request.form.get('titulo')
     descricao = request.form.get('descricao')
     tipo = request.form.get('tipo')
+    equipe_id = request.form.get('equipe_id', type=int)
     
-    novo_req = Requisito(
-        projeto_id=projeto_id,
-        titulo=titulo,
-        descricao=descricao,
-        tipo=tipo,
-        situacao='Pendente'
+    novo_req = Requirement(
+        fk_project=projeto_id,
+        fk_team=equipe_id,
+        name_requirement=titulo,
+        description_requirement=descricao,
+        type_requirement=tipo,
+        status_requirement='Pendente'
     )
     database.session.add(novo_req)
     database.session.commit()
     
-    return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id))
-
-# =============================================================================
-# VISUALIZAÇÃO DE EQUIPES
-# =============================================================================
+    return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id, equipe=equipe_id))
 
 # ---------------------------------------------------------------------------
-# Página de equipes do funcionário (com membros)
+# Editar requisito
 # ---------------------------------------------------------------------------
-@funcionario_bp.route('/equipe')
+@funcionario_bp.route('/update-requisito/<int:req_id>', methods=['POST'])
 @login_required
-def equipe():
-    if current_user.tipo != 'funcionario':
-        return redirect(url_for('page_login'))
-    funcionario = Funcionario.query.filter_by(usuario_id=current_user.id).first()
-    if not funcionario:
-        return "Perfil de funcionário não encontrado", 404
-    equipes = funcionario.lista_equipes
+def update_requisito(req_id):
+    req = Requirement.query.get_or_404(req_id)
+    projeto_id = req.fk_project
+    equipe_id = req.fk_team
     
-    membros_data = {}
-    for eq in equipes:
-        membros = (
-            Funcionario.query
-            .join(Funcionario.lista_equipes)
-            .filter(Equipes.id == eq.id)
-            .all()
-        )
-        membros_data[eq.id] = {
-            'nome': eq.nome,
-            'membros': membros
-        }
-        
-    return render_template('funcionario/equipe.html', equipes_info=membros_data)
+    # Verifica acesso do funcionario a esta equipe
+    funcionario = Employee.query.filter_by(fk_user=current_user.pk_id_user).first()
+    if not funcionario:
+        return "Perfil nao encontrado", 404
+    equipes_ids = [eq.pk_id_team for eq in funcionario.teams]
+    if equipe_id and equipe_id not in equipes_ids:
+        abort(403)
+    
+    req.name_requirement = request.form.get('titulo', req.name_requirement)
+    req.description_requirement = request.form.get('descricao', req.description_requirement)
+    req.type_requirement = request.form.get('tipo', req.type_requirement)
+    req.status_requirement = request.form.get('status', req.status_requirement)
+    database.session.commit()
+    
+    flash("Requisito atualizado com sucesso!", "sucesso")
+    return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id, equipe=equipe_id))
+
+# =============================================================================
+# CODEFLOW
+# =============================================================================
+@funcionario_bp.route('/codeflow')
+@funcionario_bp.route('/codeflow/dashboard')
+@login_required
+def codeflow_dashboard():
+    if current_user.type_user != 'employee':
+        return redirect(url_for('page_login'))
+    from function.crypto import decrypt_token
+    api_url = current_app.config.get('CODEFLOW_API_URL', 'http://localhost:5000')
+    github_token = decrypt_token(current_app.config['SECRET_KEY'], current_user.github_key_user) if current_user.github_key_user else ''
+    return render_template('funcionario/codeflow.html', api_url=api_url, github_token=github_token, active_page='codeflow')
 
 # =============================================================================
 # CONFIGURAÇÕES DO FUNCIONÁRIO
@@ -404,11 +445,25 @@ def salvar_senha():
         flash('As senhas não coincidem!', 'danger')
         return redirect(url_for('funcionario.configuracoes') + '#seguranca')
         
-    if not check_password_hash(current_user.senha, senha_atual):
+    if not check_password_hash(current_user.password_user, senha_atual):
         flash('Senha atual incorreta!', 'danger')
         return redirect(url_for('funcionario.configuracoes') + '#seguranca')
         
-    current_user.senha = generate_password_hash(nova_senha)
+    current_user.password_user = generate_password_hash(nova_senha)
     database.session.commit()
     flash('Senha atualizada com sucesso!', 'success')
     return redirect(url_for('funcionario.configuracoes') + '#seguranca')
+
+# ---------------------------------------------------------------------------
+# Salvar chave GitHub
+# ---------------------------------------------------------------------------
+@funcionario_bp.route('/configuracoes/github-key', methods=['POST'])
+@login_required
+def salvar_github_key():
+    from flask import current_app
+    from function.crypto import encrypt_token
+    github_key = request.form.get('github_key', '')
+    current_user.github_key_user = encrypt_token(current_app.config['SECRET_KEY'], github_key)
+    database.session.commit()
+    flash('Chave do GitHub salva com sucesso!', 'success')
+    return redirect(url_for('funcionario.configuracoes') + '#integracoes')

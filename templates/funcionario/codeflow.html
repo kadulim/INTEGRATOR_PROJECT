@@ -1,4 +1,4 @@
-{% extends "admin/base.html" %}
+{% extends "funcionario/base.html" %}
 {% set active_page = 'codeflow' %}
 {% block title %}CodeFlow — Análise de Arquitetura — CoByte{% endblock %}
 {% block extra_css %}
@@ -319,7 +319,6 @@
   .badge-red { background: var(--rd-d); color: var(--rd); }
   .badge-yellow { background: var(--am-d); color: var(--am); }
   .badge-blue { background: var(--ac-d); color: var(--ac); }
-  /* Status-specific badges */
   .badge-em-andamento { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
   .badge-concluido { background: rgba(16, 185, 129, 0.12); color: #10b981; }
   .badge-pausado { background: rgba(255, 85, 119, 0.12); color: #FF5577; }
@@ -471,7 +470,6 @@
   <h1>CodeFlow</h1>
   <p>Análise de arquitetura de código-fonte</p>
 
-  <!-- Gradientes para sparklines -->
   <svg width="0" height="0" style="position:absolute;">
     <defs>
       <linearGradient id="cf-wave-blue-1" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -502,7 +500,6 @@
   </svg>
 </div>
 
-<!-- Input Section -->
 <div class="cf-input-section">
   <div class="card">
     <div class="card-body" style="padding:24px;">
@@ -562,7 +559,6 @@
   </div>
 </div>
 
-<!-- KPI Row -->
 <div class="cf-kpi-row" id="cf-kpi-row" style="display:none;">
   <div class="cf-kpi-card">
     <div class="cf-kpi-icon blue">
@@ -625,10 +621,8 @@
   </div>
 </div>
 
-<!-- Languages stat inline (hidden, kept for JS compatibility) -->
 <div style="display:none" id="cf-stat-languages"></div>
 
-<!-- Results -->
 <div id="cf-results" style="display:none">
   <div class="cf-loading" id="cf-loading">
     <div class="spinner"></div>
@@ -636,7 +630,6 @@
   </div>
 
   <div id="cf-content">
-    <!-- Charts Row -->
     <div class="cf-charts-row" id="cf-charts-row" style="display:none">
       <div class="cf-chart-card">
         <div class="card-body">
@@ -669,7 +662,6 @@
       </div>
     </div>
 
-    <!-- Detail Sections -->
     <div class="cf-detail-grid">
       <div class="cf-section">
         <div class="card-header" onclick="cfToggleSection(this)">

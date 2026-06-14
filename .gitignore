@@ -39,6 +39,12 @@ instance/
 *.sqlite
 *.sqlite3
 
+# ── Uploads de usuários (documentos, diagramas, galeria)
+static/uploads/
+
+# ── Pasta img/ na raiz (duplicada em static/img/)
+img/
+
 # ── Empacotamento e builds
 dist/
 build/
