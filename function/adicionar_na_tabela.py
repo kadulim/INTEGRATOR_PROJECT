@@ -10,39 +10,40 @@ def adicionar(app):
     with app.app_context():
         database.create_all()
 
-        # --- Verificação de colunas (Postgres e MySQL) ---
-        try:
-            from sqlalchemy import text
-            # Tentativa para Postgres (Render)
+        # --- Migração de colunas (tenta nomes novos e antigos) ---
+        from sqlalchemy import text
+
+        def _try(sql):
             try:
-                database.session.execute(text("ALTER TABLE projeto ADD COLUMN IF NOT EXISTS prioridade VARCHAR(20)"))
-                database.session.execute(text("ALTER TABLE requisito ADD COLUMN IF NOT EXISTS tipo VARCHAR(50)"))
-                database.session.execute(text("ALTER TABLE funcionario ADD COLUMN IF NOT EXISTS skills VARCHAR(255)"))
-                database.session.execute(text("ALTER TABLE usuario ADD COLUMN IF NOT EXISTS nivel INTEGER"))
-                database.session.execute(text("ALTER TABLE equipes ADD COLUMN IF NOT EXISTS descricao VARCHAR(250) DEFAULT ''"))
-                database.session.execute(text("ALTER TABLE equipes ADD COLUMN IF NOT EXISTS funcao VARCHAR(250) DEFAULT ''"))
-                database.session.execute(text("ALTER TABLE equipes ADD COLUMN IF NOT EXISTS lider_equipe INTEGER"))
+                database.session.execute(text(sql))
                 database.session.commit()
-            except:
+            except Exception:
                 database.session.rollback()
-                # Tentativa para MySQL (Local) - sem o IF NOT EXISTS
-                try: database.session.execute(text("ALTER TABLE projeto ADD COLUMN prioridade VARCHAR(20)"))
-                except: database.session.rollback()
-                try: database.session.execute(text("ALTER TABLE requisito ADD COLUMN tipo VARCHAR(50)"))
-                except: database.session.rollback()
-                try: database.session.execute(text("ALTER TABLE funcionario ADD COLUMN skills VARCHAR(255)"))
-                except: database.session.rollback()
-                try: database.session.execute(text("ALTER TABLE usuario ADD COLUMN nivel INTEGER"))
-                except: database.session.rollback()
-                try: database.session.execute(text("ALTER TABLE equipes ADD COLUMN descricao VARCHAR(250) DEFAULT ''"))
-                except: database.session.rollback()
-                try: database.session.execute(text("ALTER TABLE equipes ADD COLUMN funcao VARCHAR(250) DEFAULT ''"))
-                except: database.session.rollback()
-                try: database.session.execute(text("ALTER TABLE equipes ADD COLUMN lider_equipe INTEGER"))
-                except: database.session.rollback()
-                database.session.commit()
-        except Exception as e:
-            print(f"[INFO] Nota: Colunas ja existem ou erro ao atualizar: {e}")
+
+        # Tabela project / projeto
+        _try("ALTER TABLE project ADD COLUMN prioridade VARCHAR(20)")
+        _try("ALTER TABLE projeto ADD COLUMN prioridade VARCHAR(20)")
+        # Tabela requirement / requisito
+        _try("ALTER TABLE requirement ADD COLUMN tipo VARCHAR(50)")
+        _try("ALTER TABLE requisito ADD COLUMN tipo VARCHAR(50)")
+        # Tabela employee / funcionario
+        _try("ALTER TABLE employee ADD COLUMN skills VARCHAR(255)")
+        _try("ALTER TABLE funcionario ADD COLUMN skills VARCHAR(255)")
+        # Tabela team / equipes
+        _try("ALTER TABLE team ADD COLUMN descricao VARCHAR(250) DEFAULT ''")
+        _try("ALTER TABLE equipes ADD COLUMN descricao VARCHAR(250) DEFAULT ''")
+        _try("ALTER TABLE team ADD COLUMN funcao VARCHAR(250) DEFAULT ''")
+        _try("ALTER TABLE equipes ADD COLUMN funcao VARCHAR(250) DEFAULT ''")
+        _try("ALTER TABLE team ADD COLUMN lider_equipe INTEGER")
+        _try("ALTER TABLE equipes ADD COLUMN lider_equipe INTEGER")
+        # Tabela admin
+        _try("ALTER TABLE admin ADD COLUMN IF NOT EXISTS fk_user INTEGER")
+        _try("ALTER TABLE admin ADD COLUMN fk_user INTEGER")
+        _try("ALTER TABLE admin ADD COLUMN IF NOT EXISTS level_admin INTEGER DEFAULT 1")
+        _try("ALTER TABLE admin ADD COLUMN level_admin INTEGER DEFAULT 1")
+        # Tabela user / usuario
+        _try("ALTER TABLE user ADD COLUMN nivel INTEGER")
+        _try("ALTER TABLE usuario ADD COLUMN nivel INTEGER")
 
         # ─── Seed: Admin ────────────────────────────────────────────────
         admin_email = os.getenv('ADMIN_EMAIL')
