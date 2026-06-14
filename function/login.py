@@ -2,18 +2,15 @@ from flask import request, render_template, redirect, url_for
 from werkzeug.security import check_password_hash
 from flask_login import login_user
 from sqlalchemy import or_
-from models import Usuario, Projeto, Cliente
+from models import User, Project, Client
 import logging
-
-
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def logar():
-    # Estatísticas dinâmicas para a tela de login
-    total_projetos = Projeto.query.count()
-    total_clientes = Cliente.query.count()
-    projeto_destaque = Projeto.query.first()
+    total_projetos = Project.query.count()
+    total_clientes  = Client.query.count()
+    projeto_destaque = Project.query.first()
 
     if request.method == 'POST':
         identificador = request.form['identificador']
@@ -21,43 +18,33 @@ def logar():
 
         logging.info(f"Tentativa de login: {identificador}")
 
-        # Busca por email OU nome de usuário
-        usuario = Usuario.query.filter(
-            or_(Usuario.email == identificador, Usuario.nome == identificador)
+        user = User.query.filter(
+            or_(User.email_user == identificador, User.name_user == identificador)
         ).first()
 
-        if not usuario:
-            logging.warning(f"Falha de login: Usuário não encontrado ({identificador})")
-            return render_template('auth/login.html', error="Usuário não encontrado", 
+        if not user:
+            logging.warning(f"Falha de login: Usuario nao encontrado ({identificador})")
+            return render_template('auth/login.html', error="Usuário não encontrado",
                                  total_projetos=total_projetos, total_clientes=total_clientes,
                                  projeto_destaque=projeto_destaque)
 
-        if not check_password_hash(usuario.senha, senha):
+        if not check_password_hash(user.password_user, senha):
             logging.warning(f"Falha de login: Senha incorreta ({identificador})")
             return render_template('auth/login.html', error="Senha incorreta",
                                  total_projetos=total_projetos, total_clientes=total_clientes,
                                  projeto_destaque=projeto_destaque)
-            
 
-        login_user(usuario)
-        logging.info(f"Login bem-sucedido: {identificador} (Tipo: {usuario.tipo})")
-        
-        
-        
+        login_user(user)
+        logging.info(f"Login bem-sucedido: {identificador} (Tipo: {user.type_user})")
 
-        if usuario.tipo == 'admin':
-            logging.warning(f"entrou no admin ({identificador})")
+        if user.type_user == 'admin':
             return redirect('/admin/')
-
-        elif usuario.tipo == 'funcionario':
-            logging.warning(f"entrou no funcionario ({identificador})")
+        elif user.type_user == 'employee':
             return redirect('/funcionario')
-
         else:
-            logging.warning(f"entrou no cliente ({identificador})")
             return redirect('/cliente-dashboard')
 
-    return render_template('auth/login.html', 
-                         total_projetos=total_projetos, 
+    return render_template('auth/login.html',
+                         total_projetos=total_projetos,
                          total_clientes=total_clientes,
                          projeto_destaque=projeto_destaque)
