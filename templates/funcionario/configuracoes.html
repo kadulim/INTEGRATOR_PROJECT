@@ -18,6 +18,10 @@
                 <i data-lucide="lock"></i>
                 <span>Segurança</span>
             </div>
+            <div class="s-nav-item" id="tab-integracoes" onclick="switchTab('integracoes')">
+                <i data-lucide="puzzle"></i>
+                <span>Integrações</span>
+            </div>
         </div>
     </div>
 
@@ -76,10 +80,33 @@
                 </form>
             </div>
 
+            </div>
 
+            <!-- Painel Integracoes (GitHub) -->
+            <div id="panel-integracoes" class="panel-section" style="display: none;">
+                <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">Integrações</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Conecte sua conta a serviços externos</p>
+
+                <div style="background: var(--surface-2); border-radius: 12px; padding: 24px; border: 1px solid var(--border);">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--tx2);">
+                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                        </svg>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 15px;">GitHub</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">Token de acesso pessoal para o CodeFlow</div>
+                        </div>
+                    </div>
+                    <form action="{{ url_for('funcionario.salvar_github_key') }}" method="POST" style="display: flex; flex-direction: column; gap: 12px;">
+                        <input type="password" name="github_key" placeholder="Cole seu GitHub Personal Access Token" class="form-control" style="width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: 'JetBrains Mono', monospace; font-size: 13px;" value="{% if current_user.github_key_user %}********{% endif %}">
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button type="submit" class="btn btn-primary" style="font-weight: 600; padding: 10px 20px;">Salvar Token</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
         </div>
-    </div>
 </div>
 
 <style>

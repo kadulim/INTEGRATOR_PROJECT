@@ -1059,64 +1059,12 @@
         document.getElementById('tt-name').style.color = seg.color;
         document.getElementById('tt-val').textContent = seg.val + (seg.val === 1 ? ' projeto' : ' projetos');
         document.getElementById('tt-pct').textContent = Math.round(pct * 100) + '%';
-        
-        const keyMap = {
-          'Em andamento': 'em_andamento',
-          'Concluído': 'concluido',
-          'Pausado': 'pausado',
-          'Cancelado': 'cancelado'
-        };
-        const statusKey = keyMap[seg.label];
-        const projs = projetosStatus[statusKey] || [];
-        
-        const listEl = document.getElementById('tt-projects-list');
-        const dividerEl = document.getElementById('tt-divider');
-        listEl.innerHTML = '';
-        
-        if (projs.length > 0) {
-          dividerEl.style.display = 'block';
-          projs.forEach(p => {
-            const item = document.createElement('div');
-            item.style.display = 'flex';
-            item.style.flexDirection = 'column';
-            item.style.gap = '1px';
-            item.style.padding = '3px 0';
-            item.style.textAlign = 'left';
-            
-            item.innerHTML = `
-              <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.name_project}">${p.name_project}</span>
-              <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.end_date_project}</span>
-            `;
-            listEl.appendChild(item);
-          });
-        } else {
-          dividerEl.style.display = 'none';
-        }
-        
+        document.getElementById('tt-divider').style.display = 'none';
+        document.getElementById('tt-projects-list').innerHTML = '';
         if (tt) {
           tt.style.opacity = '1';
-          tt.style.pointerEvents = 'auto';
+          tt.style.pointerEvents = 'none';
         }
-        
-        if (tt && !tt.dataset.hoverBound) {
-          tt.addEventListener('mouseenter', () => clearTimeout(window.donutTtTimeout));
-          tt.addEventListener('mouseleave', () => {
-            window.donutTtTimeout = setTimeout(() => {
-              tt.style.opacity = '0';
-              tt.style.pointerEvents = 'none';
-            }, 150);
-          });
-          tt.dataset.hoverBound = 'true';
-        }
-      });
-      path.addEventListener('mouseleave', () => {
-        window.donutTtTimeout = setTimeout(() => {
-          const tt = document.getElementById('donut-tooltip');
-          if (tt) {
-            tt.style.opacity = '0';
-            tt.style.pointerEvents = 'none';
-          }
-        }, 150);
       });
 
       path.setAttribute('d', describeArc(segStart, segEnd));
