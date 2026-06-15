@@ -454,11 +454,17 @@ body {
 
 /* ── Responsive ── */
 @media (max-width: 1100px) {
+    body {
+        overflow-y: auto !important;
+        height: auto !important;
+        width: 100% !important;
+    }
+
     .layout-wrapper { 
         display: flex;
         flex-direction: column; 
-        overflow-y: auto; 
-        height: auto; 
+        overflow: visible !important; 
+        height: auto !important; 
         padding: 40px 24px;
         align-items: center;
     }
@@ -471,11 +477,12 @@ body {
     
     .brand-top { 
         order: 1; 
-        margin: 0 0 24px; 
+        margin: 0 auto 24px; 
         justify-content: flex-start; 
         width: 100%;
         max-width: 450px;
         gap: 8px;
+        align-self: center;
     }
 
     .brand-img {
@@ -489,24 +496,26 @@ body {
     
     .brand-headline { 
         order: 2; 
-        margin: 0 0 16px; 
+        margin: 0 auto 16px; 
         text-align: left; 
         font-size: 40px; 
         line-height: 1.1; 
         letter-spacing: -2px; 
         width: 100%;
         max-width: 450px;
+        align-self: center;
     }
     
     .brand-subtext { 
         order: 3; 
-        margin: 0 0 32px; 
+        margin: 0 auto 32px; 
         text-align: left; 
         font-size: 16px; 
         line-height: 1.5;
         width: 100%;
         max-width: 450px;
         color: var(--text-dim);
+        align-self: center;
     }
     
     /* Top Utils (Theme Switcher) */
@@ -514,14 +523,15 @@ body {
         order: 4; 
         position: static; 
         justify-content: flex-end; 
-        margin-bottom: 20px; 
+        margin: 0 auto 20px; 
         width: 100%;
         max-width: 450px;
+        align-self: center;
     }
     
     .auth-card { 
         order: 5; 
-        margin: 0 0 24px; 
+        margin: 0 auto 24px; 
         width: 100%; 
         max-width: 450px;
         background: var(--glass-bg);
@@ -530,6 +540,7 @@ body {
         padding: 36px 24px;
         text-align: center;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        align-self: center;
     }
 
     .auth-lock-icon {
@@ -598,10 +609,11 @@ body {
     .features-grid { 
         order: 6; 
         grid-template-columns: 1fr; 
-        margin: 24px 0; 
+        margin: 24px auto; 
         gap: 16px;
         width: 100%;
         max-width: 450px;
+        align-self: center;
     }
     
     /* Reformat features for horizontal layout on mobile */
@@ -626,6 +638,7 @@ body {
         grid-row: 1; 
         margin-bottom: 0; 
         font-size: 15px; 
+        color: var(--text-primary);
     }
     .feat-box p { 
         grid-column: 2; 
@@ -636,11 +649,12 @@ body {
 
     .bottom-card { 
         order: 7; 
-        margin: 0 0 24px; 
+        margin: 0 auto 24px; 
         width: 100%;
         max-width: 450px;
         padding: 24px 16px;
         border-radius: 20px;
+        align-self: center;
     }
 
     .bottom-card-header {
