@@ -594,7 +594,7 @@
           </div>
           <div class="kpi-data">
             <h3>{{ projetos|selectattr('situacao', 'equalto', 'Em andamento')|list|length }}</h3>
-            <p>Projetos em Desenvolvimento</p>
+            <p>Projetos em Andamento</p>
           </div>
         </div>
         <!-- Waves -->
@@ -640,7 +640,7 @@
                 <!-- Hover remove member form -->
                 <form action="{{ url_for('admin.equipe_remover_membro', equipe_id=equipe.pk_id_team, funcionario_id=func.pk_id_employee) }}" method="POST" class="member-remove-form" onsubmit="return confirm('Tem certeza que deseja remover {{ nome_func }} desta equipe?');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <button type="submit" class="btn-remove-member" title="Remover da Equipe">&times;</button>
+                  <button type="submit" class="btn-remove-member" title="Remover da Equipe">X</button>
                 </form>
                 <div class="member-avatar {% if lider and func.pk_id_employee == lider.id %}leader{% endif %}">
                   {{ nome_func[:2].upper() }}
@@ -657,7 +657,7 @@
         <!-- Projetos em Desenvolvimento -->
         <div class="premium-card">
           <div class="section-header">
-            <span class="section-title">Projetos em Desenvolvimento</span>
+            <span class="section-title">Projetos em Andamento</span>
             <a class="section-action">Ver todos</a>
           </div>
           <div>
@@ -757,7 +757,7 @@
   <div class="modal-box">
     <div class="modal-head">
       <h3>Adicionar Membro à Equipe</h3>
-      <button class="modal-close" onclick="closeModal('modal-add-membro')">&times;</button>
+      <button class="modal-close" onclick="closeModal('modal-add-membro')">X</button>
     </div>
     <form action="{{ url_for('admin.equipe_add_membro', equipe_id=equipe.pk_id_team) }}" method="POST" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -790,7 +790,7 @@
   <div class="modal-box" style="width: 600px;">
     <div class="modal-head">
       <h3>Todos os Logs da Equipe</h3>
-      <button class="modal-close" onclick="closeModal('modal-todos-logs')">&times;</button>
+      <button class="modal-close" onclick="closeModal('modal-todos-logs')">X</button>
     </div>
     <div style="padding: 24px; max-height: 400px; overflow-y: auto;" class="custom-scroll">
       <div class="timeline" style="padding: 0;">

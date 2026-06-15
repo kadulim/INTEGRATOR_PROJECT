@@ -151,6 +151,79 @@
       border: 1px solid rgba(0, 0, 0, 0.06);
       color: rgba(0, 0, 0, 0.6);
     }
+
+    html, body {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      overflow: hidden;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    html::-webkit-scrollbar, body::-webkit-scrollbar {
+      display: none;
+    }
+    .app-shell {
+      height: 100vh;
+      overflow: hidden;
+    }
+    .main-content {
+      height: 100vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .main-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    :root {
+      --welcome-bg: rgba(30, 41, 59, 0.25);
+      --welcome-border: rgba(255, 255, 255, 0.05);
+      --welcome-text: #ffffff;
+      --welcome-subtext: rgba(255, 255, 255, 0.45);
+    }
+    .light-mode {
+      --welcome-bg: #f1f5f9;
+      --welcome-border: rgba(0, 0, 0, 0.06);
+      --welcome-text: #0F172A;
+      --welcome-subtext: #64748b;
+    }
+
+    /* Mobile Topbar Base Style */
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--brand);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .light-mode .mobile-topbar {
+      background: #ffffff;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    @media (max-width: 768px) {
+      .mobile-topbar {
+        display: flex !important;
+      }
+      .page-content {
+        padding: 24px 16px 100px !important;
+      }
+      .detail-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+      }
+      .docs-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -164,12 +237,22 @@
         <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
       </span>
     </div>
+
+    <!-- User Welcome Card -->
+    <div class="user-welcome-card" style="background: var(--welcome-bg); border: 1px solid var(--welcome-border); border-radius: 12px; padding: 16px; margin: 16px 12px; margin-bottom: 24px;">
+      <div style="font-size: 15px; font-weight: 700; color: var(--welcome-text); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+        Olá, {{ current_user.name_user.split(' ')[0] }}! 
+      </div>
+      <div style="font-size: 12px; color: var(--welcome-subtext); line-height: 1.5;">
+        Bem-vindo de volta ao Portal do Cliente CoByte.
+      </div>
+    </div>
     
     <nav class="sidebar-nav">
       <div class="nav-label">Menu</div>
       
       <a href="{{ url_for('cliente_dashboard') }}" class="nav-item">
-        <i data-lucide="layout-dashboard"></i>
+        <i data-lucide="layout-grid"></i>
         <span>Meu Painel</span>
       </a>
       
@@ -195,7 +278,22 @@
 
   <!-- Conteúdo Principal -->
   <div class="main-content">
-    <main class="page-content fade-up" style="max-width: 1200px; margin: 0 auto; padding: 40px 32px 64px; width: 100%;">
+    
+    <!-- Mobile Topbar -->
+    <div class="mobile-topbar">
+      <button id="mobileMenuBtn" style="background: none; border: none; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; padding: 4px;">
+        <i data-lucide="menu" style="width: 24px; height: 24px;"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 32px; width: auto; object-fit: contain;">
+        <span style="font-size: 20px; font-weight: 800; letter-spacing: -1px; font-family: 'Outfit', sans-serif; line-height: 1;">
+          <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
+        </span>
+      </div>
+      <div style="width: 24px;"></div> <!-- Spacer to center the logo -->
+    </div>
+
+    <main class="page-content fade-up" style="padding: 40px 32px 64px; width: 100%;">
       
       <!-- Topbar Custom -->
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px;">
@@ -216,7 +314,7 @@
       </div>
 
       <!-- Bento Layout Grid -->
-      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px; align-items: start;">
+      <div class="detail-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px; align-items: start;">
         
         <!-- Coluna da Esquerda (Informações Principais & Requisitos) -->
         <div style="display: flex; flex-direction: column; gap: 28px;">
@@ -231,11 +329,7 @@
               {{ projeto.description_project or 'Sem descrição cadastrada para este projeto.' }}
             </p>
             
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding-top: 24px; border-top: 1px solid var(--border);">
-              <div>
-                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Prioridade</div>
-                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ 'Média' or 'Média' }}</div>
-              </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding-top: 24px; border-top: 1px solid var(--border);">
               <div>
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Prazo Final</div>
                 <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">{{ projeto.end_date_project }}</div>
@@ -243,7 +337,7 @@
               <div>
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px;">Orçamento</div>
                 <div style="font-size: 14px; font-weight: 600; color: var(--green);">
-                  {% if projeto.orcamento %} R$ {{ projeto.orcamento|format_budget }} {% else %} Sob demanda {% endif %}
+                  {% if projeto.orcamento %} R$ {{ "{:,.2f}".format(projeto.orcamento).replace(",", "X").replace(".", ",").replace("X", ".") }} {% else %} Sob demanda {% endif %}
                 </div>
               </div>
             </div>
@@ -266,9 +360,27 @@
                   </div>
                   <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">{{ req.description_requirement or 'Sem descrição.' }}</div>
                 </div>
-                <span class="badge {% if req.status_requirement == 'Concluído' %}badge-green{% elif req.status_requirement == 'Em andamento' %}badge-blue{% else %}badge-gray{% endif %}" style="font-size: 11px; padding: 3px 8px;">
-                  {{ req.status_requirement }}
-                </span>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0;">
+                  <span class="badge {% if req.status_requirement == 'Concluído' %}badge-green{% elif req.status_requirement == 'Em andamento' %}badge-blue{% else %}badge-gray{% endif %}" style="font-size: 11px; padding: 3px 8px;">
+                    {{ req.status_requirement }}
+                  </span>
+                  {% if req.approval_requirement == 'approved' %}
+                  <span style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #10b981;">Aprovado</span>
+                  {% elif req.approval_requirement == 'rejected' %}
+                  <span style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(255, 85, 119, 0.15); color: #FF5577;">Rejeitado</span>
+                  {% else %}
+                  <div style="display: flex; gap: 6px;">
+                    <form action="{{ url_for('cliente_aprovar_requisito', projeto_id=projeto.pk_id_project, requisito_id=req.pk_id_requirement, action='aprovar') }}" method="POST" style="display:inline;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" style="font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 4px; border: none; cursor: pointer; background: rgba(16, 185, 129, 0.15); color: #10b981;">Aprovar</button>
+                    </form>
+                    <form action="{{ url_for('cliente_aprovar_requisito', projeto_id=projeto.pk_id_project, requisito_id=req.pk_id_requirement, action='rejeitar') }}" method="POST" style="display:inline;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" style="font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 4px; border: none; cursor: pointer; background: rgba(255, 85, 119, 0.15); color: #FF5577;">Rejeitar</button>
+                    </form>
+                  </div>
+                  {% endif %}
+                </div>
               </div>
               {% else %}
               <div style="text-align: center; padding: 40px 10px; color: var(--text-muted);">
@@ -287,7 +399,7 @@
             </h2>
             
             {% if documentos %}
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="docs-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
               {% for doc in documentos %}
               <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1;">
@@ -335,10 +447,10 @@
               {% for item in galeria %}
               <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
                 <div style="height: 120px; overflow: hidden; background: #000; position: relative;">
-                  <img src="/static/{{ item.path_gallery }}" alt="{{ item.nome }}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+                  <img src="/static/{{ item.path_gallery }}" alt="{{ item.path_gallery.split('/')[-1] }}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
                   <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px;">Galeria</span>
                 </div>
-                <div style="padding: 10px; font-size: 12px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ item.nome }}</div>
+                <div style="padding: 10px; font-size: 12px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ item.path_gallery.split('/')[-1] }}</div>
               </div>
               {% endfor %}
             </div>
@@ -434,8 +546,8 @@
                         </span>
                       </div>
                     </div>
-                    {% if current_user.admin and current_user.admin.level_admin == 1 or com.fk_user == current_user.pk_id_user %}
-                      <form action="/projeto/delete-comentario/{{ com.pk_id_comment }}" method="POST" style="display:inline;">
+                    {% if current_user.type_user == 'admin' or com.fk_user == current_user.pk_id_user %}
+                    <form action="/projeto/delete-comentario/{{ com.pk_id_comment }}" method="POST" style="display:inline;">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent; cursor:pointer;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir comentário">
                         <i data-lucide="trash-2" style="width:14px;"></i>
@@ -444,7 +556,7 @@
                     {% endif %}
                   </div>
                   <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; word-break: break-word;">{{ com.content_comment }}</div>
-                  <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px; text-align: right;">{{ com.data.strftime('%d/%m/%Y %H:%M') }}</div>
+                  <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px; text-align: right;">{{ com.date_comment.strftime('%d/%m/%Y %H:%M') }}</div>
                 </div>
               {% else %}
               <div style="text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: 12.5px;">Nenhum comentário cadastrado para este projeto.</div>

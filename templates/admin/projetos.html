@@ -569,7 +569,7 @@
             <div class="scard-lbl">Em Andamento</div>
             <div class="scard-val" style="color:var(--am);">{{ projetos|selectattr("situacao", "equalto", "Em andamento")|list|length }}</div>
             <div class="scard-sub">
-              <span class="tag tag-am">Em desenvolvimento</span>
+              <span class="tag tag-am">Em Andamento</span>
             </div>
           </div>
           <div class="scard-ico" style="background:var(--am-d);">
@@ -834,7 +834,7 @@
   <div class="modal">
     <div class="modal-header">
       <h2 class="modal-title">Cadastrar Novo Projeto</h2>
-      <div class="modal-close" onclick="closeModal('modal-novo-projeto')">&times;</div>
+      <div class="modal-close" onclick="closeModal('modal-novo-projeto')">X</div>
     </div>
     <form action="{{ url_for('admin.add_projeto') }}" method="POST">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

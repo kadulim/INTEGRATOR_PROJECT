@@ -5,10 +5,26 @@
 {% block extra_css %}
 <style>
   /* Force hide original topbar and clean up content wrapper */
-  .topbar { display: none !important; }
-  .main-content { padding-top: 0 !important; height: 100vh !important; overflow: hidden !important; }
-  .page-content { padding: 0 !important; height: 100vh !important; overflow: hidden !important; }
-  body { height: 100vh !important; overflow: hidden !important; }
+  .topbar {
+    display: none !important;
+  }
+
+  .main-content {
+    padding-top: 0 !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  .page-content {
+    padding: 0 !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  body {
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
 
   :root {
     --bg: #060910;
@@ -22,7 +38,7 @@
     --ac-d: rgba(0, 207, 255, 0.10);
     --ac-d2: rgba(0, 207, 255, 0.06);
     --gr: #00E5A0;
-    --gr-conclu:#10b981;
+    --gr-conclu: #10b981;
     --gr-d: rgba(0, 229, 160, 0.10);
     --am: #FFB020;
     --am-d: rgba(255, 176, 32, 0.10);
@@ -77,30 +93,37 @@
     border-color: rgba(16, 185, 129, 0.25) !important;
     background: var(--s1) !important;
   }
+
   .light-mode .mcard-gr .mcard-icon {
     background: rgba(16, 185, 129, 0.1);
     border: 1px solid rgba(16, 185, 129, 0.2);
   }
+
   .light-mode .mcard-ac {
     border-color: rgba(245, 158, 11, 0.25) !important;
     background: var(--s1) !important;
   }
+
   .light-mode .mcard-ac .mcard-icon {
     background: rgba(245, 158, 11, 0.1);
     border: 1px solid rgba(245, 158, 11, 0.2);
   }
+
   .light-mode .mcard-am {
     border-color: rgba(255, 85, 119, 0.25) !important;
     background: var(--s1) !important;
   }
+
   .light-mode .mcard-am .mcard-icon {
     background: rgba(255, 85, 119, 0.1);
     border: 1px solid rgba(255, 85, 119, 0.2);
   }
+
   .light-mode .mcard-cn {
     border-color: rgba(107, 114, 128, 0.22) !important;
     background: var(--s1) !important;
   }
+
   .light-mode .mcard-cn .mcard-icon {
     background: rgba(107, 114, 128, 0.1);
     border: 1px solid rgba(107, 114, 128, 0.2);
@@ -121,12 +144,15 @@
   .light-mode .proj-row {
     border-bottom-color: rgba(15, 23, 42, 0.1) !important;
   }
+
   .light-mode .act-row {
     border-bottom-color: rgba(15, 23, 42, 0.1) !important;
   }
+
   .light-mode .card-hdr {
     border-bottom-color: rgba(15, 23, 42, 0.1) !important;
   }
+
   .light-mode .big-stat {
     border-bottom-color: rgba(15, 23, 42, 0.1) !important;
   }
@@ -135,17 +161,19 @@
   .light-mode .topbar-custom {
     background: rgba(255, 255, 255, 0.95) !important;
     border-bottom-color: rgba(15, 23, 42, 0.12) !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
   /* Scard icon & waves */
   .light-mode .scard-ico {
     border: 1px solid rgba(15, 23, 42, 0.1);
   }
+
   .light-mode .proj-ico {
     border-color: rgba(15, 23, 42, 0.12) !important;
     background: #f8fafc !important;
   }
+
   .light-mode .act-ico {
     border-color: rgba(0, 229, 160, 0.25) !important;
     background: rgba(0, 229, 160, 0.08) !important;
@@ -155,10 +183,12 @@
   .light-mode .modal-ov {
     background: rgba(15, 23, 42, 0.3) !important;
   }
+
   .light-mode .modal-box {
     border: 1px solid rgba(15, 23, 42, 0.12) !important;
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1) !important;
   }
+
   .light-mode .modal-head {
     border-bottom-color: rgba(15, 23, 42, 0.1) !important;
   }
@@ -197,9 +227,18 @@
   }
 
   /* ─── SCROLLBAR ─── */
-  .custom-scroll::-webkit-scrollbar { width: 4px; }
-  .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-  .custom-scroll::-webkit-scrollbar-thumb { background: var(--b3); border-radius: 4px; }
+  .custom-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scroll::-webkit-scrollbar-thumb {
+    background: var(--b3);
+    border-radius: 4px;
+  }
 
   /* ─── TOPBAR ─── */
   .topbar-custom {
@@ -212,9 +251,28 @@
     backdrop-filter: blur(12px);
     flex-shrink: 0;
   }
-  .tb-left .page-title { font-size: 20px; font-weight: 800; letter-spacing: -0.4px; color: var(--tx); }
-  .tb-left .breadcrumb { font-size: 11.5px; color: var(--tx2); margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
-  .tb-right { display: flex; align-items: center; gap: 10px; }
+
+  .tb-left .page-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: var(--tx);
+  }
+
+  .tb-left .breadcrumb {
+    font-size: 11.5px;
+    color: var(--tx2);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .tb-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
   .date-pill {
     padding: 6px 14px;
@@ -225,6 +283,7 @@
     color: var(--tx2);
     font-family: 'JetBrains Mono', monospace;
   }
+
   .icon-btn {
     width: 36px;
     height: 36px;
@@ -238,8 +297,16 @@
     color: var(--tx2);
     transition: all 0.15s;
   }
-  .icon-btn:hover { color: var(--tx); border-color: var(--b2); }
-  .icon-btn svg { width: 16px; height: 16px; }
+
+  .icon-btn:hover {
+    color: var(--tx);
+    border-color: var(--b2);
+  }
+
+  .icon-btn svg {
+    width: 16px;
+    height: 16px;
+  }
 
   /* ─── CONTENT ─── */
   .content-scrollable {
@@ -271,85 +338,175 @@
 
   /* glow effects */
   .hero::before {
-    content: ''; position: absolute;
-    top: -100px; right: -60px;
-    width: 380px; height: 380px;
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -60px;
+    width: 380px;
+    height: 380px;
     background: radial-gradient(circle, rgba(0, 207, 255, 0.07) 0%, transparent 65%);
     pointer-events: none;
   }
+
   .hero::after {
-    content: ''; position: absolute;
-    bottom: -80px; left: 25%;
-    width: 260px; height: 260px;
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: 25%;
+    width: 260px;
+    height: 260px;
     background: radial-gradient(circle, rgba(0, 229, 160, 0.05) 0%, transparent 65%);
     pointer-events: none;
   }
 
   /* hero left */
   .hero-eyebrow {
-    font-size: 9.5px; font-weight: 700; letter-spacing: 1.6px;
-    text-transform: uppercase; color: var(--ac);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--ac);
     margin-bottom: 10px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .hero-eyebrow::before {
-    content: ''; width: 22px; height: 2px;
-    background: var(--ac); border-radius: 2px;
-  }
-  .hero-title {
-    font-size: 30px; font-weight: 800; letter-spacing: -0.6px;
-    line-height: 1.1; margin-bottom: 12px; color: var(--tx);
-  }
-  .hero-sub {
-    font-size: 12.5px; color: var(--tx2); line-height: 1.65;
-    max-width: 300px; margin-bottom: 26px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .status-list { display: flex; flex-direction: column; gap: 13px; }
-  .status-item { display: flex; align-items: center; gap: 12px; }
-  .s-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-  .s-name { font-size: 13px; color: var(--tx2); flex: 1; }
+  .hero-eyebrow::before {
+    content: '';
+    width: 22px;
+    height: 2px;
+    background: var(--ac);
+    border-radius: 2px;
+  }
+
+  .hero-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    color: var(--tx);
+  }
+
+  .hero-sub {
+    font-size: 12.5px;
+    color: var(--tx2);
+    line-height: 1.65;
+    max-width: 300px;
+    margin-bottom: 26px;
+  }
+
+  .status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .s-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .s-name {
+    font-size: 13px;
+    color: var(--tx2);
+    flex: 1;
+  }
+
   .s-count {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 15px; font-weight: 600; color: var(--tx);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--tx);
   }
 
   /* donut */
   .donut-wrap {
     position: relative;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
     z-index: 50;
   }
+
   .donut-center {
-    position: absolute; text-align: center; pointer-events: none;
+    position: absolute;
+    text-align: center;
+    pointer-events: none;
   }
+
   .d-num {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 52px; font-weight: 600; color: var(--tx); line-height: 1;
+    font-size: 52px;
+    font-weight: 600;
+    color: var(--tx);
+    line-height: 1;
   }
+
   .d-lbl {
-    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
-    text-transform: uppercase; color: var(--tx2); margin-top: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--tx2);
+    margin-top: 5px;
   }
 
   /* hero right */
   .hero-right-lbl {
-    font-size: 9.5px; font-weight: 700; letter-spacing: 1.4px;
-    text-transform: uppercase; color: var(--tx3); margin-bottom: 18px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--tx3);
+    margin-bottom: 18px;
   }
+
   .big-stat {
     padding: 16px 0;
     border-bottom: 1px solid var(--b1);
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  .big-stat:last-child { border-bottom: none; }
-  .bs-left { display: flex; align-items: center; gap: 12px; }
-  .bs-bar { width: 4px; height: 36px; border-radius: 2px; flex-shrink: 0; }
-  .bs-name { font-size: 12.5px; color: var(--tx2); }
+
+  .big-stat:last-child {
+    border-bottom: none;
+  }
+
+  .bs-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .bs-bar {
+    width: 4px;
+    height: 36px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .bs-name {
+    font-size: 12.5px;
+    color: var(--tx2);
+  }
+
   .bs-num {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 30px; font-weight: 600; line-height: 1;
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1;
   }
 
   /* ─── STATS ROW ─── */
@@ -365,42 +522,96 @@
     border: 1px solid var(--b1);
     border-radius: var(--r);
     padding: 20px 22px;
-    display: flex; flex-direction: column; gap: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
     cursor: pointer;
     transition: border-color 0.18s, transform 0.18s;
-    position: relative; overflow: hidden;
+    position: relative;
+    overflow: hidden;
   }
-  .scard:hover { border-color: var(--b2); transform: translateY(-2px); }
 
-  .scard-top { display: flex; align-items: flex-start; justify-content: space-between; }
+  .scard:hover {
+    border-color: var(--b2);
+    transform: translateY(-2px);
+  }
+
+  .scard-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
   .scard-lbl {
-    font-size: 10px; font-weight: 700; letter-spacing: 0.9px;
-    text-transform: uppercase; color: var(--tx2);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: var(--tx2);
   }
+
   .scard-ico {
-    width: 32px; height: 32px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .scard-ico svg { width: 16px; height: 16px; }
+
+  .scard-ico svg {
+    width: 16px;
+    height: 16px;
+  }
 
   .scard-val {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 32px; font-weight: 600; letter-spacing: -1px;
-    color: var(--tx); line-height: 1;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    color: var(--tx);
+    line-height: 1;
   }
+
   .scard-sub {
-    font-size: 11.5px; color: var(--tx2);
-    display: flex; align-items: center; gap: 6px;
+    font-size: 11.5px;
+    color: var(--tx2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
+
   .tag {
-    font-size: 10px; font-weight: 600;
-    padding: 2px 8px; border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
   }
-  .tag-ac { background: var(--ac-d); color: var(--ac); }
-  .tag-gr { background: var(--gr-d); color: var(--gr); }
-  .tag-am { background: var(--am-d); color: var(--am); }
-  .tag-vi { background: var(--vi-d); color: var(--vi); }
-  .tag-cn { background: var(--cn-d); color: var(--cn); }
+
+  .tag-ac {
+    background: var(--ac-d);
+    color: var(--ac);
+  }
+
+  .tag-gr {
+    background: var(--gr-d);
+    color: var(--gr);
+  }
+
+  .tag-am {
+    background: var(--am-d);
+    color: var(--am);
+  }
+
+  .tag-vi {
+    background: var(--vi-d);
+    color: var(--vi);
+  }
+
+  .tag-cn {
+    background: var(--cn-d);
+    color: var(--cn);
+  }
 
   /* ─── SCARD WAVES ANIMATION ─── */
   .scard {
@@ -408,6 +619,7 @@
     overflow: hidden;
     z-index: 1;
   }
+
   .scard-waves {
     position: absolute;
     left: 0;
@@ -420,29 +632,46 @@
     overflow: hidden;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
   }
+
   .scard:hover .scard-waves {
     transform: scaleY(1.22);
   }
+
   .scard-waves svg {
     position: absolute;
     bottom: 0;
     width: 200%;
     height: 100%;
   }
+
   .wave-path {
     /* Gradients are defined inline in HTML to use exact theme variables */
   }
+
   @keyframes flowWave1 {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
   }
+
   @keyframes flowWave2 {
-    0% { transform: translateX(-50%); }
-    100% { transform: translateX(0); }
+    0% {
+      transform: translateX(-50%);
+    }
+
+    100% {
+      transform: translateX(0);
+    }
   }
+
   .wave1 {
     animation: flowWave1 22s linear infinite;
   }
+
   .wave2 {
     animation: flowWave2 15s linear infinite;
   }
@@ -461,19 +690,44 @@
     border-radius: var(--r);
     overflow: hidden;
   }
+
   .card-hdr {
     padding: 18px 22px 14px;
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     border-bottom: 1px solid var(--b1);
   }
+
   .card-ttl {
-    font-size: 13px; font-weight: 700; letter-spacing: 0.2px;
-    display: flex; align-items: center; gap: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
     color: var(--tx);
   }
-  .card-ttl-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ac); }
-  .card-act { font-size: 11.5px; color: var(--ac); cursor: pointer; font-weight: 500; opacity: 0.85; text-decoration: none; }
-  .card-act:hover { opacity: 1; }
+
+  .card-ttl-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ac);
+  }
+
+  .card-act {
+    font-size: 11.5px;
+    color: var(--ac);
+    cursor: pointer;
+    font-weight: 500;
+    opacity: 0.85;
+    text-decoration: none;
+  }
+
+  .card-act:hover {
+    opacity: 1;
+  }
 
   /* project row */
   .proj-row {
@@ -481,33 +735,89 @@
     border-bottom: 1px solid var(--b1);
     display: grid;
     grid-template-columns: auto 1fr auto;
-    gap: 14px; align-items: center;
-    cursor: pointer; transition: background 0.15s;
+    gap: 14px;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.15s;
   }
-  .proj-row:hover { background: var(--s2); }
-  .proj-row:last-child { border-bottom: none; }
+
+  .proj-row:hover {
+    background: var(--s2);
+  }
+
+  .proj-row:last-child {
+    border-bottom: none;
+  }
+
   .proj-ico {
-    width: 40px; height: 40px;
+    width: 40px;
+    height: 40px;
     background: var(--s3);
     border: 1px solid var(--b2);
     border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--ac); flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ac);
+    flex-shrink: 0;
   }
-  .proj-ico svg { width: 18px; height: 18px; }
-  .proj-name { font-size: 13.5px; font-weight: 600; color: var(--tx); margin-bottom: 3px; }
-  .proj-desc { font-size: 11.5px; color: var(--tx2); }
-  .proj-date { text-align: right; }
-  .proj-date-lbl { font-size: 9.5px; color: var(--tx3); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.6px; }
-  .proj-date-val { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ac); }
+
+  .proj-ico svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .proj-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--tx);
+    margin-bottom: 3px;
+  }
+
+  .proj-desc {
+    font-size: 11.5px;
+    color: var(--tx2);
+  }
+
+  .proj-date {
+    text-align: right;
+  }
+
+  .proj-date-lbl {
+    font-size: 9.5px;
+    color: var(--tx3);
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  .proj-date-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--ac);
+  }
 
   .badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px; border-radius: 20px;
-    font-size: 10.5px; font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 600;
   }
-  .badge-ac { background: var(--ac-d); color: var(--ac); }
-  .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  .badge-ac {
+    background: var(--ac-d);
+    color: var(--ac);
+  }
+
+  .badge-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
 
   /* activity row */
   .act-row {
@@ -515,22 +825,58 @@
     border-bottom: 1px solid var(--b1);
     display: grid;
     grid-template-columns: auto 1fr auto;
-    gap: 12px; align-items: flex-start;
-    cursor: pointer; transition: background 0.15s;
+    gap: 12px;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: background 0.15s;
   }
-  .act-row:hover { background: var(--s2); }
-  .act-row:last-child { border-bottom: none; }
+
+  .act-row:hover {
+    background: var(--s2);
+  }
+
+  .act-row:last-child {
+    border-bottom: none;
+  }
+
   .act-ico {
-    width: 30px; height: 30px; border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
     background: var(--gr-d);
-    border: 1px solid rgba(0,229,160,0.18);
-    display: flex; align-items: center; justify-content: center;
-    margin-top: 1px; flex-shrink: 0;
+    border: 1px solid rgba(0, 229, 160, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    flex-shrink: 0;
   }
-  .act-ico svg { width: 13px; height: 13px; stroke: var(--gr); }
-  .act-user { font-size: 12.5px; font-weight: 600; color: var(--tx); margin-bottom: 3px; }
-  .act-desc { font-size: 11.5px; color: var(--tx2); line-height: 1.5; }
-  .act-time { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--tx3); margin-top: 2px; }
+
+  .act-ico svg {
+    width: 13px;
+    height: 13px;
+    stroke: var(--gr);
+  }
+
+  .act-user {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--tx);
+    margin-bottom: 3px;
+  }
+
+  .act-desc {
+    font-size: 11.5px;
+    color: var(--tx2);
+    line-height: 1.5;
+  }
+
+  .act-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--tx3);
+    margin-top: 2px;
+  }
 
   /* ── MONTHLY ── */
   .monthly {
@@ -554,14 +900,35 @@
     animation: slideInUp 0.5s ease-out forwards;
     opacity: 0;
   }
-  .mcard:nth-child(1) { animation-delay: 0.1s; }
-  .mcard:nth-child(2) { animation-delay: 0.2s; }
-  .mcard:nth-child(3) { animation-delay: 0.3s; }
-  .mcard:nth-child(4) { animation-delay: 0.4s; }
-  @keyframes slideInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
+
+  .mcard:nth-child(1) {
+    animation-delay: 0.1s;
   }
+
+  .mcard:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .mcard:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .mcard:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .mcard:hover {
     border-color: var(--b2);
     transform: translateY(-4px);
@@ -589,6 +956,7 @@
     flex-shrink: 0;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
+
   .mcard-icon svg {
     width: 22px;
     height: 22px;
@@ -597,6 +965,7 @@
     stroke-linejoin: round;
     fill: none;
   }
+
   .mcard:hover .mcard-icon {
     transform: scale(1.08);
   }
@@ -607,30 +976,37 @@
     color: var(--gr-conclu);
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
+
   .mcard-gr:hover .mcard-icon {
     box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
   }
+
   .mcard-ac .mcard-icon {
     background: rgba(245, 158, 11, 0.12);
     color: var(--am-anda);
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
   }
+
   .mcard-ac:hover .mcard-icon {
     box-shadow: 0 0 16px rgba(245, 158, 11, 0.2);
   }
+
   .mcard-am .mcard-icon {
     background: rgba(255, 85, 119, 0.12);
     color: var(--rd);
     box-shadow: 0 0 0 0 rgba(255, 85, 119, 0);
   }
+
   .mcard-am:hover .mcard-icon {
     box-shadow: 0 0 16px rgba(255, 85, 119, 0.2);
   }
+
   .mcard-cn .mcard-icon {
     background: rgba(107, 114, 128, 0.12);
     color: var(--cn);
     box-shadow: 0 0 0 0 rgba(107, 114, 128, 0);
   }
+
   .mcard-cn:hover .mcard-icon {
     box-shadow: 0 0 16px rgba(107, 114, 128, 0.2);
   }
@@ -655,6 +1031,7 @@
     color: var(--tx3);
     transition: color 0.3s;
   }
+
   .mcard:hover .mcard-sub {
     color: var(--tx2);
   }
@@ -668,6 +1045,7 @@
     flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+
   .mcard:hover .mcard-num {
     transform: scale(1.08);
   }
@@ -679,19 +1057,43 @@
     opacity: 0.6;
     transition: opacity 0.3s ease;
   }
+
   .mcard:hover .mcard-bar {
     opacity: 1;
   }
-  .mcard-gr .mcard-bar { background: linear-gradient(90deg, var(--gr-conclu), rgba(16, 185, 129, 0.1)); }
-  .mcard-ac .mcard-bar { background: linear-gradient(90deg, var(--am-anda), rgba(245, 158, 11, 0.1)); }
-  .mcard-am .mcard-bar { background: linear-gradient(90deg, var(--rd), rgba(255, 85, 119, 0.1)); }
-  .mcard-cn .mcard-bar { background: linear-gradient(90deg, var(--cn), rgba(107, 114, 128, 0.1)); }
+
+  .mcard-gr .mcard-bar {
+    background: linear-gradient(90deg, var(--gr-conclu), rgba(16, 185, 129, 0.1));
+  }
+
+  .mcard-ac .mcard-bar {
+    background: linear-gradient(90deg, var(--am-anda), rgba(245, 158, 11, 0.1));
+  }
+
+  .mcard-am .mcard-bar {
+    background: linear-gradient(90deg, var(--rd), rgba(255, 85, 119, 0.1));
+  }
+
+  .mcard-cn .mcard-bar {
+    background: linear-gradient(90deg, var(--cn), rgba(107, 114, 128, 0.1));
+  }
 
   /* Border accents */
-  .mcard-gr { border-color: rgba(16, 185, 129, 0.1) !important; }
-  .mcard-ac { border-color: rgba(245, 158, 11, 0.1) !important; }
-  .mcard-am { border-color: rgba(255, 85, 119, 0.1) !important; }
-  .mcard-cn { border-color: rgba(107, 114, 128, 0.12) !important; }
+  .mcard-gr {
+    border-color: rgba(16, 185, 129, 0.1) !important;
+  }
+
+  .mcard-ac {
+    border-color: rgba(245, 158, 11, 0.1) !important;
+  }
+
+  .mcard-am {
+    border-color: rgba(255, 85, 119, 0.1) !important;
+  }
+
+  .mcard-cn {
+    border-color: rgba(107, 114, 128, 0.12) !important;
+  }
 
   /* latest-change-box */
   .latest-change-box {
@@ -706,25 +1108,38 @@
   }
 
   /* ─── DONUT ANIMATION ─── */
-  .ring-track { opacity: 0.12; }
+  .ring-track {
+    opacity: 0.12;
+  }
+
   .ring-fill {
     transform-origin: center;
     transform: rotate(-90deg);
-    transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
   .ring-fill-seg {
     transform-origin: center;
   }
 
   /* section divider label */
   .section-lbl {
-    display: flex; align-items: center; gap: 12px;
-    font-size: 10px; font-weight: 700; letter-spacing: 1.3px;
-    text-transform: uppercase; color: var(--tx3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: var(--tx3);
     flex-shrink: 0;
   }
+
   .section-lbl::after {
-    content: ''; flex: 1; height: 1px; background: var(--b1);
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--b1);
   }
 
   /* Modals Centered */
@@ -738,6 +1153,7 @@
     align-items: center;
     justify-content: center;
   }
+
   .modal-box {
     width: 520px;
     max-width: 90vw;
@@ -749,6 +1165,7 @@
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   }
+
   .modal-head {
     padding: 18px 24px;
     border-bottom: 1px solid var(--b1);
@@ -757,10 +1174,12 @@
     align-items: center;
     flex-shrink: 0;
   }
+
   .modal-head h3 {
     font-size: 15px;
     color: var(--tx);
   }
+
   .modal-close {
     background: none;
     border: none;
@@ -772,21 +1191,28 @@
     line-height: 1;
     transition: all 0.2s;
   }
+
   .modal-close:hover {
     color: var(--tx);
     background: var(--b1);
   }
+
   .modal-scroll {
     overflow-y: auto;
     flex: 1;
   }
+
   /* ─── DONUT SEGMENTOS ─── */
-.seg-path {
-  transition: filter 0.2s ease, transform 0.2s ease;
-  transform-origin: 130px 130px;
-  cursor: pointer;
-}
-.seg-path:hover  { filter: brightness(1.35); transform: scale(1.04); }
+  .seg-path {
+    transition: filter 0.2s ease, transform 0.2s ease;
+    transform-origin: 130px 130px;
+    cursor: pointer;
+  }
+
+  .seg-path:hover {
+    filter: brightness(1.35);
+    transform: scale(1.04);
+  }
 </style>
 {% endblock %}
 
@@ -805,48 +1231,55 @@
         <p class="hero-sub">Acompanhe o progresso de todos os projetos ativos em tempo real.</p>
 
         <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px; width: 90%;">
-          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--tx3);">Última Alteração em Projeto</div>
-          
+          <div
+            style="font-size: 9.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--tx3);">
+            Última Alteração em Projeto</div>
+
           {% if logs %}
-            {% set last_log = logs[0] %}
-            <div class="latest-change-box">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 11px; font-weight: 600; color: var(--ac); text-transform: uppercase; letter-spacing: 0.5px;">{{ last_log.acao }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--tx3);">{{ last_log.data.strftime('%d/%m/%Y') }}</span>
-              </div>
-              <p style="font-size: 12px; color: var(--tx2); margin: 0; line-height: 1.4; font-weight: 400;">{{ last_log.descricao }}</p>
-              
-              <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--b1); padding-top: 6px; margin-top: 4px; font-size: 11px; color: var(--tx3);">
-                <span>Equipe: <strong style="color: var(--tx2);">{{ last_log.equipe_nome }}</strong></span>
-                <span>Autor: <strong style="color: var(--gr);">{{ current_user.name_user if current_user.is_authenticated else 'Administrador' }}</strong></span>
-              </div>
+          {% set last_log = logs[0] %}
+          <div class="latest-change-box">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span
+                style="font-size: 11px; font-weight: 600; color: var(--ac); text-transform: uppercase; letter-spacing: 0.5px;">{{
+                last_log.acao }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--tx3);">{{
+                last_log.data.strftime('%d/%m/%Y') }}</span>
             </div>
+            <p style="font-size: 12px; color: var(--tx2); margin: 0; line-height: 1.4; font-weight: 400;">{{
+              last_log.descricao }}</p>
+
+            <div
+              style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--b1); padding-top: 6px; margin-top: 4px; font-size: 11px; color: var(--tx3);">
+              <span>Equipe: <strong style="color: var(--tx2);">{{ last_log.equipe_nome }}</strong></span>
+              <span>Autor: <strong style="color: var(--gr);">{{ current_user.name_user if current_user.is_authenticated
+                  else 'Administrador' }}</strong></span>
+            </div>
+          </div>
           {% else %}
-            <div style="font-size: 12px; color: var(--tx3); font-style: italic;">Nenhuma alteração registrada.</div>
+          <div style="font-size: 12px; color: var(--tx3); font-style: italic;">Nenhuma alteração registrada.</div>
           {% endif %}
         </div>
       </div>
 
       <!-- Center: Donut -->
-<!-- Center: Donut -->
-<div class="donut-wrap" id="donutWrap">
-  <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260" style="overflow:visible;">
-    <!-- Anel de pulso animado -->
-    <circle id="pulseRing" cx="130" cy="130" r="92"
-      fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
-    <!-- Track de fundo -->
-    <circle cx="130" cy="130" r="92"
-      fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="22"/>
-    <!-- Segmentos e gaps gerados por JS -->
-    <g id="segsGroup"></g>
-    <g id="gapsGroup"></g>
-  </svg>
-  <div class="donut-center">
-    <div class="d-num" id="totalCount">0</div>
-    <div class="d-lbl">Total</div>
-  </div>
-  <!-- Tooltip flutuante de alta performance e riqueza visual -->
-  <div id="donut-tooltip" style="
+      <!-- Center: Donut -->
+      <div class="donut-wrap" id="donutWrap">
+        <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260" style="overflow:visible;">
+          <!-- Anel de pulso animado -->
+          <circle id="pulseRing" cx="130" cy="130" r="92" fill="none" stroke="rgba(255,255,255,0.07)"
+            stroke-width="1" />
+          <!-- Track de fundo -->
+          <circle cx="130" cy="130" r="92" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="22" />
+          <!-- Segmentos e gaps gerados por JS -->
+          <g id="segsGroup"></g>
+          <g id="gapsGroup"></g>
+        </svg>
+        <div class="donut-center">
+          <div class="d-num" id="totalCount">0</div>
+          <div class="d-lbl">Total</div>
+        </div>
+        <!-- Tooltip flutuante de alta performance e riqueza visual -->
+        <div id="donut-tooltip" style="
     position:absolute; background:rgba(16, 26, 45, 0.95); border:1px solid var(--b2);
     backdrop-filter: blur(8px);
     border-radius:10px; padding:10px 14px; font-family:'Outfit',sans-serif;
@@ -854,15 +1287,20 @@
     z-index:10; top:50%; left:50%;
     transform:translate(-50%, 68px); width:210px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.35);">
-    <div id="tt-name" style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:2px;"></div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--tx);margin-top:1px;display:flex;justify-content:space-between;align-items:baseline;">
-      <span id="tt-val"></span>
-      <span id="tt-pct" style="font-size:10.5px;color:var(--tx2);font-weight:400;margin-left:8px;"></span>
-    </div>
-    <div id="tt-divider" style="height:1px;background:var(--b1);margin:8px 0;display:none;"></div>
-    <div id="tt-projects-list" style="display:flex;flex-direction:column;gap:5px;max-height:120px;overflow-y:auto;padding-right:2px;" class="custom-scroll"></div>
-  </div>
-</div>
+          <div id="tt-name"
+            style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:2px;">
+          </div>
+          <div
+            style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--tx);margin-top:1px;display:flex;justify-content:space-between;align-items:baseline;">
+            <span id="tt-val"></span>
+            <span id="tt-pct" style="font-size:10.5px;color:var(--tx2);font-weight:400;margin-left:8px;"></span>
+          </div>
+          <div id="tt-divider" style="height:1px;background:var(--b1);margin:8px 0;display:none;"></div>
+          <div id="tt-projects-list"
+            style="display:flex;flex-direction:column;gap:5px;max-height:120px;overflow-y:auto;padding-right:2px;"
+            class="custom-scroll"></div>
+        </div>
+      </div>
 
       <!-- Right: breakdown stats -->
       <div class="hero-right">
@@ -872,7 +1310,9 @@
           <div class="bs-left">
             <div class="bs-bar" style="background:var(--am-anda);box-shadow:0 0 10px rgba(245,158,11,0.4);"></div>
             <div>
-              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Em andamento</div>
+              <div
+                style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">
+                Em andamento</div>
               <div class="bs-name">Projetos ativos</div>
             </div>
           </div>
@@ -883,7 +1323,9 @@
           <div class="bs-left">
             <div class="bs-bar" style="background:var(--gr-conclu);box-shadow:0 0 10px rgba(16,185,129,0.3);"></div>
             <div>
-              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Concluído</div>
+              <div
+                style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">
+                Concluído</div>
               <div class="bs-name">Finalizados</div>
             </div>
           </div>
@@ -894,7 +1336,9 @@
           <div class="bs-left">
             <div class="bs-bar" style="background:var(--rd);box-shadow:0 0 10px rgba(255,85,119,0.3);"></div>
             <div>
-              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Pausado</div>
+              <div
+                style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">
+                Pausado</div>
               <div class="bs-name">Parados</div>
             </div>
           </div>
@@ -905,7 +1349,9 @@
           <div class="bs-left">
             <div class="bs-bar" style="background:var(--cn);box-shadow:0 0 10px rgba(107,114,128,0.3);"></div>
             <div>
-              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Cancelado</div>
+              <div
+                style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">
+                Cancelado</div>
               <div class="bs-name">Cancelados</div>
             </div>
           </div>
@@ -934,7 +1380,8 @@
                 <stop offset="100%" stop-color="var(--ac)" stop-opacity="0.0"></stop>
               </linearGradient>
             </defs>
-            <path class="wave1" fill="url(#grad-ac)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave1" fill="url(#grad-ac)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z">
+            </path>
             <path class="wave2" fill="url(#grad-ac)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
           </svg>
         </div>
@@ -956,7 +1403,8 @@
                 <stop offset="100%" stop-color="var(--gr)" stop-opacity="0.0"></stop>
               </linearGradient>
             </defs>
-            <path class="wave1" fill="url(#grad-gr)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave1" fill="url(#grad-gr)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z">
+            </path>
             <path class="wave2" fill="url(#grad-gr)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
           </svg>
         </div>
@@ -978,7 +1426,8 @@
                 <stop offset="100%" stop-color="var(--vi)" stop-opacity="0.0"></stop>
               </linearGradient>
             </defs>
-            <path class="wave1" fill="url(#grad-vi)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave1" fill="url(#grad-vi)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z">
+            </path>
             <path class="wave2" fill="url(#grad-vi)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
           </svg>
         </div>
@@ -986,11 +1435,11 @@
 
       <div class="scard">
         <div class="scard-top">
-          <div class="scard-lbl">Budget Total</div>
+          <div class="scard-lbl">Orçamento Total</div>
         </div>
-        <div class="scard-val" style="font-size:22px;letter-spacing:-0.5px;position: relative; z-index: 2;">R${{ budget_total|format_budget }}</div>
+        <div class="scard-val" style="font-size:22px;letter-spacing:-0.5px;position: relative; z-index: 2;">R${{
+          budget_total|format_budget }}</div>
         <div class="scard-sub" style="position: relative; z-index: 2;">
-          <span class="tag tag-am">Consolidado</span>
         </div>
         <div class="scard-waves">
           <svg viewBox="0 0 240 24" preserveAspectRatio="none">
@@ -1000,7 +1449,8 @@
                 <stop offset="100%" stop-color="var(--am)" stop-opacity="0.0"></stop>
               </linearGradient>
             </defs>
-            <path class="wave1" fill="url(#grad-am)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z"></path>
+            <path class="wave1" fill="url(#grad-am)" d="M0,12 Q30,6 60,12 T120,12 T180,12 T240,12 L240,24 L0,24 Z">
+            </path>
             <path class="wave2" fill="url(#grad-am)" d="M0,8 Q30,16 60,8 T120,8 T180,8 T240,8 L240,24 L0,24 Z"></path>
           </svg>
         </div>
@@ -1026,16 +1476,18 @@
         {% for proj in projetos_recentes %}
         <div class="proj-row" onclick="location.href='{{ url_for('admin.projeto_detalhe', id=proj.pk_id_project) }}'">
           <div class="proj-ico">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
             </svg>
           </div>
           <div>
             <div class="proj-name">{{ proj.name_project }}</div>
-            <div class="proj-desc" style="margin-bottom:6px;">{{ proj.description_project[:40] if proj.description_project else 'Sem descrição' }}...</div>
+            <div class="proj-desc" style="margin-bottom:6px;">{{ proj.description_project[:40] if
+              proj.description_project else 'Sem descrição' }}...</div>
             <span class="badge badge-ac"><span class="badge-dot"></span>{{ proj.status_project or 'Pausado' }}</span>
           </div>
           <div class="proj-date">
@@ -1064,11 +1516,14 @@
         <div class="act-row" onclick="document.getElementById('logs-modal').style.display='flex';">
           <div class="act-ico">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
+              <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
           <div>
-            <div class="act-user">{{ log.equipe_nome }}</div>
+            <div class="act-user">
+              <div class="act-user">Projeto: {{ log.project_name }} | Equipe: {{ log.equipe_nome }} | Tipo {{
+                log.type_log }}</div>
+            </div>
             <div class="act-desc">{{ log.acao }} · {{ log.descricao }}</div>
             <div class="act-time">{{ log.data.strftime('%d/%m · %H:%M') }}</div>
           </div>
@@ -1089,7 +1544,10 @@
       <div class="mcard mcard-gr" onclick="openProjectsModal('concluido')">
         <div class="mcard-inner">
           <div class="mcard-icon">
-            <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <svg viewBox="0 0 24 24" stroke="currentColor">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
           </div>
           <div class="mcard-info">
             <div class="mcard-lbl">Concluídos</div>
@@ -1103,11 +1561,17 @@
       <div class="mcard mcard-ac" onclick="openProjectsModal('em_andamento')">
         <div class="mcard-inner">
           <div class="mcard-icon">
-            <svg viewBox="0 0 24 24" stroke="currentColor"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+            <svg viewBox="0 0 24 24" stroke="currentColor">
+              <polyline points="16 3 21 3 21 8" />
+              <line x1="4" y1="20" x2="21" y2="3" />
+              <polyline points="21 16 21 21 16 21" />
+              <line x1="15" y1="15" x2="21" y2="21" />
+              <line x1="4" y1="4" x2="9" y2="9" />
+            </svg>
           </div>
           <div class="mcard-info">
-            <div class="mcard-lbl">Desenvolvimento</div>
-            <div class="mcard-sub">Em andamento</div>
+            <div class="mcard-lbl">Em Andamento</div>
+            <div class="mcard-sub">Projetos ativos</div>
           </div>
           <div class="mcard-num" style="color:var(--am-anda);">{{ current_month_projects.em_andamento|length }}</div>
         </div>
@@ -1117,7 +1581,11 @@
       <div class="mcard mcard-am" onclick="openProjectsModal('pausado')">
         <div class="mcard-inner">
           <div class="mcard-icon">
-            <svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
+            <svg viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="10" y1="15" x2="10" y2="9" />
+              <line x1="14" y1="15" x2="14" y2="9" />
+            </svg>
           </div>
           <div class="mcard-info">
             <div class="mcard-lbl">Pausados</div>
@@ -1131,7 +1599,11 @@
       <div class="mcard mcard-cn" onclick="openProjectsModal('cancelado')">
         <div class="mcard-inner">
           <div class="mcard-icon">
-            <svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <svg viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
           </div>
           <div class="mcard-info">
             <div class="mcard-lbl">Cancelados</div>
@@ -1152,23 +1624,36 @@
   <div class="modal-box">
     <div class="modal-head">
       <h3>Histórico de Atividades do Sistema</h3>
-      <button class="modal-close" onclick="document.getElementById('logs-modal').style.display='none';">✕</button>
+      <button class="modal-close" onclick="document.getElementById('logs-modal').style.display='none';">X</button>
     </div>
     <div class="modal-scroll custom-scroll" style="padding: 20px;">
       {% set log_colors = ['#A855F7', '#22C55E', '#3B82F6', '#F59E0B'] %}
-      {% for log in todos_logs %}
+      {% for log in logs %}
       <div class="log-item-row" style="display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--b1);">
-        <div class="log-icon-wrap" style="background: {{ log_colors[loop.index0 % 4] }}15; color: {{ log_colors[loop.index0 % 4] }}; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <div class="log-icon-wrap"
+          style="background: {{ log_colors[loop.index0 % 4] }}15; color: {{ log_colors[loop.index0 % 4] }}; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
           <i data-lucide="check" style="width: 12px;"></i>
         </div>
         <div class="log-details" style="flex: 1;">
-          <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);"><strong>{{ log.equipe_nome }}</strong> · {{ log.acao }}</div>
-          <div class="log-description" style="font-size: 11px; color: var(--tx2); margin-top: 2px;">{{ log.descricao }}</div>
+          <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);">
+            Projeto: <strong>{{log.project_name }}</strong>
+            </div>
+            <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);">
+              Equipe: <strong>{{ log.equipe_nome }}</strong>
+            </div>
+          <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);">Tipo: <strong>{{
+              log.type_log }}</strong>
+            </div>
+          <div class="log-description" style="font-size: 11px; color: var(--tx2); margin-top: 2px;">{{ log.descricao }}
+          </div>
         </div>
-        <div class="log-timestamp" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--tx3);">{{ log.data.strftime('%d/%m/%Y %H:%M') }}</div>
+        <div class="log-timestamp"
+          style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--tx3);">{{
+          log.data.strftime('%d/%m/%Y %H:%M') }}</div>
       </div>
       {% else %}
-      <div style="padding: 24px; text-align: center; color: var(--tx2); font-size: 13px;">Nenhum registro encontrado.</div>
+      <div style="padding: 24px; text-align: center; color: var(--tx2); font-size: 13px;">Nenhum registro encontrado.
+      </div>
       {% endfor %}
     </div>
   </div>
@@ -1179,7 +1664,7 @@
   <div class="modal-box" style="width: 520px;">
     <div class="modal-head">
       <h3 id="modal-status-title">Projetos</h3>
-      <button class="modal-close" onclick="closeProjectsModal()">✕</button>
+      <button class="modal-close" onclick="closeProjectsModal()">X</button>
     </div>
     <div class="modal-scroll custom-scroll" style="padding: 20px;">
       <div id="modal-projects-list" style="display: flex; flex-direction: column; gap: 10px;">
@@ -1194,7 +1679,7 @@
 <script>
   // Initialize lucide icons
   lucide.createIcons();
-  
+
   const statusData = {{ status_data_json | safe }};
   const volumes = {{ volumes_json | safe }};
   const projetosStatus = {{ projetos_status_json | safe }};
@@ -1204,13 +1689,13 @@
   // Donut Chart logic — corrigido (DOMContentLoaded + requestAnimationFrame)
   document.addEventListener('DOMContentLoaded', () => {
     const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
-    const concluidoVal   = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
-    const pausadoVal     = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
-    const canceladoVal   = parseInt(statusData.find(d => d.label === 'Cancelado')?.val || 0);
+    const concluidoVal = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
+    const pausadoVal = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
+    const canceladoVal = parseInt(statusData.find(d => d.label === 'Cancelado')?.val || 0);
 
     document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
     document.getElementById('breakdownConcluido').textContent = concluidoVal;
-    document.getElementById('breakdownPausado').textContent   = pausadoVal;
+    document.getElementById('breakdownPausado').textContent = pausadoVal;
     document.getElementById('breakdownCancelado').textContent = canceladoVal;
 
     const SEGS = statusData.filter(s => s.val > 0).map(s => ({
@@ -1251,9 +1736,9 @@
 
     SEGS.forEach((seg, idx) => {
       const sweep = (seg.val / totalVal) * availAngle;
-      const half  = segsN > 1 ? GAP_RAD / 2 : 0;
+      const half = segsN > 1 ? GAP_RAD / 2 : 0;
       const segStart = cursor + half;
-      const segEnd   = cursor + half + sweep;
+      const segEnd = cursor + half + sweep;
       cursor += sweep + (segsN > 1 ? GAP_RAD : 0);
 
       const pct = seg.val / totalVal;
@@ -1268,7 +1753,7 @@
         document.getElementById('tt-name').style.color = seg.color;
         document.getElementById('tt-val').textContent = seg.val + (seg.val === 1 ? ' projeto' : ' projetos');
         document.getElementById('tt-pct').textContent = Math.round(pct * 100) + '%';
-        
+
         const keyMap = {
           'Em andamento': 'em_andamento',
           'Concluído': 'concluido',
@@ -1277,11 +1762,11 @@
         };
         const statusKey = keyMap[seg.label];
         const projs = projetosStatus[statusKey] || [];
-        
+
         const listEl = document.getElementById('tt-projects-list');
         const dividerEl = document.getElementById('tt-divider');
         listEl.innerHTML = '';
-        
+
         if (projs.length > 0) {
           dividerEl.style.display = 'block';
           projs.forEach(p => {
@@ -1291,7 +1776,7 @@
             item.style.gap = '1px';
             item.style.padding = '3px 0';
             item.style.textAlign = 'left';
-            
+
             item.innerHTML = `
               <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.name_project}">${p.name_project}</span>
               <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.end_date_project}</span>
@@ -1301,12 +1786,12 @@
         } else {
           dividerEl.style.display = 'none';
         }
-        
+
         if (tt) {
           tt.style.opacity = '1';
           tt.style.pointerEvents = 'auto';
         }
-        
+
         if (tt && !tt.dataset.hoverBound) {
           tt.addEventListener('mouseenter', () => clearTimeout(window.donutTtTimeout));
           tt.addEventListener('mouseleave', () => {
@@ -1346,51 +1831,51 @@
   const monthlyProjectsData = {
     concluido: [
       {% for p in current_month_projects.concluido %}
-        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
-      {% endfor %}
+  { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
+  {% endfor %}
     ],
-    em_andamento: [
-      {% for p in current_month_projects.em_andamento %}
-        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
-      {% endfor %}
+  em_andamento: [
+    {% for p in current_month_projects.em_andamento %}
+  { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
+  {% endfor %}
     ],
-    pausado: [
-      {% for p in current_month_projects.pausado %}
-        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
-      {% endfor %}
+  pausado: [
+    {% for p in current_month_projects.pausado %}
+  { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
+  {% endfor %}
     ],
-    cancelado: [
-      {% for p in current_month_projects.cancelado %}
-        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
-      {% endfor %}
+  cancelado: [
+    {% for p in current_month_projects.cancelado %}
+  { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" },
+  {% endfor %}
     ]
   };
 
-  window.openProjectsModal = function(statusKey) {
+  window.openProjectsModal = function (statusKey) {
     const modal = document.getElementById('projects-status-modal');
     const titleEl = document.getElementById('modal-status-title');
     const listEl = document.getElementById('modal-projects-list');
     if (!modal || !titleEl || !listEl) return;
-    
+
     let title = 'Projetos';
     let themeColor = 'var(--ac)';
-    
+
     if (statusKey === 'concluido') {
       title = 'Projetos Concluídos em {{ current_month_name }}';
       themeColor = 'var(--gr)';
     } else if (statusKey === 'em_andamento') {
-      title = 'Projetos em Desenvolvimento em {{ current_month_name }}';
-      themeColor = 'var(--ac)';
+      title = 'Projetos em Andamento em {{ current_month_name }}';
+      themeColor = 'var(--am-anda)';
     } else if (statusKey === 'pausado') {
       title = 'Projetos Pausados em {{ current_month_name }}';
-      themeColor = 'var(--am)';
+      themeColor = 'var(--rd)';
     } else if (statusKey === 'cancelado') {
       title = 'Projetos Cancelados em {{ current_month_name }}';
       themeColor = 'var(--cn)';
     }
-    
+
     titleEl.innerHTML = `<span style="color: ${themeColor}; font-weight: 800; font-size: 14.5px;">${title}</span>`;
-    
+
     const projs = monthlyProjectsData[statusKey] || [];
     if (projs.length === 0) {
       listEl.innerHTML = `
@@ -1414,21 +1899,21 @@
         `;
       }).join('');
     }
-    
+
     modal.style.display = 'flex';
   };
 
-  window.closeProjectsModal = function() {
+  window.closeProjectsModal = function () {
     const modal = document.getElementById('projects-status-modal');
     if (modal) modal.style.display = 'none';
   };
 
   // Close modals when clicking outside
-  document.getElementById('logs-modal')?.addEventListener('click', function(e) {
+  document.getElementById('logs-modal')?.addEventListener('click', function (e) {
     if (e.target === this) this.style.display = 'none';
   });
-  
-  document.getElementById('projects-status-modal')?.addEventListener('click', function(e) {
+
+  document.getElementById('projects-status-modal')?.addEventListener('click', function (e) {
     if (e.target === this) this.style.display = 'none';
   });
 

@@ -11,7 +11,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import database
+from database import database as db, database
 import json
 import datetime
 from models import User, Employee, Project, Team, Requirement, Log, Client, project_teams, Document, Diagram, Gallery, Comment
@@ -37,8 +37,14 @@ def dashboard():
     # Projetos associados às equipes do funcionário
     projetos = []
     equipes_ids = [eq.pk_id_team for eq in equipes]
+    projeto_equipes_map = {}
     if equipes_ids:
         projetos = Project.query.join(project_teams, Project.pk_id_project == project_teams.c.fk_project).filter(project_teams.c.fk_team.in_(equipes_ids)).all()
+        for p in projetos:
+            project_team_ids = [t.pk_id_team for t in p.teams]
+            func_team_ids = [eid for eid in equipes_ids if eid in project_team_ids]
+            func_teams = Team.query.filter(Team.pk_id_team.in_(func_team_ids)).all()
+            projeto_equipes_map[p.pk_id_project] = func_teams
     
     # Métricas
     total_projetos = len(projetos)
@@ -89,32 +95,7 @@ def dashboard():
         for s, c in status_counts.items()
     ]
     
-    # ── Gráfico de Atividade Mensal ──────────────────
-    monthly_map = {m: {'Em andamento': 0, 'Concluído': 0, 'Pausado': 0, 'Cancelado': 0} for m in range(1, 13)}
-    for p in projetos:
-        if p.end_date_project:
-            try:
-                # end_date_project é um objeto date
-                m = p.end_date_project.month if hasattr(p.end_date_project, 'month') else int(str(p.end_date_project)[5:7])
-                st = p.status_project or 'Pausado'
-                if st == 'Pendente':
-                    st = 'Pausado'
-                if st not in monthly_map[m]:
-                    st = 'Pausado'
-                monthly_map[m][st] += 1
-            except (ValueError, IndexError, AttributeError):
-                pass
-                
-    volumes = [
-        {
-            'em_andamento': monthly_map[m]['Em andamento'],
-            'concluido': monthly_map[m]['Concluído'],
-            'pendente': monthly_map[m]['Pausado']
-        }
-        for m in range(1, 13)
-    ]
-    
-    # ── Logs dos projetos do funcionário ──────────────────
+    # ── Logs dos projetos do funcionário (apenas do usuario logado) ──
     logs_data = []
     todos_logs_data = []
     if projetos:
@@ -183,26 +164,17 @@ def dashboard():
     current_year = now.year
     
     for proj in projetos:
-        if proj.end_date_project:
-            try:
-                # end_date_project é objeto date
-                m = proj.end_date_project.month if hasattr(proj.end_date_project, 'month') else int(str(proj.end_date_project)[5:7])
-                y = proj.end_date_project.year if hasattr(proj.end_date_project, 'year') else int(str(proj.end_date_project)[0:4])
-                is_match = (m == current_month_num and y == current_year)
-            except (ValueError, AttributeError):
-                is_match = False
-            if is_match:
-                status_str = proj.status_project or 'Pausado'
-                if status_str == 'Pendente':
-                    status_str = 'Pausado'
-                if status_str == 'Em andamento':
-                    current_month_projects['em_andamento'].append(proj)
-                elif status_str == 'Concluído':
-                    current_month_projects['concluido'].append(proj)
-                elif status_str == 'Cancelado':
-                    current_month_projects['cancelado'].append(proj)
-                else:
-                    current_month_projects['pausado'].append(proj)
+        status_str = proj.status_project or 'Pausado'
+        if status_str == 'Pendente':
+            status_str = 'Pausado'
+        if status_str == 'Em andamento':
+            current_month_projects['em_andamento'].append(proj)
+        elif status_str == 'Concluído':
+            current_month_projects['concluido'].append(proj)
+        elif status_str == 'Cancelado':
+            current_month_projects['cancelado'].append(proj)
+        else:
+            current_month_projects['pausado'].append(proj)
                     
     # Widget de funcionários
     funcionarios_painel = (
@@ -226,8 +198,8 @@ def dashboard():
             status_str = 'Pausado'
         
         proj_data = {
-            'nome': proj.name_project,
-            'prazo': proj.end_date_project.strftime('%d/%m/%Y') if proj.end_date_project else 'Sem prazo',
+            'name_project': proj.name_project,
+            'end_date_project': proj.end_date_project.strftime('%d/%m/%Y') if proj.end_date_project else 'Sem prazo',
             'url': url_for('funcionario.projeto_detalhe', projeto_id=proj.pk_id_project)
         }
         
@@ -250,11 +222,11 @@ def dashboard():
         total_equipe=total_equipe,
         total_clientes=total_clientes,
         projetos_recentes=projetos,
+        projeto_equipes_map=projeto_equipes_map,
         budget_total=orcamento_total,
         funcionarios_painel=funcionarios_painel,
         status_data_json=json.dumps(status_data),
         projetos_status_json=json.dumps(projetos_por_status),
-        volumes_json=json.dumps(volumes),
         logs=logs_data,
         todos_logs=todos_logs_data,
         current_month_name=current_month_name,
@@ -329,14 +301,32 @@ def projeto_detalhe(projeto_id):
         .all()
     )
     
+    func_projeto_team_ids = [t.pk_id_team for t in func_projeto_teams]
+
     if equipe_id:
         documentos = Document.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
         diagramas = Diagram.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
         galeria = Gallery.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
     else:
-        documentos = []
-        diagramas = []
-        galeria = []
+        documentos = Document.query.filter(
+            Document.fk_project == projeto_id,
+            Document.fk_team.in_(func_projeto_team_ids)
+        ).all()
+        diagramas = Diagram.query.filter(
+            Diagram.fk_project == projeto_id,
+            Diagram.fk_team.in_(func_projeto_team_ids)
+        ).all()
+        galeria = Gallery.query.filter(
+            Gallery.fk_project == projeto_id,
+            Gallery.fk_team.in_(func_projeto_team_ids)
+        ).all()
+    logs_projeto = (
+        Log.query
+        .options(db.joinedload(Log.team), db.joinedload(Log.project), db.joinedload(Log.user))
+        .filter(Log.fk_project == projeto_id)
+        .order_by(Log.date_log.desc())
+        .all()
+    )
     comentarios = Comment.query.filter_by(fk_project=projeto_id).order_by(Comment.date_comment.asc()).all()
     
     return render_template(
@@ -349,7 +339,8 @@ def projeto_detalhe(projeto_id):
         documentos=documentos,
         diagramas=diagramas,
         galeria=galeria,
-        comentarios=comentarios
+        comentarios=comentarios,
+        logs_projeto=logs_projeto
     )
 
 # ---------------------------------------------------------------------------
@@ -403,26 +394,6 @@ def update_requisito(req_id):
     
     flash("Requisito atualizado com sucesso!", "sucesso")
     return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id, equipe=equipe_id))
-
-# =============================================================================
-# MINHA EQUIPE
-# =============================================================================
-@funcionario_bp.route('/equipe')
-@login_required
-def equipe():
-    if current_user.type_user != 'employee':
-        return redirect(url_for('page_login'))
-    funcionario = Employee.query.filter_by(fk_user=current_user.pk_id_user).first()
-    if not funcionario:
-        return "Perfil de funcionário não encontrado", 404
-    equipes = funcionario.teams
-    equipes_info = {}
-    for eq in equipes:
-        equipes_info[eq.pk_id_team] = {
-            'name_team': eq.name_team,
-            'membros': eq.employees,
-        }
-    return render_template('funcionario/equipe.html', equipes_info=equipes_info)
 
 # =============================================================================
 # CODEFLOW

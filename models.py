@@ -186,7 +186,6 @@ class Project(db.Model):
 
     __table_args__ = (
         db.Index("ix_project_fk_client",      "fk_client"),
-        db.Index("ix_project_status_project", "status_project"),
     )
 
     def __repr__(self):

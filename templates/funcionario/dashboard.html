@@ -78,12 +78,12 @@
     background: linear-gradient(160deg, rgba(0, 229, 160, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
   }
   .light-mode .mcard-ac {
-    border-color: rgba(0, 207, 255, 0.28) !important;
-    background: linear-gradient(160deg, rgba(0, 207, 255, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+    border-color: rgba(245, 158, 11, 0.28) !important;
+    background: linear-gradient(160deg, rgba(245, 158, 11, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
   }
   .light-mode .mcard-am {
-    border-color: rgba(255, 176, 32, 0.24) !important;
-    background: linear-gradient(160deg, rgba(255, 176, 32, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+    border-color: rgba(255, 85, 119, 0.24) !important;
+    background: linear-gradient(160deg, rgba(255, 85, 119, 0.04) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
   }
   .light-mode .mcard-rd {
     border-color: rgba(239, 68, 68, 0.24) !important;
@@ -240,6 +240,17 @@
     display: flex; align-items: center; justify-content: center;
     z-index: 50; margin: 0 auto;
   }
+  .donut-wrap::before {
+    content: ''; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    background: var(--dot-color, var(--ac));
+  }
+  .donut-wrap:hover::before { opacity: 0.1; }
   .donut-center {
     position: absolute; text-align: center;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -501,9 +512,9 @@
     opacity: 0.07;
     pointer-events: none;
   }
-  .mcard-ac::before { background: var(--ac); }
   .mcard-gr::before { background: var(--gr); }
-  .mcard-am::before { background: var(--am); }
+  .mcard-ac::before { background: var(--am-anda); }
+  .mcard-am::before { background: var(--rd); }
   .mcard-rd::before { background: #ef4444; }
   .mcard-cn::before { background: var(--cn); }
 
@@ -522,11 +533,11 @@
     border-color: rgba(0, 229, 160, 0.08) !important;
   }
   .mcard-ac {
-    border-color: rgba(0, 207, 255, 0.14) !important;
+    border-color: rgba(245, 158, 11, 0.14) !important;
     background: linear-gradient(160deg, #0d1a2e 0%, #0B1220 100%) !important;
   }
   .mcard-am {
-    border-color: rgba(255, 176, 32, 0.08) !important;
+    border-color: rgba(255, 85, 119, 0.08) !important;
   }
   .mcard-rd {
     border-color: rgba(239, 68, 68, 0.08) !important;
@@ -585,6 +596,11 @@
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    animation: modalFadeIn 0.2s ease-out;
+  }
+  @keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
   }
   .modal-head {
     padding: 18px 24px;
@@ -641,15 +657,10 @@
             {% set last_log = logs[0] %}
             <div class="latest-change-box">
               <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 11px; font-weight: 600; color: var(--ac); text-transform: uppercase; letter-spacing: 0.5px;">{{ last_log.type_log }}</span>
+                <span style="font-size: 11px; font-weight: 600; color: var(--ac); letter-spacing: 0.5px;">Projeto:{{ last_log.project_name }} | Equipe:{{ last_log.equipe_nome }} | Tipo {{ last_log.type_log }}</span>
                 <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--tx3);">{{ last_log.date_log.strftime('%d/%m/%Y') }}</span>
               </div>
               <p style="font-size: 12px; color: var(--tx2); margin: 0; line-height: 1.4; font-weight: 400;">{{ last_log.description_log }}</p>
-              
-              <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--b1); padding-top: 6px; margin-top: 4px; font-size: 11px; color: var(--tx3);">
-                <span>Equipe: <strong style="color: var(--tx2);">{{ last_log.equipe_nome }}</strong></span>
-                <span>Autor: <strong style="color: var(--gr);">{{ current_user.name_user if current_user.is_authenticated else 'Funcionário' }}</strong></span>
-              </div>
             </div>
           {% else %}
             <div style="font-size: 12px; color: var(--tx3); font-style: italic;">Nenhuma alteração registrada.</div>
@@ -792,7 +803,7 @@
         </div>
       </div>
 
-      <div class="scard" onclick="location.href='{{ url_for('funcionario.equipe') }}'">
+      <div class="scard">
         <div class="scard-top">
           <div class="scard-lbl">Equipe</div>
         </div>
@@ -854,7 +865,8 @@
         </div>
 
         {% for proj in projetos_recentes %}
-        <div class="proj-row" onclick="location.href='{{ url_for('funcionario.projeto_detalhe', projeto_id=proj.pk_id_project) }}'">
+        {% set eqs = projeto_equipes_map.get(proj.pk_id_project, []) %}
+        <div class="proj-row" onclick="openProjeto(this)" data-projeto-id="{{ proj.pk_id_project }}" data-projeto-nome="{{ proj.name_project }}" data-equipes='{{ eqs | map(attribute="pk_id_team") | list | tojson }}' data-equipes-nomes='{{ eqs | map(attribute="name_team") | list | tojson }}'>
           <div class="proj-ico">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
@@ -898,8 +910,8 @@
             </svg>
           </div>
           <div>
-            <div class="act-user">{{ log.equipe_nome }}</div>
-            <div class="act-desc">{{ log.type_log }} · {{ log.description_log }}</div>
+            <div class="act-user">Projeto:{{ log.project_name }} | Equipe:{{ log.equipe_nome }} | Tipo {{ log.type_log }}</div>
+            <div class="act-desc">{{ log.description_log }}</div>
             <div class="act-time">{{ log.date_log.strftime('%d/%m · %H:%M') }}</div>
           </div>
         </div>
@@ -923,14 +935,14 @@
       </div>
 
       <div class="mcard mcard-ac" onclick="openProjectsModal('em_andamento')">
-        <div class="mcard-lbl" style="color:var(--ac);">Desenvolvimento</div>
-        <div class="mcard-num" style="color:var(--ac);">{{ current_month_projects.em_andamento|length }}</div>
-        <div class="mcard-sub">projetos em andamento</div>
+        <div class="mcard-lbl" style="color:var(--am-anda);">Em Andamento</div>
+        <div class="mcard-num" style="color:var(--am-anda);">{{ current_month_projects.em_andamento|length }}</div>
+        <div class="mcard-sub">projetos ativos</div>
       </div>
 
       <div class="mcard mcard-am" onclick="openProjectsModal('pausado')">
-        <div class="mcard-lbl" style="color:var(--am);">Pausado</div>
-        <div class="mcard-num" style="color:var(--am);">{{ current_month_projects.pausado|length }}</div>
+        <div class="mcard-lbl" style="color:var(--rd);">Pausado</div>
+        <div class="mcard-num" style="color:var(--rd);">{{ current_month_projects.pausado|length }}</div>
         <div class="mcard-sub">parados</div>
       </div>
 
@@ -950,7 +962,7 @@
   <div class="modal-box">
     <div class="modal-head">
       <h3>Histórico de Atividades dos meus Projetos</h3>
-      <button class="modal-close" onclick="document.getElementById('logs-modal').style.display='none';">✕</button>
+      <button class="modal-close" onclick="document.getElementById('logs-modal').style.display='none';">X</button>
     </div>
     <div class="modal-scroll custom-scroll" style="padding: 20px;">
       {% set log_colors = ['#A855F7', '#22C55E', '#3B82F6', '#F59E0B'] %}
@@ -960,7 +972,7 @@
           <i data-lucide="check" style="width: 12px;"></i>
         </div>
         <div class="log-details" style="flex: 1;">
-          <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);"><strong>{{ log.equipe_nome }}</strong> · {{ log.type_log }}</div>
+          <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);">Projeto:{{ log.project_name }} | Equipe:{{ log.equipe_nome }} | Tipo {{ log.type_log }}</div>
           <div class="log-description" style="font-size: 11px; color: var(--tx2); margin-top: 2px;">{{ log.description_log }}</div>
         </div>
         <div class="log-timestamp" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--tx3);">{{ log.date_log.strftime('%d/%m/%Y %H:%M') }}</div>
@@ -977,12 +989,24 @@
   <div class="modal-box" style="width: 520px;">
     <div class="modal-head">
       <h3 id="modal-status-title">Projetos</h3>
-      <button class="modal-close" onclick="closeProjectsModal()">✕</button>
+      <button class="modal-close" onclick="closeProjectsModal()">X</button>
     </div>
     <div class="modal-scroll custom-scroll" style="padding: 20px;">
       <div id="modal-projects-list" style="display: flex; flex-direction: column; gap: 10px;">
         <!-- Filled dynamically by JS -->
       </div>
+    </div>
+  </div>
+</div>
+<div id="team-modal" class="modal-ov" style="display:none;">
+  <div class="modal-box" style="width: 400px;">
+    <div class="modal-head">
+      <h3 id="team-modal-title" style="font-size: 16px; font-weight: 700;"></h3>
+      <button class="modal-close" onclick="document.getElementById('team-modal').style.display='none';">X</button>
+    </div>
+    <div class="modal-scroll custom-scroll" style="padding: 20px;">
+      <p style="font-size: 12px; color: var(--tx2); margin-bottom: 16px;">Selecione a equipe:</p>
+      <div id="team-modal-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
   </div>
 </div>
@@ -1054,6 +1078,8 @@
       path.setAttribute('class', 'seg-path');
 
       path.addEventListener('mouseenter', () => {
+        const dw = document.getElementById('donutWrap');
+        dw.style.setProperty('--dot-color', seg.color);
         const tt = document.getElementById('donut-tooltip');
         document.getElementById('tt-name').textContent = seg.label;
         document.getElementById('tt-name').style.color = seg.color;
@@ -1065,6 +1091,12 @@
           tt.style.opacity = '1';
           tt.style.pointerEvents = 'none';
         }
+      });
+      path.addEventListener('mouseleave', () => {
+        const dw = document.getElementById('donutWrap');
+        dw.style.removeProperty('--dot-color');
+        const tt = document.getElementById('donut-tooltip');
+        if (tt) tt.style.opacity = '0';
       });
 
       path.setAttribute('d', describeArc(segStart, segEnd));
@@ -1079,31 +1111,13 @@
       if (count < target) { count++; el.textContent = count; setTimeout(step, Math.max(20, 300 / target)); }
     };
     setTimeout(step, 300);
-  });
 
-  // Monthly Activity Modal logic & project data serialization
-  const monthlyProjectsData = {
-    concluido: [
-      {% for p in current_month_projects.concluido %}
-        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.pk_id_project) }}" },
-      {% endfor %}
-    ],
-    em_andamento: [
-      {% for p in current_month_projects.em_andamento %}
-        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.pk_id_project) }}" },
-      {% endfor %}
-    ],
-    pausado: [
-      {% for p in current_month_projects.pausado %}
-        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.pk_id_project) }}" },
-      {% endfor %}
-    ],
-    cancelado: [
-      {% for p in current_month_projects.cancelado %}
-        { id: "{{ p.pk_id_project }}", nome: "{{ p.name_project|e }}", prazo: "{{ p.end_date_project }}", url: "{{ url_for('funcionario.projeto_detalhe', projeto_id=p.pk_id_project) }}" },
-      {% endfor %}
-    ]
-  };
+    document.getElementById('donutWrap').addEventListener('mouseleave', () => {
+      document.getElementById('donutWrap').style.removeProperty('--dot-color');
+      const tt = document.getElementById('donut-tooltip');
+      if (tt) tt.style.opacity = '0';
+    });
+  });
 
   window.openProjectsModal = function(statusKey) {
     const modal = document.getElementById('projects-status-modal');
@@ -1111,43 +1125,30 @@
     const listEl = document.getElementById('modal-projects-list');
     if (!modal || !titleEl || !listEl) return;
     
-    let title = 'Projetos';
-    let themeColor = 'var(--ac)';
+    const labels = {
+      'concluido':   { title: 'Projetos Concluídos', color: 'var(--gr)' },
+      'em_andamento':{ title: 'Projetos em Andamento', color: 'var(--am-anda)' },
+      'pausado':     { title: 'Projetos Pausados', color: 'var(--rd)' },
+      'cancelado':   { title: 'Projetos Cancelados', color: 'var(--cn)' },
+    };
+    const info = labels[statusKey] || { title: 'Projetos', color: 'var(--ac)' };
     
-    if (statusKey === 'concluido') {
-      title = 'Projetos Concluídos em {{ current_month_name }}';
-      themeColor = 'var(--gr)';
-    } else if (statusKey === 'em_andamento') {
-      title = 'Projetos em Desenvolvimento em {{ current_month_name }}';
-      themeColor = 'var(--ac)';
-    } else if (statusKey === 'pausado') {
-      title = 'Projetos Pausados em {{ current_month_name }}';
-      themeColor = 'var(--am)';
-    } else if (statusKey === 'cancelado') {
-      title = 'Projetos Cancelados em {{ current_month_name }}';
-      themeColor = 'var(--cn)';
-    }
+    titleEl.innerHTML = `<span style="color: ${info.color}; font-weight: 800; font-size: 14.5px;">${info.title}</span>`;
     
-    titleEl.innerHTML = `<span style="color: ${themeColor}; font-weight: 800; font-size: 14.5px;">${title}</span>`;
-    
-    const projs = monthlyProjectsData[statusKey] || [];
+    const projs = projetosStatus[statusKey] || [];
     if (projs.length === 0) {
-      listEl.innerHTML = `
-        <div style="padding: 40px 24px; text-align: center; color: var(--tx2); font-size: 12.5px; font-style: italic;">
-          Nenhum projeto registrado com este status para o mês de {{ current_month_name }}.
-        </div>
-      `;
+      listEl.innerHTML = `<div style="padding: 40px 24px; text-align: center; color: var(--tx2); font-size: 12.5px; font-style: italic;">Nenhum projeto com este status.</div>`;
     } else {
       listEl.innerHTML = projs.map(p => {
         return `
-          <div onclick="location.href='${p.url}'" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--s2); border: 1px solid var(--b1); border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--s3)'; this.style.borderColor='${themeColor}'" onmouseout="this.style.background='var(--s2)'; this.style.borderColor='var(--b1)'">
+          <div onclick="location.href='${p.url}'" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--s2); border: 1px solid var(--b1); border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--s3)'; this.style.borderColor='${info.color}'" onmouseout="this.style.background='var(--s2)'; this.style.borderColor='var(--b1)'">
             <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0; padding-right: 12px;">
               <span style="font-size: 13px; font-weight: 700; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name_project}</span>
               <span style="font-size: 10.5px; color: var(--tx2);">Clique para gerenciar</span>
             </div>
             <div style="text-align: right; flex-shrink: 0;">
               <span style="font-size: 8.5px; color: var(--tx2); text-transform: uppercase; display: block; letter-spacing: 0.3px;">Prazo</span>
-              <span style="font-size: 11.5px; font-weight: 700; color: ${themeColor};">${p.end_date_project}</span>
+              <span style="font-size: 11.5px; font-weight: 700; color: ${info.color};">${p.end_date_project}</span>
             </div>
           </div>
         `;
@@ -1170,6 +1171,10 @@
   document.getElementById('projects-status-modal')?.addEventListener('click', function(e) {
     if (e.target === this) this.style.display = 'none';
   });
+  
+  document.getElementById('team-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
 
   // Display the current formatted system date in the pill
   const datePill = document.querySelector('.date-pill');
@@ -1179,6 +1184,28 @@
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
     datePill.textContent = `${day} / ${month} / ${year}`;
+  }
+
+  function openProjeto(el) {
+    const projId = el.dataset.projetoId;
+    const projNome = el.dataset.projetoNome;
+    const equipes = JSON.parse(el.dataset.equipes);
+    const equipesNomes = JSON.parse(el.dataset.equipesNomes);
+    const baseUrl = '{{ url_for("funcionario.projeto_detalhe", projeto_id=0) }}'.replace('0', projId);
+    if (equipes.length <= 1) {
+      location.href = baseUrl;
+      return;
+    }
+    document.getElementById('team-modal-title').textContent = projNome;
+    const list = document.getElementById('team-modal-list');
+    list.innerHTML = equipes.map((id, i) => {
+      const url = baseUrl + '?equipe=' + id;
+      return '<div onclick="location.href=\'' + url + '\'" style="padding: 12px 16px; border-radius: 10px; border: 1px solid var(--b1); background: var(--s2); cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; display: flex; align-items: center; gap: 10px;" onmouseover="this.style.background=\'var(--s3)\'; this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.background=\'var(--s2)\'; this.style.borderColor=\'var(--b1)\'">' +
+        '<span style="width: 32px; height: 32px; border-radius: 50%; background: var(--ac-d); color: var(--ac); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;">' + equipesNomes[i][0].toUpperCase() + '</span>' +
+        equipesNomes[i] +
+        '</div>';
+    }).join('');
+    document.getElementById('team-modal').style.display = 'flex';
   }
 </script>
 {% endblock %}

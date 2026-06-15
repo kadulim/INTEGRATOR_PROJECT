@@ -802,7 +802,7 @@
   <div class="modal" style="width: 560px !important;">
     <div class="modal-header">
       <h2 class="modal-title">Cadastrar Nova Equipe</h2>
-      <div class="modal-close" onclick="closeModal('modal-nova-equipe')">&times;</div>
+      <div class="modal-close" onclick="closeModal('modal-nova-equipe')">X</div>
     </div>
     <form action="{{ url_for('admin.add_equipe') }}" method="POST">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -862,7 +862,7 @@
   <div class="modal" style="width: 560px !important;">
     <div class="modal-header">
       <h2 class="modal-title">Editar Equipe</h2>
-      <div class="modal-close" onclick="closeModal('modal-editar-equipe')">&times;</div>
+      <div class="modal-close" onclick="closeModal('modal-editar-equipe')">X</div>
     </div>
     <form id="form-editar-equipe" method="POST">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -922,7 +922,7 @@
   <div class="modal">
     <div class="modal-header">
       <h2 class="modal-title">Confirmar Exclusão</h2>
-      <div class="modal-close" onclick="closeModal('modal-deletar-equipe')">&times;</div>
+      <div class="modal-close" onclick="closeModal('modal-deletar-equipe')">X</div>
     </div>
     <div style="padding: 4px 0 16px;">
       <p style="color: var(--tx2); line-height: 1.6; font-size: 14px;">

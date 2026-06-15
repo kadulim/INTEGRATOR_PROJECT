@@ -25,11 +25,34 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
-    /* ─── HERO STATUS ─── */
+    html, body {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      overflow: hidden;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    html::-webkit-scrollbar, body::-webkit-scrollbar {
+      display: none;
+    }
+    .app-shell {
+      height: 100vh;
+      overflow: hidden;
+    }
+    .main-content {
+      height: 100vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .main-content::-webkit-scrollbar {
+      display: none;
+    }
     .hero {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--rl, 16px);
+      background: rgba(10, 16, 30, 0.4) !important;
+      border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      border-radius: 16px !important;
       padding: 32px 40px;
       display: grid;
       grid-template-columns: 1fr 260px 1fr;
@@ -40,6 +63,7 @@
       min-height: 280px;
       flex-shrink: 0;
       z-index: 10;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2) !important;
     }
     .hero::before {
       content: ''; position: absolute;
@@ -90,7 +114,6 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 20px; font-weight: 700;
     }
-
     :root {
       --ac: #00CFFF;
       --ac-d: rgba(0, 207, 255, 0.10);
@@ -110,11 +133,95 @@
       --rl: 16px;
       --vi: #A855F7;
       --vi-d: rgba(168, 85, 247, 0.10);
+
+      --client-bg: rgba(10, 16, 30, 0.4);
+      --client-border: rgba(255, 255, 255, 0.05);
+      --client-text-primary: #ffffff;
+      --client-text-secondary: rgba(255, 255, 255, 0.7);
+      --client-text-muted: rgba(255, 255, 255, 0.45);
+      --client-card-shadow: rgba(0, 0, 0, 0.2);
+
+      --welcome-bg: rgba(30, 41, 59, 0.25);
+      --welcome-border: rgba(255, 255, 255, 0.05);
+      --welcome-text: #ffffff;
+      --welcome-subtext: rgba(255, 255, 255, 0.45);
+
+      --bottom-card-bg: linear-gradient(90deg, rgba(30, 58, 138, 0.15) 0%, rgba(59, 130, 246, 0.03) 100%);
+      --bottom-card-border: rgba(59, 130, 246, 0.15);
+      --b1: rgba(255, 255, 255, 0.06);
+      --b2: rgba(255, 255, 255, 0.12);
     }
     .light-mode {
       --tx: #0F172A;
       --tx2: #475569;
       --tx3: #94A3B8;
+
+      --client-bg: #ffffff;
+      --client-border: rgba(0, 0, 0, 0.08);
+      --client-text-primary: #0F172A;
+      --client-text-secondary: #475569;
+      --client-text-muted: #94A3B8;
+      --client-card-shadow: rgba(0, 0, 0, 0.04);
+
+      --welcome-bg: #f1f5f9;
+      --welcome-border: rgba(0, 0, 0, 0.06);
+      --welcome-text: #0F172A;
+      --welcome-subtext: #64748b;
+
+      --bottom-card-bg: linear-gradient(90deg, rgba(59, 130, 246, 0.06) 0%, rgba(59, 130, 246, 0.01) 100%);
+      --bottom-card-border: rgba(59, 130, 246, 0.2);
+      --b1: rgba(0, 0, 0, 0.06);
+      --b2: rgba(0, 0, 0, 0.12);
+    }
+
+    .light-mode .hero {
+      background: #ffffff !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04) !important;
+    }
+    .light-mode .hero::before {
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.04) 0%, transparent 65%) !important;
+    }
+    .light-mode .hero::after {
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.03) 0%, transparent 65%) !important;
+    }
+    .light-mode #pulseRing {
+      stroke: rgba(0, 0, 0, 0.06) !important;
+    }
+    .light-mode #donutSvg circle:nth-child(2) {
+      stroke: rgba(0, 0, 0, 0.04) !important;
+    }
+    .light-mode #donut-tooltip {
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-color: rgba(0, 0, 0, 0.08) !important;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+    .light-mode #tt-name {
+      color: var(--tx2) !important;
+    }
+    .light-mode #tt-val {
+      color: var(--tx) !important;
+    }
+    .light-mode #tt-divider {
+      background: rgba(0, 0, 0, 0.06) !important;
+    }
+
+    /* Mobile Topbar Base Style */
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--brand);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .light-mode .mobile-topbar {
+      background: #ffffff;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
 
     /* donut */
@@ -282,6 +389,167 @@
       border: 1px solid rgba(0, 0, 0, 0.06);
       color: rgba(0, 0, 0, 0.6);
     }
+
+    /* Premium stats cards and bottom link overrides */
+    .stat-card {
+      background: var(--client-bg) !important;
+      border: 1px solid var(--client-border) !important;
+      border-radius: 16px !important;
+      padding: 24px !important;
+      display: flex !important;
+      align-items: flex-start !important;
+      gap: 20px !important;
+      box-shadow: 0 4px 30px var(--client-card-shadow) !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px) !important;
+      border-color: rgba(59, 130, 246, 0.3) !important;
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.08) !important;
+    }
+
+    .stat-card.yellow-hover:hover {
+      border-color: rgba(245, 158, 11, 0.3) !important;
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.08) !important;
+    }
+    .stat-card.green-hover:hover {
+      border-color: rgba(16, 185, 129, 0.3) !important;
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.08) !important;
+    }
+
+    .icon-glow-blue {
+      width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      background: rgba(59, 130, 246, 0.1) !important;
+      border: 1px solid rgba(59, 130, 246, 0.2) !important;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.15) !important;
+      color: #3b82f6 !important;
+    }
+    .icon-glow-yellow {
+      width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      background: rgba(245, 158, 11, 0.1) !important;
+      border: 1px solid rgba(245, 158, 11, 0.2) !important;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.15) !important;
+      color: #f59e0b !important;
+    }
+    .icon-glow-green {
+      width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      background: rgba(16, 185, 129, 0.1) !important;
+      border: 1px solid rgba(16, 185, 129, 0.2) !important;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.15) !important;
+      color: #10b981 !important;
+    }
+
+    .bottom-link-card {
+      background: var(--bottom-card-bg) !important;
+      border: 1px solid var(--bottom-card-border) !important;
+      border-radius: 16px !important;
+      padding: 20px 24px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      text-decoration: none !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      box-shadow: 0 4px 30px var(--client-card-shadow) !important;
+    }
+    .bottom-link-card:hover {
+      border-color: rgba(59, 130, 246, 0.4) !important;
+      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.15) !important;
+      transform: translateY(-2px) !important;
+    }
+    .bottom-link-card:hover .arrow-circle {
+      transform: scale(1.05) !important;
+      background: #2563eb !important;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.6) !important;
+    }
+    
+    .card-chevron {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .ios-dock {
+        display: none !important;
+      }
+      .mobile-topbar {
+        display: flex !important;
+      }
+      .mobile-welcome-card {
+        display: flex !important;
+      }
+      .page-content {
+        padding: 24px 16px 100px !important;
+      }
+      
+      /* Hero layout on mobile */
+      .hero {
+        grid-template-columns: 1fr 1.2fr !important;
+        gap: 16px 20px !important;
+        padding: 24px 20px !important;
+        min-height: auto !important;
+      }
+      .hero-left {
+        grid-column: span 2 !important;
+      }
+      .hero-title {
+        font-size: 26px !important;
+      }
+      .donut-wrap {
+        width: 130px !important;
+        height: 130px !important;
+        margin: 0 auto;
+      }
+      .donut-wrap svg {
+        width: 130px !important;
+        height: 130px !important;
+      }
+      .donut-center .d-num {
+        font-size: 24px !important;
+      }
+      .donut-center .d-lbl {
+        font-size: 8px !important;
+      }
+      
+      /* Stats Grid stacked rows */
+      .stats-grid-container {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      .stat-card {
+        padding: 16px 20px !important;
+        align-items: center !important;
+        gap: 16px !important;
+      }
+      .stat-card .icon-glow-blue,
+      .stat-card .icon-glow-yellow,
+      .stat-card .icon-glow-green {
+        width: 44px !important;
+        height: 44px !important;
+        border-radius: 12px !important;
+      }
+      .stat-card .icon-glow-blue i,
+      .stat-card .icon-glow-yellow i,
+      .stat-card .icon-glow-green i {
+        width: 20px !important;
+        height: 20px !important;
+      }
+      .stat-card div div:nth-child(2) {
+        font-size: 28px !important;
+        margin: 2px 0 !important;
+      }
+      .stat-card div div:nth-child(4) {
+        margin-top: 8px !important;
+      }
+      
+      .card-chevron {
+        display: flex !important;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.25);
+        margin-left: auto;
+      }
+      .light-mode .card-chevron {
+        color: rgba(15, 23, 42, 0.25);
+      }
+    }
   </style>
 </head>
 <body>
@@ -295,12 +563,22 @@
         <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
       </span>
     </div>
+
+    <!-- User Welcome Card -->
+    <div class="user-welcome-card" style="background: var(--welcome-bg); border: 1px solid var(--welcome-border); border-radius: 12px; padding: 16px; margin: 16px 12px; margin-bottom: 24px;">
+      <div style="font-size: 15px; font-weight: 700; color: var(--welcome-text); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+        Olá, {{ current_user.name_user.split(' ')[0] }}!
+      </div>
+      <div style="font-size: 12px; color: var(--welcome-subtext); line-height: 1.5;">
+        Bem-vindo de volta ao Portal do Cliente CoByte.
+      </div>
+    </div>
     
     <nav class="sidebar-nav">
       <div class="nav-label">Menu</div>
       
       <a href="{{ url_for('cliente_dashboard') }}" class="nav-item active">
-        <i data-lucide="layout-dashboard"></i>
+        <i data-lucide="layout-grid"></i>
         <span>Meu Painel</span>
       </a>
       
@@ -326,55 +604,29 @@
 
   <!-- Conteúdo Principal -->
   <div class="main-content">
-    <main class="page-content fade-up" style="max-width: 1200px; margin: 0 auto; padding: 40px 32px 64px; width: 100%;">
+    
+    <!-- Mobile Topbar -->
+    <div class="mobile-topbar">
+      <button id="mobileMenuBtn" style="background: none; border: none; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; padding: 4px;">
+        <i data-lucide="menu" style="width: 24px; height: 24px;"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 32px; width: auto; object-fit: contain;">
+        <span style="font-size: 20px; font-weight: 800; letter-spacing: -1px; font-family: 'Outfit', sans-serif; line-height: 1;">
+          <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
+        </span>
+      </div>
+      <div style="width: 24px;"></div> <!-- Spacer to center the logo -->
+    </div>
+
+    <main class="page-content fade-up" style="padding: 40px 32px 64px; width: 100%;">
       
-      <!-- Seção de Boas-vindas -->
-      <div class="client-welcome" style="margin-bottom: 36px;">
-        <div class="cw-text">
-          <h2 style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px;">Olá, {{ current_user.name_user.split(' ')[0] }}!</h2>
-          <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6;">Bem-vindo ao Portal do Cliente CoByte. Acompanhe a entrega dos seus projetos de ponta a ponta.</p>
-        </div>
-      </div>
-
-      <!-- Bento Grid de Estatísticas (Stats Row) -->
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 36px;">
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-          <div style="width: 48px; height: 48px; border-radius: 10px; background: rgba(59, 130, 246, 0.1); display: flex; align-items: center; justify-content: center; color: var(--blue);">
-            <i data-lucide="folder-kanban" style="width: 24px; height: 24px;"></i>
-          </div>
-          <div>
-            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Projetos Contratados</div>
-            <div style="font-size: 28px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">{{ total }}</div>
-          </div>
-        </div>
-        
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-          <div style="width: 48px; height: 48px; border-radius: 10px; background: rgba(245, 158, 11, 0.1); display: flex; align-items: center; justify-content: center; color: var(--yellow);">
-            <i data-lucide="clock" style="width: 24px; height: 24px;"></i>
-          </div>
-          <div>
-            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Projetos Em Andamento</div>
-            <div style="font-size: 28px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">{{ ativos }}</div>
-          </div>
-        </div>
-
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-          <div style="width: 48px; height: 48px; border-radius: 10px; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; color: var(--green);">
-            <i data-lucide="check-circle-2" style="width: 24px; height: 24px;"></i>
-          </div>
-          <div>
-            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Projetos Concluídos</div>
-            <div style="font-size: 28px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">{{ concluidos }}</div>
-          </div>
-        </div>
-      </div>
-
       <!-- ═══ HERO: STATUS DE PROJETOS ═══ -->
-      <div class="hero" style="margin-bottom: 36px;">
+      <div class="hero" style="margin-bottom: 24px;">
         <div class="hero-left">
           <div class="hero-eyebrow">Status de Projetos</div>
-          <h1 class="hero-title">Visão Geral<br>do Painel</h1>
-          <p class="hero-sub">Acompanhe o progresso dos seus projetos em tempo real.</p>
+          <h1 class="hero-title" style="margin-top: 4px;">Visão Geral<br>do Painel</h1>
+          <p class="hero-sub" style="margin-top: 8px;">Acompanhe o progresso dos seus projetos em tempo real.</p>
         </div>
 
         <div class="donut-wrap" id="donutWrap">
@@ -388,7 +640,7 @@
           </svg>
           <div class="donut-center">
             <div class="d-num" id="totalCount">0</div>
-            <div class="d-lbl">Total</div>
+            <div class="d-lbl">TOTAL</div>
           </div>
           <!-- Tooltip flutuante de alta performance e riqueza visual -->
           <div id="donut-tooltip" style="
@@ -415,7 +667,7 @@
             <div class="bs-left">
               <div class="bs-bar" style="background:var(--am-anda);box-shadow:0 0 10px rgba(245,158,11,0.4);"></div>
               <div>
-                <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Em andamento</div>
+                <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">EM ANDAMENTO</div>
                 <div class="bs-name">Projetos ativos</div>
               </div>
             </div>
@@ -425,7 +677,7 @@
             <div class="bs-left">
               <div class="bs-bar" style="background:var(--gr-conclu);box-shadow:0 0 10px rgba(16,185,129,0.3);"></div>
               <div>
-                <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Concluído</div>
+                <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">CONCLUÍDO</div>
                 <div class="bs-name">Finalizados</div>
               </div>
             </div>
@@ -435,7 +687,7 @@
             <div class="bs-left">
               <div class="bs-bar" style="background:var(--rd);box-shadow:0 0 10px rgba(255,85,119,0.3);"></div>
               <div>
-                <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Pausado</div>
+                <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">PAUSADO</div>
                 <div class="bs-name">Parados</div>
               </div>
             </div>
@@ -444,13 +696,75 @@
         </div>
       </div>
 
-      <!-- Atalho para Projetos -->
-      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-        <a href="{{ url_for('cliente_projetos') }}" class="btn btn-blue" style="padding: 12px 28px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
-          Ir para Meus Projetos <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-        </a>
+      <!-- Bento Grid de Estatísticas (Stats Row) -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px;">
+        <!-- Card 1: Projetos Contratados -->
+        <div class="stat-card">
+          <div class="icon-glow-blue">
+            <i data-lucide="folder" style="width: 24px; height: 24px;"></i>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            <div style="font-size: 10px; font-weight: 700; color: var(--client-text-muted); text-transform: uppercase; letter-spacing: 1.2px;">PROJETOS CONTRATADOS</div>
+            <div style="font-size: 40px; font-weight: 800; color: var(--client-text-primary); line-height: 1; margin: 4px 0;">{{ total }}</div>
+            <div style="font-size: 12.5px; color: var(--client-text-secondary); font-weight: 500;">Projetos contratados</div>
+            
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.12); width: fit-content; margin-top: 12px; font-size: 11px; font-weight: 600; color: #3B82F6;">
+              <span style="width: 6px; height: 2px; background: #3B82F6; border-radius: 1px;"></span>
+              este mês
+            </div>
+          </div>
+        </div>
+        
+        <!-- Card 2: Projetos Em Andamento -->
+        <div class="stat-card yellow-hover">
+          <div class="icon-glow-yellow">
+            <i data-lucide="clock" style="width: 24px; height: 24px;"></i>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            <div style="font-size: 10px; font-weight: 700; color: var(--client-text-muted); text-transform: uppercase; letter-spacing: 1.2px;">PROJETOS EM ANDAMENTO</div>
+            <div style="font-size: 40px; font-weight: 800; color: var(--client-text-primary); line-height: 1; margin: 4px 0;">{{ ativos }}</div>
+            <div style="font-size: 12.5px; color: var(--client-text-secondary); font-weight: 500;">Projetos em andamento</div>
+            
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.12); width: fit-content; margin-top: 12px; font-size: 11px; font-weight: 600; color: #F59E0B;">
+              <span style="width: 6px; height: 2px; background: #F59E0B; border-radius: 1px;"></span>
+              este mês
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Projetos Concluídos -->
+        <div class="stat-card green-hover">
+          <div class="icon-glow-green">
+            <i data-lucide="check-circle-2" style="width: 24px; height: 24px;"></i>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            <div style="font-size: 10px; font-weight: 700; color: var(--client-text-muted); text-transform: uppercase; letter-spacing: 1.2px;">PROJETOS CONCLUÍDOS</div>
+            <div style="font-size: 40px; font-weight: 800; color: var(--client-text-primary); line-height: 1; margin: 4px 0;">{{ concluidos }}</div>
+            <div style="font-size: 12.5px; color: var(--client-text-secondary); font-weight: 500;">Projetos concluídos</div>
+            
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.12); width: fit-content; margin-top: 12px; font-size: 11px; font-weight: 600; color: #10B981;">
+              <span style="width: 6px; height: 2px; background: #10B981; border-radius: 1px;"></span>
+              este mês
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- Atalho para Projetos (Link Card) -->
+      <a href="{{ url_for('cliente_projetos') }}" class="bottom-link-card">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.3); color: #3B82F6;">
+            <i data-lucide="folder-open" style="width: 22px; height: 22px;"></i>
+          </div>
+          <div>
+            <div style="font-size: 16px; font-weight: 700; color: var(--client-text-primary); margin-bottom: 2px;">Ir para Meus Projetos</div>
+            <div style="font-size: 13px; color: var(--client-text-secondary);">Visualize todos os seus projetos e detalhes</div>
+          </div>
+        </div>
+        <div class="arrow-circle" style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #3B82F6; color: #fff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); transition: all 0.3s ease;">
+          <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+        </div>
+      </a>
     </main>
   </div>
 </div>

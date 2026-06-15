@@ -106,7 +106,7 @@ def process_analysis(files):
 def analyze():
     data = request.get_json(silent=True) or {}
     repo_url = data.get("repo", "")
-    github_token = data.get("github_token", "") or Config.GITHUB_TOKEN
+    github_token = data.get("github_token", "")
 
     if not repo_url:
         return jsonify({"error": "repo URL is required"}), 400

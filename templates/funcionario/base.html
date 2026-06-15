@@ -49,16 +49,19 @@
         <span>Meus Projetos</span>
       </a>
 
-      <a href="{{ url_for('funcionario.equipe') }}" class="nav-item {% if active_page == 'equipe' %}active{% endif %}">
-        <i data-lucide="users-2"></i>
-        <span>Minha Equipe</span>
-      </a>
-      
       <a href="{{ url_for('funcionario.configuracoes') }}" class="nav-item {% if active_page == 'configuracoes' %}active{% endif %}">
         <i data-lucide="settings"></i>
         <span>Configurações</span>
       </a>
+
+      <div class="nav-label" style="margin-top: 8px;">Ferramentas</div>
+
+      <a href="{{ url_for('funcionario.codeflow_dashboard') }}" class="nav-item {% if active_page == 'codeflow' %}active{% endif %}">
+        <i data-lucide="git-branch"></i>
+        <span>CodeFlow</span>
+      </a>
     </nav>
+  </nav>
 
     <div class="sidebar-footer">
       <div class="user-chip">

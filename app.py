@@ -31,7 +31,7 @@ _api_codeflow_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'a
 # Imports internos do projeto
 # ---------------------------------------------------------------------------
 from database import database
-from models import User, Client, Project, Log, Document, Diagram, Gallery, Comment
+from models import User, Client, Project, Log, Document, Diagram, Gallery, Comment, Employee, Requirement
 
 import function.login as logar
 import function.adicionar_na_tabela as adicionar_na_tabela
@@ -215,6 +215,41 @@ def cliente_projeto_detalhe(projeto_id):
                            documentos=documentos, diagramas=diagramas, galeria=galeria, comentarios=comentarios)
 
 # ---------------------------------------------------------------------------
+# Cliente aprova/rejeita requisito
+# ---------------------------------------------------------------------------
+@app.route('/cliente-dashboard/projeto/<int:projeto_id>/requisito/<int:requisito_id>/<action>', methods=['POST'])
+@login_required
+def cliente_aprovar_requisito(projeto_id, requisito_id, action):
+    if action not in ('aprovar', 'rejeitar'):
+        abort(400)
+    cliente = Client.query.filter_by(fk_user=current_user.pk_id_user).first()
+    if not cliente:
+        abort(403)
+    projeto = Project.query.get_or_404(projeto_id)
+    if projeto.fk_client != cliente.pk_id_client:
+        abort(403)
+    requisito = Requirement.query.get_or_404(requisito_id)
+    if requisito.fk_project != projeto_id:
+        abort(403)
+    novo_status = 'approved' if action == 'aprovar' else 'rejected'
+    requisito.approval_requirement = novo_status
+    if action == 'aprovar':
+        requisito.status_requirement = 'Aprovado'
+    else:
+        requisito.status_requirement = 'Recusado'
+    database.session.commit()
+    acao_str = 'aprovou' if action == 'aprovar' else 'rejeitou'
+    log = Log(
+        fk_user=current_user.pk_id_user,
+        fk_project=projeto_id,
+        description_log=f"Cliente {acao_str} o requisito: {requisito.name_requirement}",
+        type_log='requisito',
+    )
+    database.session.add(log)
+    database.session.commit()
+    return redirect(url_for('cliente_projeto_detalhe', projeto_id=projeto_id))
+
+# ---------------------------------------------------------------------------
 # Envio de feedback do cliente sobre um projeto
 # ---------------------------------------------------------------------------
 @app.route('/cliente-dashboard/projeto/<int:projeto_id>/feedback', methods=['POST'])
@@ -329,10 +364,28 @@ for subdir in ('documentos', 'diagramas', 'galeria'):
 # ---------------------------------------------------------------------------
 # Upload de documento (PDF/DOCX)
 # ---------------------------------------------------------------------------
+def _resolve_equipe(projeto):
+    if current_user.type_user == 'employee':
+        func = Employee.query.filter_by(fk_user=current_user.pk_id_user).first()
+        if func:
+            func_team_ids = [t.pk_id_team for t in func.teams]
+            proj_team_ids = [t.pk_id_team for t in projeto.teams]
+            common = [tid for tid in func_team_ids if tid in proj_team_ids]
+            if common:
+                return common[0]
+    elif current_user.type_user == 'admin':
+        proj_team_ids = [t.pk_id_team for t in projeto.teams]
+        if proj_team_ids:
+            return proj_team_ids[0]
+    return None
+
 @app.route('/projeto/<int:projeto_id>/upload-documento', methods=['POST'])
 @login_required
 def upload_documento(projeto_id):
     projeto = Project.query.get_or_404(projeto_id)
+    
+    equipe_id = _resolve_equipe(projeto)
+    
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
     file = request.files['file']
@@ -355,7 +408,8 @@ def upload_documento(projeto_id):
         fk_project=projeto_id,
         name_document=filename,
         path_document=f"uploads/documentos/{unique_filename}",
-        type_document=ext
+        type_document=ext,
+        fk_team=equipe_id
     )
     database.session.add(doc)
     
@@ -363,7 +417,8 @@ def upload_documento(projeto_id):
         type_log='documento',
         description_log=f"Documento '{filename}' enviado por {current_user.name_user}.",
         fk_project=projeto_id,
-        fk_user=current_user.pk_id_user
+        fk_user=current_user.pk_id_user,
+        fk_team=equipe_id
     )
     database.session.add(log_entry)
     database.session.commit()
@@ -389,7 +444,8 @@ def delete_documento(doc_id):
         type_log='documento',
         description_log=f"Documento '{doc.name_document}' excluído por {current_user.name_user}.",
         fk_project=projeto_id,
-        fk_user=current_user.pk_id_user
+        fk_user=current_user.pk_id_user,
+        fk_team=doc.fk_team
     )
     database.session.add(log_entry)
     database.session.delete(doc)
@@ -409,6 +465,9 @@ def delete_documento(doc_id):
 @login_required
 def upload_diagrama(projeto_id):
     projeto = Project.query.get_or_404(projeto_id)
+    
+    equipe_id = _resolve_equipe(projeto)
+    
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
     file = request.files['file']
@@ -430,7 +489,8 @@ def upload_diagrama(projeto_id):
     diag = Diagram(
         fk_project=projeto_id,
         name_diagram=filename,
-        path_diagram=f"uploads/diagramas/{unique_filename}"
+        path_diagram=f"uploads/diagramas/{unique_filename}",
+        fk_team=equipe_id
     )
     database.session.add(diag)
     
@@ -438,7 +498,8 @@ def upload_diagrama(projeto_id):
         type_log='diagrama',
         description_log=f"Diagrama '{filename}' enviado por {current_user.name_user}.",
         fk_project=projeto_id,
-        fk_user=current_user.pk_id_user
+        fk_user=current_user.pk_id_user,
+        fk_team=equipe_id
     )
     database.session.add(log_entry)
     database.session.commit()
@@ -464,7 +525,8 @@ def delete_diagrama(diag_id):
         type_log='diagrama',
         description_log=f"Diagrama '{diag.name_diagram}' excluído por {current_user.name_user}.",
         fk_project=projeto_id,
-        fk_user=current_user.pk_id_user
+        fk_user=current_user.pk_id_user,
+        fk_team=diag.fk_team
     )
     database.session.add(log_entry)
     database.session.delete(diag)
@@ -484,6 +546,9 @@ def delete_diagrama(diag_id):
 @login_required
 def upload_galeria(projeto_id):
     projeto = Project.query.get_or_404(projeto_id)
+    
+    equipe_id = _resolve_equipe(projeto)
+    
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
     file = request.files['file']
@@ -504,7 +569,8 @@ def upload_galeria(projeto_id):
     
     gal = Gallery(
         fk_project=projeto_id,
-        path_gallery=f"uploads/galeria/{unique_filename}"
+        path_gallery=f"uploads/galeria/{unique_filename}",
+        fk_team=equipe_id
     )
     database.session.add(gal)
     
@@ -512,7 +578,8 @@ def upload_galeria(projeto_id):
         type_log='galeria',
         description_log=f"Imagem '{filename}' enviada para a galeria por {current_user.name_user}.",
         fk_project=projeto_id,
-        fk_user=current_user.pk_id_user
+        fk_user=current_user.pk_id_user,
+        fk_team=equipe_id
     )
     database.session.add(log_entry)
     database.session.commit()
@@ -538,7 +605,8 @@ def delete_galeria(item_id):
         type_log='galeria',
         description_log=f"Imagem removida da galeria por {current_user.name_user}.",
         fk_project=projeto_id,
-        fk_user=current_user.pk_id_user
+        fk_user=current_user.pk_id_user,
+        fk_team=gal.fk_team
     )
     database.session.add(log_entry)
     database.session.delete(gal)

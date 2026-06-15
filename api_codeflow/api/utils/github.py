@@ -17,7 +17,7 @@ def parse_repo_url(url):
 
 def api_headers(token=None):
     h = {"Accept": "application/vnd.github.v3+json"}
-    t = token or Config.GITHUB_TOKEN
+    t = token
     if t:
         h["Authorization"] = f"Bearer {t}"
     return h

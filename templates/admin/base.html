@@ -17,6 +17,7 @@
         localStorage.setItem('cobyte-theme', 'dark');
       }
 
+      if (localStorage.getItem('cobyte-sidebar-collapsed') === 'true') { document.documentElement.classList.add('sidebar-preload-collapsed'); }
       if (savedTheme === 'light') {
         document.documentElement.classList.add('light-mode');
         document.body.classList.add('light-mode');
@@ -420,7 +421,8 @@
     const savedTheme = localStorage.getItem('cobyte-theme');
     const sunIcon = document.querySelector('.theme-icon-sun');
     const moonIcon = document.querySelector('.theme-icon-moon');
-    if (savedTheme === 'light') {
+    if (localStorage.getItem('cobyte-sidebar-collapsed') === 'true') { document.documentElement.classList.add('sidebar-preload-collapsed'); }
+      if (savedTheme === 'light') {
       if (sunIcon) sunIcon.style.display = 'none';
       if (moonIcon) moonIcon.style.display = 'block';
     }

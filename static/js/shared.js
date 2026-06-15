@@ -116,6 +116,9 @@ function loadAppTheme() {
 document.addEventListener('DOMContentLoaded', () => {
   loadAppTheme();
   initSidebarToggle();
+  setTimeout(() => {
+    document.documentElement.classList.remove('sidebar-preload-collapsed');
+  }, 50);
 });
 
 // ── Sidebar Collapse Toggle ────────────────────────────────

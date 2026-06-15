@@ -2,173 +2,255 @@
 {% set active_page = 'configuracoes' %}
 
 {% block title %}Configurações — CoByte{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/configuracoes.css') }}">
+<style>
+  .topbar {
+    display: none !important;
+  }
+</style>
+{% endblock %}
+
 {% block topbar_title %}Configurações{% endblock %}
 
 {% block content %}
-<!-- Flash messages are now handled globally in base.html via JS toasts -->
-<div class="settings-grid" style="display: grid; grid-template-columns: 300px 1fr; gap: 32px; max-width: 1200px; margin: 0 auto;">
-    <!-- Sidebar Navigation -->
-    <div class="settings-nav">
-        <div class="card" style="padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;">
-            <div class="s-nav-item active" id="tab-perfil" onclick="switchTab('perfil')">
-                <i data-lucide="user"></i>
-                <span>Perfil</span>
-            </div>
-            <div class="s-nav-item" id="tab-seguranca" onclick="switchTab('seguranca')">
-                <i data-lucide="lock"></i>
-                <span>Segurança</span>
-            </div>
-            <div class="s-nav-item" id="tab-integracoes" onclick="switchTab('integracoes')">
-                <i data-lucide="puzzle"></i>
-                <span>Integrações</span>
-            </div>
-        </div>
-    </div>
 
-    <!-- Content Panel -->
-    <div class="settings-content">
-        <div class="card" style="padding: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; min-height: 400px;">
-            
-            <!-- Painel Meu Perfil (Excluída a parte de cima com foto e avatar) -->
-            <div id="panel-perfil" class="panel-section">
-                <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 24px; color: var(--text-primary);">Meu Perfil</h3>
-                
-                <form style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="form-group">
-                        <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Nome Completo</label>
-                        <input type="text" value="{{ current_user.name_user }}" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: inherit;" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">E-mail</label>
-                        <input type="email" value="{{ current_user.email_user }}" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: inherit;" readonly>
-                    </div>
-                    <div style="grid-column: 1 / -1; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
-                        <p style="font-size: 12px; color: var(--text-muted); font-style: italic; line-height: 1.5; display: flex; align-items: center; gap: 6px;">
-                            <i data-lucide="info" style="width: 14px;"></i>
-                            As informações cadastrais de perfil são gerenciadas exclusivamente pelo administrador do sistema.
-                        </p>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Painel Segurança (Troca de senha igual ao Admin) -->
-            <div id="panel-seguranca" class="panel-section" style="display: none;">
-                <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">Segurança</h3>
-                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Gerencie a segurança da sua conta e altere sua senha</p>
-                
-                <form action="{{ url_for('funcionario.salvar_senha') }}" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="form-group">
-                        <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Senha Atual</label>
-                        <input type="password" name="senha_atual" placeholder="Sua senha atual" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: inherit;" required>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="form-group">
-                            <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Nova Senha</label>
-                            <input type="password" name="nova_senha" placeholder="Mínimo 6 caracteres" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: inherit;" required minlength="6">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Confirmar Nova Senha</label>
-                            <input type="password" name="confirmar_senha" placeholder="Repita a nova senha" class="form-control" style="width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: inherit;" required minlength="6">
-                        </div>
-                    </div>
-                    
-                    <div style="text-align: right; margin-top: 24px;">
-                        <button type="submit" class="btn btn-primary" style="font-weight: 600; padding: 10px 20px;">Atualizar Senha</button>
-                    </div>
-                </form>
-            </div>
-
-            </div>
-
-            <!-- Painel Integracoes (GitHub) -->
-            <div id="panel-integracoes" class="panel-section" style="display: none;">
-                <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">Integrações</h3>
-                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Conecte sua conta a serviços externos</p>
-
-                <div style="background: var(--surface-2); border-radius: 12px; padding: 24px; border: 1px solid var(--border);">
-                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--tx2);">
-                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-                        </svg>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; font-size: 15px;">GitHub</div>
-                            <div style="font-size: 12px; color: var(--text-muted);">Token de acesso pessoal para o CodeFlow</div>
-                        </div>
-                    </div>
-                    <form action="{{ url_for('funcionario.salvar_github_key') }}" method="POST" style="display: flex; flex-direction: column; gap: 12px;">
-                        <input type="password" name="github_key" placeholder="Cole seu GitHub Personal Access Token" class="form-control" style="width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; font-family: 'JetBrains Mono', monospace; font-size: 13px;" value="{% if current_user.github_key_user %}********{% endif %}">
-                        <div style="display: flex; justify-content: flex-end;">
-                            <button type="submit" class="btn btn-primary" style="font-weight: 600; padding: 10px 20px;">Salvar Token</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-        </div>
+<!-- Page Header -->
+<div class="settings-header fade-up">
+  <h1>Configurações</h1>
+  <p>Gerencie sua conta, preferências e integrações</p>
 </div>
 
-<style>
-    .s-nav-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        border-radius: 8px;
-        color: var(--text-muted);
-        cursor: pointer;
-        transition: all 0.2s;
-        font-weight: 500;
-        font-size: 14px;
-        margin-bottom: 4px;
-    }
-    .s-nav-item:last-child {
-        margin-bottom: 0;
-    }
-    .s-nav-item:hover {
-        background: var(--surface-2);
-        color: var(--text-primary);
-    }
-    .s-nav-item.active {
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-weight: 600;
-    }
-    .s-nav-item i {
-        width: 18px;
-        height: 18px;
-    }
-</style>
+<!-- Cards Grid -->
+<div class="settings-cards-grid">
+
+  <!-- Card: Meu Perfil -->
+  <div class="settings-card fade-up fade-up-1" data-section="perfil" onclick="openSection('perfil')">
+    <div class="settings-card-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    </div>
+    <div>
+      <div class="settings-card-title">Meu Perfil</div>
+      <div class="settings-card-desc">Visualize suas informações pessoais de cadastro</div>
+    </div>
+    <div class="settings-card-arrow">
+      <span>Visualizar</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Card: Segurança -->
+  <div class="settings-card fade-up fade-up-2" data-section="seguranca" onclick="openSection('seguranca')">
+    <div class="settings-card-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <div>
+      <div class="settings-card-title">Segurança</div>
+      <div class="settings-card-desc">Altere sua senha e gerencie a segurança da sua conta</div>
+    </div>
+    <div class="settings-card-arrow">
+      <span>Proteger</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Card: Integrações -->
+  <div class="settings-card fade-up fade-up-3" data-section="integracoes" onclick="openSection('integracoes')">
+    <div class="settings-card-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+      </svg>
+    </div>
+    <div>
+      <div class="settings-card-title">Integrações</div>
+      <div class="settings-card-desc">Conecte ferramentas e apps externos ao seu workspace</div>
+    </div>
+    <div class="settings-card-arrow">
+      <span>Conectar</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+      </svg>
+    </div>
+  </div>
+
+</div>
+
+<!-- Detail Panel Backdrop -->
+<div class="settings-detail-backdrop" id="settings-backdrop" onclick="closeSection()"></div>
+
+<!-- Detail Slide Panel -->
+<div class="settings-detail-panel" id="settings-detail-panel">
+
+  <!-- Panel Header -->
+  <div class="detail-panel-header">
+    <button class="detail-panel-back" onclick="closeSection()" title="Voltar">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+    </button>
+    <div class="detail-panel-title-group">
+      <div class="detail-panel-title" id="detail-title"></div>
+      <div class="detail-panel-subtitle" id="detail-subtitle"></div>
+    </div>
+  </div>
+
+  <!-- Panel Body -->
+  <div class="detail-panel-body" id="detail-body">
+
+    <!-- Painel Perfil -->
+    <div id="panel-perfil" class="panel-section" style="display:none;">
+      <div class="settings-section">
+        <div class="settings-section-title">Informações Pessoais</div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-group">
+              <label class="form-label">Nome</label>
+              <input class="form-input" type="text" value="{{ current_user.name_user if current_user.is_authenticated else '' }}" disabled style="opacity:0.6;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cargo</label>
+              <input class="form-input" type="text" value="{{ 'Administrador' if current_user.type_user == 'admin' else 'Funcionário' }}" disabled style="opacity:0.6;">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input class="form-input" type="email" value="{{ current_user.email_user if current_user.is_authenticated else '' }}" disabled style="opacity:0.6;">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+          <p style="font-size:12px;color:var(--text-muted);font-style:italic;display:flex;align-items:center;gap:6px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            As informações cadastrais são gerenciadas exclusivamente pelo administrador.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Painel Segurança -->
+    <div id="panel-seguranca" class="panel-section" style="display:none;">
+      <form action="{{ url_for('funcionario.salvar_senha') }}" method="POST" class="settings-section">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="settings-section-title" style="margin-bottom: 20px;">Alterar Senha</div>
+        
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="form-group">
+            <label class="form-label">Senha Atual</label>
+            <input class="form-input" type="password" name="senha_atual" placeholder="Sua senha atual" required>
+          </div>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-group">
+              <label class="form-label">Nova Senha</label>
+              <input class="form-input" type="password" name="nova_senha" placeholder="Mínimo 6 caracteres" required minlength="6">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Confirmar Nova Senha</label>
+              <input class="form-input" type="password" name="confirmar_senha" placeholder="Repita a nova senha" required minlength="6">
+            </div>
+          </div>
+        </div>
+        
+        <div style="display:flex;justify-content:flex-end;margin-top:24px;">
+          <button class="btn btn-primary" type="submit">Atualizar Senha</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Painel Integrações -->
+    <div id="panel-integracoes" class="panel-section" style="display:none;">
+      <div class="settings-section">
+        <div style="margin-bottom:24px;">
+          <div class="settings-section-title" style="margin-bottom:16px;">GitHub — CodeFlow</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tx2);flex-shrink:0;">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+            </svg>
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:14px;">Token de Acesso Pessoal</div>
+              <div style="font-size:12px;color:var(--text-muted);">Usado pelo CodeFlow para acessar repositórios</div>
+            </div>
+          </div>
+          <form action="{{ url_for('funcionario.salvar_github_key') }}" method="POST" style="display:flex;flex-direction:column;gap:12px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="password" name="github_key" placeholder="Cole seu GitHub Personal Access Token" class="form-input" value="{% if current_user.github_key_user %}********{% endif %}">
+            <div style="display:flex;justify-content:flex-end;">
+              <button type="submit" class="btn btn-primary">Salvar Token</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  function switchTab(tabId) {
-    // Esconder todas as seções e remover ativa das abas
-    document.querySelectorAll('.panel-section').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.s-nav-item').forEach(el => el.classList.remove('active'));
-    
-    // Mostrar a seção selecionada e marcar a aba como ativa
-    const targetPanel = document.getElementById('panel-' + tabId);
-    const targetTab = document.getElementById('tab-' + tabId);
-    
-    if (targetPanel && targetTab) {
-        targetPanel.style.display = 'block';
-        targetTab.classList.add('active');
+  const sectionMeta = {
+    perfil: {
+      title: 'Meu Perfil',
+      subtitle: 'Visualize suas informações pessoais'
+    },
+    seguranca: {
+      title: 'Segurança',
+      subtitle: 'Proteja sua conta e altere sua senha'
+    },
+    integracoes: {
+      title: 'Integrações',
+      subtitle: 'Conecte ferramentas ao seu workspace'
     }
-    
-    // Salvar o estado da aba ativa no hash da URL
-    window.location.hash = tabId;
+  };
+
+  function openSection(sectionId) {
+    const meta = sectionMeta[sectionId];
+    if (!meta) return;
+
+    document.getElementById('detail-title').textContent = meta.title;
+    document.getElementById('detail-subtitle').textContent = meta.subtitle;
+
+    document.querySelectorAll('.panel-section').forEach(el => el.style.display = 'none');
+    const panel = document.getElementById('panel-' + sectionId);
+    if (panel) panel.style.display = 'block';
+
+    document.getElementById('settings-backdrop').classList.add('open');
+    document.getElementById('settings-detail-panel').classList.add('open');
+
+    document.body.style.overflow = 'hidden';
+
+    window.location.hash = sectionId;
   }
 
+  function closeSection() {
+    document.getElementById('settings-backdrop').classList.remove('open');
+    document.getElementById('settings-detail-panel').classList.remove('open');
+    document.body.style.overflow = '';
+
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSection();
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
-    lucide.createIcons();
-    
-    // Restaurar a aba ativa pelo hash da URL se houver
     const hash = window.location.hash.substring(1);
-    if (hash && document.getElementById('tab-' + hash)) {
-      switchTab(hash);
+    if (hash && sectionMeta[hash]) {
+      setTimeout(() => openSection(hash), 300);
     }
   });
 </script>

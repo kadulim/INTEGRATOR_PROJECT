@@ -33,11 +33,25 @@
 <div class="card" style="margin-bottom: 24px;">
     <div class="card-body" style="padding: 32px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">{{ projeto.name_project }}</h2>
-            <div style="display: flex; gap: 12px; align-items: center;">
+            <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 8px;">
+                Projeto: {{ projeto.name_project }}
+                {% if equipe_atual %}
+                {% set eq_atual = equipes_disponiveis | selectattr('pk_id_team', 'equalto', equipe_atual) | first %}
+                <span style="font-size: 16px; font-weight: 600; color: var(--ac);">| Equipe: {{ eq_atual.name_team if eq_atual else '' }}</span>
+                {% endif %}
+            </h2>
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                 {% set badge_status = {'Em andamento': 'badge-em-andamento', 'Concluído': 'badge-concluido', 'Pausado': 'badge-pausado', 'Cancelado': 'badge-cancelado'} %}
                 <span class="badge {{ badge_status.get(projeto.status_project, 'badge-gray') }}">{{ projeto.status_project }}</span>
                 <span style="font-size: 13px; color: var(--text-muted);">Prazo: <strong>{{ projeto.end_date_project }}</strong></span>
+                {% if equipes_disponiveis and equipes_disponiveis|length > 1 %}
+                <span style="font-size: 12px; color: var(--tx2); font-weight: 600; letter-spacing: 0.5px;">Equipe:</span>
+                <select onchange="location.href=this.value" style="background: var(--s2); border: 2px solid var(--ac); color: var(--tx); padding: 8px 32px 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; outline: none; cursor: pointer; appearance: auto; -webkit-appearance: auto;">
+                    {% for eq in equipes_disponiveis %}
+                    <option value="{{ url_for('funcionario.projeto_detalhe', projeto_id=projeto.pk_id_project, equipe=eq.pk_id_team) }}" {% if equipe_atual == eq.pk_id_team %}selected{% endif %}>{{ eq.name_team }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
             </div>
         </div>
         <a href="{{ url_for('funcionario.projetos') }}" class="btn btn-ghost" style="border: 1px solid var(--border);">Voltar</a>
@@ -51,6 +65,7 @@
     <button class="proj-tab" onclick="switchTab('documentacao', this)">Documentação</button>
     <button class="proj-tab" onclick="switchTab('diagramas', this)">Diagramas</button>
     <button class="proj-tab" onclick="switchTab('galeria', this)">Galeria</button>
+    <button class="proj-tab" onclick="switchTab('atividade', this)">Registros</button>
     <button class="proj-tab" onclick="switchTab('comentarios', this)">Comentários</button>
 </div>
 
@@ -87,6 +102,15 @@
                     <div class="req-item-mini" style="padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px;">
                         <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">{{ r.name_requirement }}</div>
                         <div style="font-size: 12px; color: var(--text-muted);">{{ r.description_requirement }}</div>
+                        <div style="margin-top: 8px;">
+                            {% if r.approval_requirement == 'approved' %}
+                            <span style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #10b981;">Aprovado pelo Cliente</span>
+                            {% elif r.approval_requirement == 'rejected' %}
+                            <span style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(255, 85, 119, 0.15); color: #FF5577;">Rejeitado pelo Cliente</span>
+                            {% else %}
+                            <span style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(107, 114, 128, 0.15); color: #6b7280;">Aguardando Aprovacao</span>
+                            {% endif %}
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
@@ -98,6 +122,15 @@
                     <div class="req-item-mini" style="padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px;">
                         <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">{{ r.name_requirement }}</div>
                         <div style="font-size: 12px; color: var(--text-muted);">{{ r.description_requirement }}</div>
+                        <div style="margin-top: 8px;">
+                            {% if r.approval_requirement == 'approved' %}
+                            <span style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #10b981;">Aprovado pelo Cliente</span>
+                            {% elif r.approval_requirement == 'rejected' %}
+                            <span style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(255, 85, 119, 0.15); color: #FF5577;">Rejeitado pelo Cliente</span>
+                            {% else %}
+                            <span style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(107, 114, 128, 0.15); color: #6b7280;">Aguardando Aprovacao</span>
+                            {% endif %}
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
@@ -133,7 +166,7 @@
                 <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
                     <i data-lucide="upload" style="width:16px;"></i>
                     Enviar Documento
-                    <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.id }}/upload-documento')">
+                    <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.pk_id_project }}/upload-documento')">
                 </label>
             </div>
         </div>
@@ -198,7 +231,7 @@
                 <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
                     <i data-lucide="upload" style="width:16px;"></i>
                     Enviar Diagrama
-                    <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.id }}/upload-diagrama')">
+                    <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.pk_id_project }}/upload-diagrama')">
                 </label>
             </div>
         </div>
@@ -224,7 +257,7 @@
                 <div class="diagram-info">
                     <div>
                         <div class="diagram-name">{{ diag.name_diagram }}</div>
-                        <div class="diagram-type">Upload em {{ diag.upload_date_diagram.strftime('%d/%m/%Y') }}</div>
+                        <div class="diagram-type">{{ diag.type_diagram or 'Diagrama' }}</div>
                     </div>
                     <a href="/static/{{ diag.path_diagram }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                         <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
@@ -255,7 +288,7 @@
                 <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
                     <i data-lucide="upload" style="width:16px;"></i>
                     Enviar Imagem
-                    <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.id }}/upload-galeria')">
+                    <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.pk_id_project }}/upload-galeria')">
                 </label>
             </div>
         </div>
@@ -297,6 +330,33 @@
             </div>
             <h4 style="margin-bottom:6px;">Nenhuma Imagem</h4>
             <p style="color:var(--text-muted); font-size:13px; max-width:320px; margin:0 auto 16px;">Faça upload de mockups de telas ou capturas de progresso do sistema.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Aba Atividade -->
+    <div id="tab-atividade" class="tab-pane">
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">Registros</h3>
+        {% if logs_projeto %}
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            {% for log in logs_projeto %}
+            <div style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px;">
+                <div style="width: 32px; height: 32px; background: var(--accent-soft); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--accent); flex-shrink: 0; font-size: 14px;">•</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 600; font-size: 13px;">Tipo {{ log.type_log }}</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">{{ log.description_log }}</div>
+                    <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">{{ log.date_log.strftime('%d/%m/%Y %H:%M') }} · {{ log.user.name_user if log.user else 'Sistema' }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:60px 40px; background:rgba(255,255,255,0.01); border-radius:16px; border:1px dashed var(--border);">
+            <div style="width:56px; height:56px; background:rgba(59, 130, 246, 0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--blue);">
+                <i data-lucide="activity" style="width:24px; height:24px;"></i>
+            </div>
+            <h4 style="margin-bottom:6px;">Nenhum Registro</h4>
+            <p style="color:var(--text-muted); font-size:13px;">Nenhum registro de atividade neste projeto.</p>
         </div>
         {% endif %}
     </div>
@@ -423,8 +483,8 @@
                     <div style="position: relative;">
                         <select name="tipo" required 
                                 style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 14px 18px; border-radius: 12px; font-size: 15px; outline: none; appearance: none; cursor: pointer; transition: 0.2s;">
-                            <option value="Funcional">🚀 Requisito Funcional</option>
-                            <option value="Não-Funcional">⚙️ Requisito Não Funcional</option>
+<option value="Funcional">Requisito Funcional</option>
+<option value="Não-Funcional">Requisito Não Funcional</option>
                         </select>
                         <i data-lucide="chevron-down" style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 16px; color: var(--text-muted); pointer-events: none;"></i>
                     </div>

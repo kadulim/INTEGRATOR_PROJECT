@@ -150,6 +150,75 @@
       border: 1px solid rgba(0, 0, 0, 0.06);
       color: rgba(0, 0, 0, 0.6);
     }
+
+    html, body {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      overflow: hidden;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    html::-webkit-scrollbar, body::-webkit-scrollbar {
+      display: none;
+    }
+    .app-shell {
+      height: 100vh;
+      overflow: hidden;
+    }
+    .main-content {
+      height: 100vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .main-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    :root {
+      --welcome-bg: rgba(30, 41, 59, 0.25);
+      --welcome-border: rgba(255, 255, 255, 0.05);
+      --welcome-text: #ffffff;
+      --welcome-subtext: rgba(255, 255, 255, 0.45);
+    }
+    .light-mode {
+      --welcome-bg: #f1f5f9;
+      --welcome-border: rgba(0, 0, 0, 0.06);
+      --welcome-text: #0F172A;
+      --welcome-subtext: #64748b;
+    }
+
+    /* Mobile Topbar Base Style */
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--brand);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .light-mode .mobile-topbar {
+      background: #ffffff;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    @media (max-width: 768px) {
+      .mobile-topbar {
+        display: flex !important;
+      }
+      .page-content {
+        padding: 24px 16px 100px !important;
+      }
+      .client-proj-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -163,12 +232,22 @@
         <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
       </span>
     </div>
+
+    <!-- User Welcome Card -->
+    <div class="user-welcome-card" style="background: var(--welcome-bg); border: 1px solid var(--welcome-border); border-radius: 12px; padding: 16px; margin: 16px 12px; margin-bottom: 24px;">
+      <div style="font-size: 15px; font-weight: 700; color: var(--welcome-text); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+        Olá, {{ current_user.name_user.split(' ')[0] }}! 
+      </div>
+      <div style="font-size: 12px; color: var(--welcome-subtext); line-height: 1.5;">
+        Bem-vindo de volta ao Portal do Cliente CoByte.
+      </div>
+    </div>
     
     <nav class="sidebar-nav">
       <div class="nav-label">Menu</div>
       
       <a href="{{ url_for('cliente_dashboard') }}" class="nav-item">
-        <i data-lucide="layout-dashboard"></i>
+        <i data-lucide="layout-grid"></i>
         <span>Meu Painel</span>
       </a>
       
@@ -194,7 +273,22 @@
 
   <!-- Conteúdo Principal -->
   <div class="main-content">
-    <main class="page-content fade-up" style="max-width: 1200px; margin: 0 auto; padding: 40px 32px 64px; width: 100%;">
+    
+    <!-- Mobile Topbar -->
+    <div class="mobile-topbar">
+      <button id="mobileMenuBtn" style="background: none; border: none; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; padding: 4px;">
+        <i data-lucide="menu" style="width: 24px; height: 24px;"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 32px; width: auto; object-fit: contain;">
+        <span style="font-size: 20px; font-weight: 800; letter-spacing: -1px; font-family: 'Outfit', sans-serif; line-height: 1;">
+          <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
+        </span>
+      </div>
+      <div style="width: 24px;"></div> <!-- Spacer to center the logo -->
+    </div>
+
+    <main class="page-content fade-up" style="padding: 40px 32px 64px; width: 100%;">
       
       <!-- Topbar Custom -->
       <div style="margin-bottom: 32px;">

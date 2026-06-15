@@ -15,7 +15,7 @@
             <div class="projects-list-table">
                 {% for p in projetos %}
                 {% set equipes_projeto = projeto_equipes_map.get(p.pk_id_project, []) %}
-                <div class="p-row" style="display: grid; grid-template-columns: 1fr 180px 180px 120px; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); transition: 0.2s; cursor: pointer;" onclick="window.location.href='{{ url_for('funcionario.projeto_detalhe', projeto_id=p.pk_id_project) }}'">
+                <div class="p-row" data-projeto-id="{{ p.pk_id_project }}" data-projeto-nome="{{ p.name_project }}" data-equipes='{{ equipes_projeto | map(attribute="pk_id_team") | list | tojson }}' data-equipes-nomes='{{ equipes_projeto | map(attribute="name_team") | list | tojson }}' style="display: grid; grid-template-columns: 1fr 180px 180px 120px; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); transition: 0.2s; cursor: pointer;" onclick="openProjeto(this)">
                     <div style="display: flex; align-items: center; gap: 16px;">
                         <div style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--blue);">
                             <i data-lucide="folder"></i>
@@ -60,5 +60,100 @@
     .p-row:hover {
         background: rgba(255, 255, 255, 0.02);
     }
+    .modal-ov {
+        position: fixed; inset: 0;
+        background: rgba(4, 6, 12, 0.8);
+        backdrop-filter: blur(8px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .light-mode .modal-ov {
+        background: rgba(15, 23, 42, 0.35) !important;
+    }
+    .modal-box {
+        width: 520px; max-width: 90vw;
+        background: var(--s1);
+        border: 1px solid var(--b2);
+        border-radius: 16px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        animation: modalFadeIn 0.2s ease-out;
+    }
+    .light-mode .modal-box {
+        box-shadow: 0 24px 64px rgba(15, 23, 42, 0.12) !important;
+    }
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-head {
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--b1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    .modal-head h3 { font-size: 15px; color: var(--tx); }
+    .modal-close {
+        background: none; border: none;
+        color: var(--tx2); cursor: pointer;
+        padding: 4px; border-radius: 6px;
+        font-size: 18px; line-height: 1;
+        transition: all 0.2s;
+    }
+    .modal-close:hover {
+        color: var(--tx);
+        background: var(--b1);
+    }
+    .modal-scroll {
+        overflow-y: auto;
+        flex: 1;
+    }
 </style>
+
+<div id="team-modal" class="modal-ov" style="display:none;">
+  <div class="modal-box" style="width: 400px;">
+    <div class="modal-head">
+      <h3 id="team-modal-title" style="font-size: 16px; font-weight: 700;"></h3>
+      <button class="modal-close" onclick="document.getElementById('team-modal').style.display='none';">X</button>
+    </div>
+    <div class="modal-scroll custom-scroll" style="padding: 20px;">
+      <p style="font-size: 12px; color: var(--tx2); margin-bottom: 16px;">Selecione a equipe:</p>
+      <div id="team-modal-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openProjeto(el) {
+    const projId = el.dataset.projetoId;
+    const projNome = el.dataset.projetoNome;
+    const equipes = JSON.parse(el.dataset.equipes);
+    const equipesNomes = JSON.parse(el.dataset.equipesNomes);
+    const baseUrl = '{{ url_for("funcionario.projeto_detalhe", projeto_id=0) }}'.replace('0', projId);
+    if (equipes.length <= 1) {
+      location.href = baseUrl;
+      return;
+    }
+    document.getElementById('team-modal-title').textContent = projNome;
+    const list = document.getElementById('team-modal-list');
+    list.innerHTML = equipes.map((id, i) => {
+      const url = baseUrl + '?equipe=' + id;
+      return '<div onclick="location.href=\'' + url + '\'" style="padding: 12px 16px; border-radius: 10px; border: 1px solid var(--b1); background: var(--s2); cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; display: flex; align-items: center; gap: 10px;" onmouseover="this.style.background=\'var(--s3)\'; this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.background=\'var(--s2)\'; this.style.borderColor=\'var(--b1)\'">' +
+        '<span style="width: 32px; height: 32px; border-radius: 50%; background: var(--ac-d); color: var(--ac); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;">' + equipesNomes[i][0].toUpperCase() + '</span>' +
+        equipesNomes[i] +
+        '</div>';
+    }).join('');
+    document.getElementById('team-modal').style.display = 'flex';
+  }
+
+  document.getElementById('team-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+</script>
 {% endblock %}

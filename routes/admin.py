@@ -138,7 +138,9 @@ def dashboard():
             'acao': log.type_log,
             'descricao': log.description_log,
             'data': log.date_log,
-            'equipe_nome': equipe_nome
+            'equipe_nome': equipe_nome,
+            'project_name': projeto.name_project if projeto else 'Geral',
+            'type_log': log.type_log
         })
 
     todos_logs_query = database.session.query(Log, Project).outerjoin(Project, Log.fk_project == Project.pk_id_project).order_by(Log.date_log.desc()).all()
@@ -154,7 +156,7 @@ def dashboard():
             'equipe_nome': equipe_nome
         })
 
-    # ── Projetos criados no mês atual ──────────────────
+    # ── Projetos agrupados por status para o mês atual ──────────────────
     import datetime
     now = datetime.datetime.now()
     current_month_num = now.month
@@ -169,19 +171,7 @@ def dashboard():
         'cancelado': []
     }
 
-    logs_criacao = Log.query.filter(
-        Log.type_log == 'Projeto criado',
-        extract('year', Log.date_log) == current_year,
-        extract('month', Log.date_log) == current_month_num
-    ).all()
-
-    projeto_ids_mes = set()
-    for log_entry in logs_criacao:
-        if log_entry.fk_project:
-            projeto_ids_mes.add(log_entry.fk_project)
-
-    projetos_do_mes = Project.query.filter(Project.pk_id_project.in_(projeto_ids_mes)).all() if projeto_ids_mes else []
-    for proj in projetos_do_mes:
+    for proj in Project.query.all():
         status_str = proj.status_project or 'Pausado'
         if status_str == 'Pendente':
             status_str = 'Pausado'
@@ -265,7 +255,7 @@ def add_projeto():
     nome = request.form.get('nome')
     descricao = request.form.get('descricao')
     prazo = request.form.get('prazo')
-    orcamento = request.form.get('orcamento', 0)
+    orcamento = request.form.get('budget', 0)
     cliente_id = request.form.get('cliente_id')
     equipes_ids = [int(x) for x in request.form.getlist('check_equipes') if x.isdigit()]
 
@@ -997,4 +987,21 @@ def salvar_senha():
     current_user.password_user = generate_password_hash(nova_senha)
     database.session.commit()
     flash('Senha atualizada com sucesso!', 'success')
+
+# ---------------------------------------------------------------------------
+# Salvar GitHub Key do administrador
+# ---------------------------------------------------------------------------
+@admin_bp.route('/configuracoes/github-key', methods=['POST'])
+def salvar_github_key():
+    from function.crypto import encrypt_token
+    from flask import current_app
+
+    github_key = request.form.get('github_key')
+    if github_key and github_key != '********':
+        current_user.github_key_user = encrypt_token(current_app.config['SECRET_KEY'], github_key)
+        database.session.commit()
+        flash('Token do GitHub salvo com sucesso!', 'success')
+    else:
+        flash('Nenhuma alteração realizada.', 'info')
+    return redirect(url_for('admin.configuracoes') + '#integracoes')
     return redirect(url_for('admin.configuracoes') + '#seguranca')
