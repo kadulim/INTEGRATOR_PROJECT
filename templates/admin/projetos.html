@@ -869,7 +869,7 @@
           <div class="members-checkbox-list">
             {% for eq in equipes %}
             <label class="check-label">
-              <input type="checkbox" name="check_equipes" value="{{ eq.id }}"> {{ eq.name_team }}
+              <input type="checkbox" name="check_equipes" value="{{ eq.pk_id_team }}"> {{ eq.name_team }}
             </label>
             {% endfor %}
           </div>

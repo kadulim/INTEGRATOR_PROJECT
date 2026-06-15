@@ -401,7 +401,7 @@
             </h2>
 
             <!-- Enviar Novo Comentário -->
-            <form action="/projeto/{{ projeto.id }}/add-comentario" method="POST" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+            <form action="/projeto/{{ projeto.pk_id_project }}/add-comentario" method="POST" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div>
                 <label style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Nova Mensagem</label>

@@ -155,7 +155,7 @@
                         <i data-lucide="file-down"></i>
                         {% endif %}
                     </div>
-                    <form action="/projeto/delete-documento/{{ doc.id }}" method="POST" onclick="event.stopPropagation();" style="display:inline;">
+                    <form action="/projeto/delete-documento/{{ doc.pk_id_document }}" method="POST" onclick="event.stopPropagation();" style="display:inline;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="close-btn" style="color:var(--text-muted); border:none; background:transparent;" onmouseover="this.style.color='var(--accent)';" onmouseout="this.style.color='var(--text-muted)';" title="Excluir arquivo">
                             <i data-lucide="trash-2" style="width:16px;"></i>
@@ -214,7 +214,7 @@
             <div class="diagram-card">
                 <div class="diagram-preview" onclick="window.open('/static/{{ diag.path_diagram }}', '_blank')" style="position:relative;">
                     <img src="/static/{{ diag.path_diagram }}" alt="{{ diag.name_diagram }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
-                    <form action="/projeto/delete-diagrama/{{ diag.id }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
+                    <form action="/projeto/delete-diagrama/{{ diag.pk_id_diagram }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="close-btn" style="background:rgba(0,0,0,0.6); color:#fff; border:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Excluir diagrama">
                             <i data-lucide="trash-2" style="width:14px;"></i>
@@ -270,8 +270,8 @@
             {% for item in galeria %}
             <div class="diagram-card">
                 <div class="diagram-preview" onclick="window.open('/static/{{ item.path_gallery }}', '_blank')" style="position:relative;">
-                    <img src="/static/{{ item.path_gallery }}" alt="{{ item.nome }}" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
-                    <form action="/projeto/delete-galeria/{{ item.id }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
+                    <img src="/static/{{ item.path_gallery }}" alt="" style="width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+                    <form action="/projeto/delete-galeria/{{ item.pk_id_gallery }}" method="POST" onclick="event.stopPropagation();" style="position:absolute; top:8px; right:8px;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="close-btn" style="background:rgba(0,0,0,0.6); color:#fff; border:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Excluir imagem">
                             <i data-lucide="trash-2" style="width:14px;"></i>
@@ -280,7 +280,7 @@
                 </div>
                 <div class="diagram-info">
                     <div>
-                        <div class="diagram-name">{{ item.nome }}</div>
+                        <div class="diagram-name">Imagem</div>
                         <div class="diagram-type">Upload em {{ item.date_gallery.strftime('%d/%m/%Y') }}</div>
                     </div>
                     <a href="/static/{{ item.path_gallery }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
@@ -308,7 +308,7 @@
                 <div class="card" style="margin-bottom:20px;">
                     <div class="card-body" style="padding:24px;">
                         <h4 style="margin-bottom:16px;">Novo Comentário</h4>
-                        <form action="/projeto/{{ projeto.id }}/add-comentario" method="POST" class="comment-input-area">
+                        <form action="/projeto/{{ projeto.pk_id_project }}/add-comentario" method="POST" class="comment-input-area">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <textarea name="conteudo" required class="comment-textarea" placeholder="Deixe um comentário para a equipe ou para o cliente..."></textarea>
                             <div style="display:flex; justify-content:flex-end;">
