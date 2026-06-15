@@ -184,8 +184,8 @@ body {
 }
 
 .shimmer-text {
-    background: linear-gradient(90deg, #3B82F6, #A855F7, #22C55E, #3B82F6);
-    background-size: 300% auto;
+    background: linear-gradient(90deg, #3B82F6, #A855F7, #3B82F6);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: shimmer 6s linear infinite;
@@ -454,9 +454,120 @@ body {
 
 /* ── Responsive ── */
 @media (max-width: 1100px) {
-    .layout-wrapper { flex-direction: column; overflow-y: auto; height: auto; }
-    .brand-section, .login-section { width: 100%; padding: 60px 40px; }
-    .features-grid { grid-template-columns: 1fr; }
-    .bottom-grid { grid-template-columns: repeat(2, 1fr); }
-    .top-utils { position: relative; top: 0; right: 0; margin-bottom: 20px; }
+    .layout-wrapper { 
+        display: flex;
+        flex-direction: column; 
+        overflow-y: auto; 
+        height: auto; 
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+    
+    .brand-section, .login-section { 
+        display: contents; /* Allows children to be ordered directly by layout-wrapper */
+        width: 100%; 
+        padding: 0;
+    }
+    
+    .brand-top { 
+        order: 1; 
+        margin: 0 auto 20px; 
+        justify-content: center; 
+    }
+    .brand-headline { 
+        order: 2; 
+        margin: 0 20px 16px; 
+        text-align: center; 
+        font-size: 42px; 
+        line-height: 1.1; 
+        letter-spacing: -1.5px; 
+    }
+    .brand-subtext { 
+        order: 3; 
+        margin: 0 20px 32px; 
+        text-align: center; 
+        font-size: 16px; 
+    }
+    
+    /* Top Utils (Theme Switcher) */
+    .top-utils { 
+        order: 4; 
+        position: static; 
+        justify-content: center; 
+        margin-bottom: 24px; 
+    }
+    
+    .auth-card { 
+        order: 5; 
+        margin: 0 auto; 
+        width: calc(100% - 40px); 
+        max-width: 450px;
+        align-self: center;
+        background: #0F172A; /* Match the slightly lighter background of the card in the design */
+    }
+    
+    .features-grid { 
+        order: 6; 
+        grid-template-columns: 1fr; 
+        margin: 40px auto; 
+        gap: 16px;
+        max-width: 450px;
+        width: calc(100% - 40px);
+    }
+    
+    /* Reformat features for horizontal layout on mobile */
+    .feat-box {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+        gap: 4px 16px;
+        align-items: center;
+        padding: 20px 24px;
+        text-align: left;
+    }
+    .feat-icon-wrap { 
+        grid-column: 1; 
+        grid-row: 1 / span 2; 
+        margin-bottom: 0; 
+        width: 40px; 
+        height: 40px; 
+    }
+    .feat-box h4 { 
+        grid-column: 2; 
+        grid-row: 1; 
+        margin-bottom: 0; 
+        font-size: 15px; 
+    }
+    .feat-box p { 
+        grid-column: 2; 
+        grid-row: 2; 
+        margin-bottom: 0; 
+        font-size: 13px; 
+    }
+
+    .bottom-card { 
+        order: 7; 
+        margin: 0 auto; 
+        max-width: 450px;
+        width: calc(100% - 40px);
+    }
+    
+    .bottom-grid { 
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 12px;
+    }
+    .bottom-item h5 { font-size: 11px; }
+    .bottom-item p { font-size: 9px; display: none; } /* Hide subtext on very small screens if needed, but we keep it */
+    
+    @media (max-width: 480px) {
+        .bottom-item p { display: none; }
+    }
+
+    .footer-note { 
+        order: 8; 
+        margin: 20px auto 0; 
+        justify-content: center; 
+        text-align: center; 
+        flex-direction: column;
+    }
 }
