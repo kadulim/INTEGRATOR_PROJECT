@@ -1,0 +1,124 @@
+<!-- Mobile Navigation Global Component -->
+<div class="mobile-nav-global">
+  <button class="mobile-menu-btn" title="Menu">
+    <i data-lucide="menu"></i>
+  </button>
+</div>
+
+<style>
+  .mobile-nav-global {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    .mobile-nav-global {
+      display: block;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 10000;
+    }
+
+    .mobile-menu-btn {
+      background: rgba(10, 16, 30, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(8px);
+    }
+    
+    .light-mode .mobile-menu-btn {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      color: #0F172A;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .mobile-menu-btn i {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Fixed sidebar for mobile when opened */
+    .sidebar.mobile-open, .func-sidebar.mobile-open {
+      display: flex !important;
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 10001;
+      width: 260px !important;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+    }
+    
+    .light-mode .sidebar.mobile-open, .light-mode .func-sidebar.mobile-open {
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Backdrop */
+    .mobile-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .mobile-backdrop.show {
+      display: block;
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Add backdrop to body
+    let backdrop = document.querySelector('.mobile-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.className = 'mobile-backdrop';
+      document.body.appendChild(backdrop);
+    }
+
+    const mobileMenuBtns = document.querySelectorAll('.mobile-menu-btn');
+    const sidebars = document.querySelectorAll('.sidebar, .func-sidebar');
+    
+    mobileMenuBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sidebars.forEach(sidebar => {
+          sidebar.classList.toggle('mobile-open');
+        });
+        
+        // Toggle backdrop
+        const isOpen = Array.from(sidebars).some(s => s.classList.contains('mobile-open'));
+        if (isOpen) {
+          backdrop.classList.add('show');
+        } else {
+          backdrop.classList.remove('show');
+        }
+      });
+    });
+
+    // Close when clicking outside (on backdrop)
+    backdrop.addEventListener('click', () => {
+      sidebars.forEach(sidebar => {
+        sidebar.classList.remove('mobile-open');
+      });
+      backdrop.classList.remove('show');
+    });
+  });
+</script>

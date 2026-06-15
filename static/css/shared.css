@@ -1002,12 +1002,12 @@ select option {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.fade-up { animation: fadeUp 0.3s ease both; }
-.fade-up-1 { animation-delay: 0.05s; }
-.fade-up-2 { animation-delay: 0.10s; }
-.fade-up-3 { animation-delay: 0.15s; }
-.fade-up-4 { animation-delay: 0.20s; }
-.fade-up-5 { animation-delay: 0.25s; }
+.fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
+.fade-up-1 { animation-delay: 0s; }
+.fade-up-2 { animation-delay: 0s; }
+.fade-up-3 { animation-delay: 0s; }
+.fade-up-4 { animation-delay: 0s; }
+.fade-up-5 { animation-delay: 0s; }
 
 /* ── Utilities ── */
 .flex { display: flex; }

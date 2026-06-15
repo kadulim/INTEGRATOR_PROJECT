@@ -274,19 +274,8 @@
   <!-- Conteúdo Principal -->
   <div class="main-content">
     
-    <!-- Mobile Topbar -->
-    <div class="mobile-topbar">
-      <button id="mobileMenuBtn" style="background: none; border: none; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; padding: 4px;">
-        <i data-lucide="menu" style="width: 24px; height: 24px;"></i>
-      </button>
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 32px; width: auto; object-fit: contain;">
-        <span style="font-size: 20px; font-weight: 800; letter-spacing: -1px; font-family: 'Outfit', sans-serif; line-height: 1;">
-          <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
-        </span>
-      </div>
-      <div style="width: 24px;"></div> <!-- Spacer to center the logo -->
-    </div>
+    <!-- Mobile Topbar Global -->
+    {% include 'components/mobile_nav.html' %}
 
     <main class="page-content fade-up" style="padding: 40px 32px 64px; width: 100%;">
       
