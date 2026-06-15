@@ -1213,6 +1213,119 @@
     filter: brightness(1.35);
     transform: scale(1.04);
   }
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    /* Allow scrolling on mobile */
+    .main-content {
+      height: auto !important;
+      overflow: visible !important;
+    }
+    .page-content {
+      height: auto !important;
+      overflow: visible !important;
+      padding-top: 72px !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+    body {
+      height: auto !important;
+      overflow: auto !important;
+    }
+    .db-wrapper {
+      height: auto !important;
+      overflow: visible !important;
+      min-height: 100vh;
+    }
+    .content-scrollable {
+      overflow-y: visible !important;
+      padding: 16px;
+    }
+
+    /* Hero: stack vertically */
+    .hero {
+      grid-template-columns: 1fr !important;
+      padding: 20px 16px !important;
+      gap: 20px !important;
+      min-height: auto !important;
+    }
+    .hero-right-lbl {
+      display: none;
+    }
+    .big-stat {
+      display: none;
+    }
+
+    /* Stats row: 2 columns on mobile */
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 10px !important;
+    }
+
+    /* Monthly cards: 2 columns on mobile */
+    .monthly {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Bottom grid: stack vertically */
+    .bottom-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .bottom-grid > * {
+      min-height: 300px;
+    }
+
+    /* Topbar custom */
+    .topbar-custom {
+      padding: 12px 16px !important;
+      padding-top: 68px !important;
+    }
+    .tb-right .date-pill {
+      display: none;
+    }
+
+    /* Donut: smaller */
+    .donut-wrap svg {
+      width: 180px !important;
+      height: 180px !important;
+    }
+    .d-num {
+      font-size: 36px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    /* Extra small: stats and monthly in single column */
+    .stats-row {
+      grid-template-columns: 1fr !important;
+    }
+    .monthly {
+      grid-template-columns: 1fr !important;
+    }
+    .scard {
+      padding: 16px !important;
+    }
+    .hero-title {
+      font-size: 22px !important;
+    }
+  }
+
+  /* Tablet */
+  @media (min-width: 769px) and (max-width: 1100px) {
+    .hero {
+      grid-template-columns: 1fr 220px 1fr !important;
+      gap: 24px !important;
+    }
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .monthly {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .bottom-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
 </style>
 {% endblock %}
 

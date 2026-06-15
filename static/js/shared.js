@@ -121,12 +121,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 50);
 });
 
-// ── Sidebar Collapse Toggle ────────────────────────────────
+// ── Sidebar Collapse Toggle ──────────────────────────────────
 function initSidebarToggle() {
   const sidebar = document.querySelector('.sidebar, .func-sidebar');
   if (!sidebar) return;
 
-  // Create toggle button
+  const isMobile = () => window.innerWidth <= 768;
+
+  // Create toggle button (desktop collapse only)
   const toggleBtn = document.createElement('button');
   toggleBtn.className = 'sidebar-toggle';
   toggleBtn.setAttribute('title', 'Minimizar menu');
@@ -142,18 +144,30 @@ function initSidebarToggle() {
     }
   });
 
-  // Restore saved state
-  const isCollapsed = localStorage.getItem('cobyte-sidebar-collapsed') === 'true';
-  if (isCollapsed) {
-    sidebar.classList.add('sidebar-collapsed');
-    toggleBtn.setAttribute('title', 'Expandir menu');
+  // Restore saved state (only on desktop)
+  if (!isMobile()) {
+    const isCollapsed = localStorage.getItem('cobyte-sidebar-collapsed') === 'true';
+    if (isCollapsed) {
+      sidebar.classList.add('sidebar-collapsed');
+      toggleBtn.setAttribute('title', 'Expandir menu');
+    }
   }
 
   // Toggle handler
   toggleBtn.addEventListener('click', () => {
+    // On mobile: toggle mobile-open class (show/hide full sidebar)
+    if (isMobile()) {
+      sidebar.classList.remove('mobile-open');
+      // Also hide backdrop
+      const backdrop = document.querySelector('.mobile-backdrop');
+      if (backdrop) backdrop.classList.remove('show');
+      return;
+    }
+
+    // On desktop: toggle collapsed state
     const willCollapse = !sidebar.classList.contains('sidebar-collapsed');
     sidebar.classList.toggle('sidebar-collapsed');
-    
+
     if (willCollapse) {
       localStorage.setItem('cobyte-sidebar-collapsed', 'true');
       toggleBtn.setAttribute('title', 'Expandir menu');
@@ -166,6 +180,18 @@ function initSidebarToggle() {
     const funcMain = document.querySelector('[style*="margin-left: var(--sidebar-w)"]');
     if (funcMain) {
       funcMain.style.marginLeft = willCollapse ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)';
+    }
+  });
+
+  // On resize: clean up mobile state when switching back to desktop
+  window.addEventListener('resize', () => {
+    if (!isMobile()) {
+      sidebar.classList.remove('mobile-open');
+      const backdrop = document.querySelector('.mobile-backdrop');
+      if (backdrop) backdrop.classList.remove('show');
+    } else {
+      // On mobile: force remove sidebar-collapsed so it won't show icon-only
+      sidebar.classList.remove('sidebar-collapsed');
     }
   });
 }

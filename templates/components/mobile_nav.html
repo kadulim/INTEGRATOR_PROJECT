@@ -16,12 +16,12 @@
       position: fixed;
       top: 16px;
       left: 16px;
-      z-index: 10000;
+      z-index: 10002;
     }
 
     .mobile-menu-btn {
-      background: rgba(10, 16, 30, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(10, 16, 30, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 8px;
       color: #ffffff;
       cursor: pointer;
@@ -30,15 +30,15 @@
       justify-content: center;
       width: 44px;
       height: 44px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
     }
     
     .light-mode .mobile-menu-btn {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       border: 1px solid rgba(15, 23, 42, 0.12);
       color: #0F172A;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .mobile-menu-btn i {
@@ -53,7 +53,7 @@
       top: 0;
       left: 0;
       bottom: 0;
-      z-index: 10001;
+      z-index: 10003;
       width: 260px !important;
       box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
     }
@@ -72,7 +72,7 @@
       bottom: 0;
       background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
-      z-index: 10000;
+      z-index: 10001;
       opacity: 0;
       transition: opacity 0.3s;
     }
@@ -95,30 +95,49 @@
 
     const mobileMenuBtns = document.querySelectorAll('.mobile-menu-btn');
     const sidebars = document.querySelectorAll('.sidebar, .func-sidebar');
-    
+
+    function openSidebar() {
+      sidebars.forEach(sidebar => {
+        // Remove collapsed state when opening on mobile so labels are visible
+        sidebar.classList.remove('sidebar-collapsed');
+        sidebar.classList.add('mobile-open');
+      });
+      backdrop.classList.add('show');
+    }
+
+    function closeSidebar() {
+      sidebars.forEach(sidebar => {
+        sidebar.classList.remove('mobile-open');
+      });
+      backdrop.classList.remove('show');
+    }
+
     mobileMenuBtns.forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        sidebars.forEach(sidebar => {
-          sidebar.classList.toggle('mobile-open');
-        });
-        
-        // Toggle backdrop
         const isOpen = Array.from(sidebars).some(s => s.classList.contains('mobile-open'));
         if (isOpen) {
-          backdrop.classList.add('show');
+          closeSidebar();
         } else {
-          backdrop.classList.remove('show');
+          openSidebar();
         }
       });
     });
 
     // Close when clicking outside (on backdrop)
     backdrop.addEventListener('click', () => {
-      sidebars.forEach(sidebar => {
-        sidebar.classList.remove('mobile-open');
+      closeSidebar();
+    });
+
+    // When a nav-item is clicked on mobile, close the sidebar
+    sidebars.forEach(sidebar => {
+      sidebar.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          if (window.innerWidth <= 768) {
+            closeSidebar();
+          }
+        });
       });
-      backdrop.classList.remove('show');
     });
   });
 </script>

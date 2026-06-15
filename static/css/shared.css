@@ -690,11 +690,77 @@ html.sidebar-preload-collapsed .sidebar-logo img {
 .sidebar-collapsed ~ .main-content {
   margin-left: var(--sidebar-collapsed-w);
 }
-/* ── Responsive Design (Exemplo) ── */
+/* ── Responsive Design ── */
 @media (max-width: 768px) {
-  .sidebar { width: 0; display: none; }
-  .main-content { margin-left: 0; }
-  .stat-grid { grid-template-columns: 1fr; }
+  /* Hidden by default on mobile — opened via mobile-open */
+  .sidebar,
+  .func-sidebar {
+    display: none !important;
+    width: 260px !important;
+    transition: none !important;
+  }
+
+  /* When opened via hamburger */
+  .sidebar.mobile-open,
+  .func-sidebar.mobile-open {
+    display: flex !important;
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 10001;
+    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Do NOT let the collapsed toggle button mess with mobile layout */
+  .sidebar.mobile-open.sidebar-collapsed,
+  .func-sidebar.mobile-open.sidebar-collapsed {
+    width: 260px !important;
+  }
+
+  /* Hide the desktop sidebar-toggle button on mobile */
+  .sidebar-toggle,
+  .func-sidebar .sidebar-toggle {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+  /* Revert collapsed labels to visible when sidebar is open on mobile */
+  .sidebar.mobile-open .sidebar-logo-text,
+  .sidebar.mobile-open .nav-label,
+  .sidebar.mobile-open .user-info,
+  .sidebar.mobile-open .nav-item span,
+  .func-sidebar.mobile-open .sidebar-logo-text,
+  .func-sidebar.mobile-open .nav-label,
+  .func-sidebar.mobile-open .user-info,
+  .func-sidebar.mobile-open .nav-item span {
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+
+  /* Hide topbar title on very small screens */
+  .topbar-title {
+    font-size: 15px;
+  }
+
+  /* Stack stat-grid to single column */
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Ensure page-content has top padding so it doesn't hide behind hamburger */
+  .page-content {
+    padding-top: 64px !important;
+  }
+
+  /* Hide the topbar header on mobile (the hamburger button replaces it) */
+  .topbar {
+    display: none;
+  }
 }
 
 /* ── Topbar ── */
