@@ -864,7 +864,7 @@ def add_funcionario():
         name_user=nome,
         email_user=email,
         password_user=generate_password_hash(senha),
-        type_user='funcionario'
+        type_user='employee'
     )
     database.session.add(usuario)
     database.session.flush()

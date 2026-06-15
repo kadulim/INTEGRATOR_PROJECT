@@ -46,6 +46,9 @@ def adicionar(app):
         # Tabela user / usuario
         _try("ALTER TABLE user ADD COLUMN nivel INTEGER")
         _try("ALTER TABLE usuario ADD COLUMN nivel INTEGER")
+        # Corrige type_user de registros antigos (pt -> en)
+        _try("UPDATE user SET type_user = 'employee' WHERE type_user = 'funcionario'")
+        _try("UPDATE usuario SET type_user = 'employee' WHERE type_user = 'funcionario'")
 
         # ─── Seed: Admin ────────────────────────────────────────────────
         admin_email = os.getenv('ADMIN_EMAIL')

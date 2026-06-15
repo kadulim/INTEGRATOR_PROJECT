@@ -21,6 +21,7 @@ funcionario_bp = Blueprint('funcionario', __name__, url_prefix='/funcionario')
 # =============================================================================
 # DASHBOARD DO FUNCIONÁRIO
 # =============================================================================
+@funcionario_bp.route('/')
 @funcionario_bp.route('/dashboard')
 @login_required
 def dashboard():
