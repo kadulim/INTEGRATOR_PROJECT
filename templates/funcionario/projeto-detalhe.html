@@ -162,18 +162,17 @@
                 <h3 style="font-size: 18px; font-weight: 700; margin-bottom:4px;">Documentação do Projeto</h3>
                 <p style="color:var(--text-muted); font-size:13px;">Upload e gerenciamento de especificações, manuais e outros arquivos em formato PDF ou DOCX.</p>
             </div>
-            <div>
-                <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
-                    <i data-lucide="upload" style="width:16px;"></i>
-                    Enviar Documento
-                    <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.pk_id_project }}/upload-documento')">
-                </label>
-            </div>
-        </div>
-
-        <div id="document-status" class="status-indicator" style="display:none;"></div>
-        <div id="document-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
-            <div id="document-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <select id="doc-team-select" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; min-width:160px;">
+                        <option value="">Selecione a equipe</option>
+                        {% for equipe in equipes %}
+                        <option value="{{ equipe.pk_id_team }}">{{ equipe.name_team }}</option>
+                        {% endfor %}
+                    </select>
+                    <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+                        <i data-lucide="upload" style="width:16px;"></i>
+                        Enviar Documento
+                        <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.pk_id_project }}/upload-documento', 'doc-team-select')">
         </div>
 
         {% if documentos %}
@@ -227,18 +226,17 @@
                 <h3 style="font-size: 18px; font-weight: 700; margin-bottom:4px;">Diagramas do Projeto</h3>
                 <p style="color:var(--text-muted); font-size:13px;">Upload de diagramas de arquitetura, UML, fluxogramas de processos, etc.</p>
             </div>
-            <div>
-                <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
-                    <i data-lucide="upload" style="width:16px;"></i>
-                    Enviar Diagrama
-                    <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.pk_id_project }}/upload-diagrama')">
-                </label>
-            </div>
-        </div>
-
-        <div id="diagram-status" class="status-indicator" style="display:none;"></div>
-        <div id="diagram-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
-            <div id="diagram-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <select id="diag-team-select" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; min-width:160px;">
+                        <option value="">Selecione a equipe</option>
+                        {% for equipe in equipes %}
+                        <option value="{{ equipe.pk_id_team }}">{{ equipe.name_team }}</option>
+                        {% endfor %}
+                    </select>
+                    <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+                        <i data-lucide="upload" style="width:16px;"></i>
+                        Enviar Diagrama
+                        <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.pk_id_project }}/upload-diagrama', 'diag-team-select')">
         </div>
 
         {% if diagramas %}
@@ -284,18 +282,17 @@
                 <h3 style="font-size: 18px; font-weight: 700; margin-bottom:4px;">Galeria do Projeto</h3>
                 <p style="color:var(--text-muted); font-size:13px;">Imagens do projeto, capturas de tela das interfaces, mockups e inspirações visuais.</p>
             </div>
-            <div>
-                <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
-                    <i data-lucide="upload" style="width:16px;"></i>
-                    Enviar Imagem
-                    <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.pk_id_project }}/upload-galeria')">
-                </label>
-            </div>
-        </div>
-
-        <div id="gallery-status" class="status-indicator" style="display:none;"></div>
-        <div id="gallery-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
-            <div id="gallery-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <select id="gal-team-select" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; min-width:160px;">
+                        <option value="">Selecione a equipe</option>
+                        {% for equipe in equipes %}
+                        <option value="{{ equipe.pk_id_team }}">{{ equipe.name_team }}</option>
+                        {% endfor %}
+                    </select>
+                    <label class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+                        <i data-lucide="upload" style="width:16px;"></i>
+                        Enviar Imagem
+                        <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.pk_id_project }}/upload-galeria', 'gal-team-select')">
         </div>
 
         {% if galeria %}
@@ -538,9 +535,17 @@
         }
     }
 
-    function uploadFile(inputElement, fileType, uploadUrl) {
+    function uploadFile(inputElement, fileType, uploadUrl, teamSelectId) {
         const file = inputElement.files[0];
         if (!file) return;
+
+        // Validar seleção de equipe
+        const teamSelect = document.getElementById(teamSelectId);
+        const equipeId = teamSelect ? teamSelect.value : null;
+        if (!equipeId) {
+            showStatus(fileType + '-status', 'Por favor, selecione uma equipe antes de fazer upload.', 'error');
+            return;
+        }
 
         const ext = file.name.split('.').pop().toLowerCase();
         if (fileType === 'document' && !['pdf', 'docx'].includes(ext)) {
@@ -562,6 +567,7 @@
 
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('equipe_id', equipeId);
         
         const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 

@@ -181,6 +181,94 @@
       </div>
     </div>
 
+    <!-- Projetos associados -->
+    {% if projetos %}
+    <div class="pcard fade-up">
+      <div class="pcard-strip" style="background: #00CFFF;"></div>
+      <div class="pcard-body">
+        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin-bottom:16px;">Projetos</h3>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          {% for proj in projetos %}
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--s2); border-radius:8px; border:1px solid var(--b1);">
+            <div>
+              <div style="font-size:14px; font-weight:600; color:var(--tx);">{{ proj.name_project }}</div>
+              <div style="font-size:12px; color:var(--tx2);">{{ proj.status_project }}</div>
+            </div>
+            <a href="{{ url_for('admin.projeto_detalhe', id=proj.pk_id_project) }}" style="color:var(--ac); text-decoration:none; font-size:13px; font-weight:600;">Ver</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Documentação -->
+    <div class="pcard fade-up">
+      <div class="pcard-strip" style="background: #A78BFA;"></div>
+      <div class="pcard-body">
+        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin-bottom:16px;">Documentação</h3>
+        {% if documentos %}
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          {% for doc in documentos %}
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--s2); border-radius:8px; border:1px solid var(--b1);">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="color:var(--ac);"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+              <div>
+                <div style="font-size:14px; font-weight:600; color:var(--tx);">{{ doc.name_document }}</div>
+                <div style="font-size:12px; color:var(--tx2);">{{ doc.type_document or 'Documento' }}</div>
+              </div>
+            </div>
+            <a href="/static/{{ doc.path_document }}" target="_blank" style="color:var(--ac); text-decoration:none; font-size:13px; font-weight:600;">Abrir</a>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--tx3); font-size:13px;">Nenhum documento disponível.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Diagramas -->
+    <div class="pcard fade-up">
+      <div class="pcard-strip" style="background: #FFB020;"></div>
+      <div class="pcard-body">
+        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin-bottom:16px;">Diagramas</h3>
+        {% if diagramas %}
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px;">
+          {% for diag in diagramas %}
+          <div style="position:relative; border-radius:8px; overflow:hidden; border:1px solid var(--b1); cursor:pointer;" onclick="window.open('/static/{{ diag.path_diagram }}', '_blank')">
+            <img src="/static/{{ diag.path_diagram }}" alt="{{ diag.name_diagram }}" style="width:100%; height:120px; object-fit:cover;">
+            <div style="padding:8px; background:var(--s2);">
+              <div style="font-size:12px; font-weight:600; color:var(--tx); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ diag.name_diagram }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--tx3); font-size:13px;">Nenhum diagrama disponível.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Galeria -->
+    <div class="pcard fade-up">
+      <div class="pcard-strip" style="background: #00E5A0;"></div>
+      <div class="pcard-body">
+        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin-bottom:16px;">Galeria</h3>
+        {% if galeria %}
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px;">
+          {% for img in galeria %}
+          <div style="position:relative; border-radius:8px; overflow:hidden; border:1px solid var(--b1); cursor:pointer;" onclick="window.open('/static/{{ img.path_gallery }}', '_blank')">
+            <img src="/static/{{ img.path_gallery }}" alt="Galeria" style="width:100%; height:120px; object-fit:cover;">
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--tx3); font-size:13px;">Nenhuma imagem na galeria.</p>
+        {% endif %}
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}

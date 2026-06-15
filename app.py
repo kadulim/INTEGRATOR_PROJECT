@@ -353,38 +353,51 @@ import time
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
 
-# Garante que as pastas de upload existam (importante no Render com filesystem efêmero)
-for subdir in ('documentos', 'diagramas', 'galeria'):
-    os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], subdir), exist_ok=True)
+# Garante que a pasta de upload existe (importante no Render com filesystem efêmero)
+upload_folder = os.path.join(app.root_path, 'static', 'uploads')
+os.makedirs(upload_folder, exist_ok=True)
 
 # =============================================================================
 # ROTAS DE UPLOAD / CRUD DE ARQUIVOS (documentos, diagramas, galeria)
 # =============================================================================
 
 # ---------------------------------------------------------------------------
-# Upload de documento (PDF/DOCX)
+# Validação de equipe para upload
 # ---------------------------------------------------------------------------
-def _resolve_equipe(projeto):
+def _validar_equipe_upload(projeto_id, equipe_id):
+    """Valida se o usuário pode fazer upload para a equipe especificada."""
+    projeto = Project.query.get_or_404(projeto_id)
+    
+    # Verificar se a equipe pertence ao projeto
+    proj_team_ids = [t.pk_id_team for t in projeto.teams]
+    if equipe_id not in proj_team_ids:
+        return False
+    
+    # Validar permissão do usuário
     if current_user.type_user == 'employee':
         func = Employee.query.filter_by(fk_user=current_user.pk_id_user).first()
-        if func:
-            func_team_ids = [t.pk_id_team for t in func.teams]
-            proj_team_ids = [t.pk_id_team for t in projeto.teams]
-            common = [tid for tid in func_team_ids if tid in proj_team_ids]
-            if common:
-                return common[0]
+        if not func:
+            return False
+        func_team_ids = [t.pk_id_team for t in func.teams]
+        return equipe_id in func_team_ids
     elif current_user.type_user == 'admin':
-        proj_team_ids = [t.pk_id_team for t in projeto.teams]
-        if proj_team_ids:
-            return proj_team_ids[0]
-    return None
+        return True
+    
+    return False
 
 @app.route('/projeto/<int:projeto_id>/upload-documento', methods=['POST'])
 @login_required
 def upload_documento(projeto_id):
     projeto = Project.query.get_or_404(projeto_id)
     
-    equipe_id = _resolve_equipe(projeto)
+    # Receber equipe_id do formulário
+    equipe_id = request.form.get('equipe_id', type=int)
+    if not equipe_id:
+        return "Equipe não especificada", 400
+    
+    # Validar permissão
+    if not _validar_equipe_upload(projeto_id, equipe_id):
+        return "Permissão negada ou equipe inválida", 403
     
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
@@ -399,7 +412,8 @@ def upload_documento(projeto_id):
     filename = secure_filename(file.filename)
     unique_filename = f"{int(time.time())}_{filename}"
     
-    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], 'documentos')
+    # Pasta organizada por projeto e equipe
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f'projeto_{projeto_id}', f'equipe_{equipe_id}', 'documentos')
     os.makedirs(upload_path, exist_ok=True)
     file_path = os.path.join(upload_path, unique_filename)
     file.save(file_path)
@@ -407,7 +421,7 @@ def upload_documento(projeto_id):
     doc = Document(
         fk_project=projeto_id,
         name_document=filename,
-        path_document=f"uploads/documentos/{unique_filename}",
+        path_document=f"uploads/projeto_{projeto_id}/equipe_{equipe_id}/documentos/{unique_filename}",
         type_document=ext,
         fk_team=equipe_id
     )
@@ -466,7 +480,14 @@ def delete_documento(doc_id):
 def upload_diagrama(projeto_id):
     projeto = Project.query.get_or_404(projeto_id)
     
-    equipe_id = _resolve_equipe(projeto)
+    # Receber equipe_id do formulário
+    equipe_id = request.form.get('equipe_id', type=int)
+    if not equipe_id:
+        return "Equipe não especificada", 400
+    
+    # Validar permissão
+    if not _validar_equipe_upload(projeto_id, equipe_id):
+        return "Permissão negada ou equipe inválida", 403
     
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
@@ -481,7 +502,8 @@ def upload_diagrama(projeto_id):
     filename = secure_filename(file.filename)
     unique_filename = f"{int(time.time())}_{filename}"
     
-    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], 'diagramas')
+    # Pasta organizada por projeto e equipe
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f'projeto_{projeto_id}', f'equipe_{equipe_id}', 'diagramas')
     os.makedirs(upload_path, exist_ok=True)
     file_path = os.path.join(upload_path, unique_filename)
     file.save(file_path)
@@ -489,7 +511,7 @@ def upload_diagrama(projeto_id):
     diag = Diagram(
         fk_project=projeto_id,
         name_diagram=filename,
-        path_diagram=f"uploads/diagramas/{unique_filename}",
+        path_diagram=f"uploads/projeto_{projeto_id}/equipe_{equipe_id}/diagramas/{unique_filename}",
         fk_team=equipe_id
     )
     database.session.add(diag)
@@ -547,7 +569,14 @@ def delete_diagrama(diag_id):
 def upload_galeria(projeto_id):
     projeto = Project.query.get_or_404(projeto_id)
     
-    equipe_id = _resolve_equipe(projeto)
+    # Receber equipe_id do formulário
+    equipe_id = request.form.get('equipe_id', type=int)
+    if not equipe_id:
+        return "Equipe não especificada", 400
+    
+    # Validar permissão
+    if not _validar_equipe_upload(projeto_id, equipe_id):
+        return "Permissão negada ou equipe inválida", 403
     
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
@@ -562,14 +591,15 @@ def upload_galeria(projeto_id):
     filename = secure_filename(file.filename)
     unique_filename = f"{int(time.time())}_{filename}"
     
-    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], 'galeria')
+    # Pasta organizada por projeto e equipe
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f'projeto_{projeto_id}', f'equipe_{equipe_id}', 'galeria')
     os.makedirs(upload_path, exist_ok=True)
     file_path = os.path.join(upload_path, unique_filename)
     file.save(file_path)
     
     gal = Gallery(
         fk_project=projeto_id,
-        path_gallery=f"uploads/galeria/{unique_filename}",
+        path_gallery=f"uploads/projeto_{projeto_id}/equipe_{equipe_id}/galeria/{unique_filename}",
         fk_team=equipe_id
     )
     database.session.add(gal)

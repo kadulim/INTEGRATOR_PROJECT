@@ -284,11 +284,17 @@
             <h3 style="margin-bottom:4px;">Documentação do Projeto</h3>
             <p style="color:var(--text-muted); font-size:13px;">Upload e gerenciamento de especificações, manuais e outros arquivos em formato PDF ou DOCX.</p>
           </div>
-          <div>
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <select id="doc-team-select" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; min-width:160px;">
+              <option value="">Selecione a equipe</option>
+              {% for equipe in equipes %}
+              <option value="{{ equipe.pk_id_team }}">{{ equipe.name_team }}</option>
+              {% endfor %}
+            </select>
             <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
               <i data-lucide="upload" style="width:16px;"></i>
               Enviar Documento
-              <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.pk_id_project }}/upload-documento')">
+              <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.pk_id_project }}/upload-documento', 'doc-team-select')">
             </label>
           </div>
         </div>
@@ -353,11 +359,17 @@
             <h3 style="margin-bottom:4px;">Diagramas do Projeto</h3>
             <p style="color:var(--text-muted); font-size:13px;">Upload de diagramas de arquitetura, UML, fluxogramas de processos, etc.</p>
           </div>
-          <div>
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <select id="diag-team-select" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; min-width:160px;">
+              <option value="">Selecione a equipe</option>
+              {% for equipe in equipes %}
+              <option value="{{ equipe.pk_id_team }}">{{ equipe.name_team }}</option>
+              {% endfor %}
+            </select>
             <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
               <i data-lucide="upload" style="width:16px;"></i>
               Enviar Diagrama
-              <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.pk_id_project }}/upload-diagrama')">
+              <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.pk_id_project }}/upload-diagrama', 'diag-team-select')">
             </label>
           </div>
         </div>
@@ -414,11 +426,17 @@
             <h3 style="margin-bottom:4px;">Galeria do Projeto</h3>
             <p style="color:var(--text-muted); font-size:13px;">Imagens do projeto, capturas de tela das interfaces, mockups e inspirações visuais.</p>
           </div>
-          <div>
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <select id="gal-team-select" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; min-width:160px;">
+              <option value="">Selecione a equipe</option>
+              {% for equipe in equipes %}
+              <option value="{{ equipe.pk_id_team }}">{{ equipe.name_team }}</option>
+              {% endfor %}
+            </select>
             <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
               <i data-lucide="upload" style="width:16px;"></i>
               Enviar Imagem
-              <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.pk_id_project }}/upload-galeria')">
+              <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.pk_id_project }}/upload-galeria', 'gal-team-select')">
             </label>
           </div>
         </div>
@@ -755,9 +773,17 @@
     }
   }
 
-  function uploadFile(inputElement, fileType, uploadUrl) {
+  function uploadFile(inputElement, fileType, uploadUrl, teamSelectId) {
     const file = inputElement.files[0];
     if (!file) return;
+
+    // Validar seleção de equipe
+    const teamSelect = document.getElementById(teamSelectId);
+    const equipeId = teamSelect ? teamSelect.value : null;
+    if (!equipeId) {
+      showStatus(fileType + '-status', 'Por favor, selecione uma equipe antes de fazer upload.', 'error');
+      return;
+    }
 
     const ext = file.name.split('.').pop().toLowerCase();
     if (fileType === 'document' && !['pdf', 'docx'].includes(ext)) {
@@ -779,6 +805,7 @@
 
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('equipe_id', equipeId);
     
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 

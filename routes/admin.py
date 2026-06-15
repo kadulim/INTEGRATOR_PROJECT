@@ -218,7 +218,7 @@ def dashboard():
         total_clientes    = total_clientes,
         projetos_recentes = projetos_recentes,
         budget_total   = orcamento_total,
-        funcionarios_painel = funcionarios_painel,
+        funcionarios_dash = funcionarios_painel,
         status_data_json  = json.dumps(status_data),
         projetos_status_json = json.dumps(projetos_por_status),
         volumes_json      = json.dumps(volumes),
@@ -823,7 +823,41 @@ def funcionarios():
 @admin_bp.route('/funcionario/<int:id>')
 def funcionario_perfil(id):
     funcionario = Employee.query.get_or_404(id)
-    return render_template('admin/funcionario-perfil.html', funcionario=funcionario)
+    
+    # Buscar equipes do funcionário
+    equipes = funcionario.teams
+    equipes_ids = [eq.pk_id_team for eq in equipes]
+    
+    # Buscar projetos associados às equipes do funcionário
+    projetos = []
+    if equipes_ids:
+        projetos = (
+            Project.query
+            .join(project_teams, Project.pk_id_project == project_teams.c.fk_project)
+            .filter(project_teams.c.fk_team.in_(equipes_ids))
+            .distinct()
+            .all()
+        )
+    
+    projetos_ids = [proj.pk_id_project for proj in projetos]
+    
+    # Buscar documentos, diagramas e galeria dos projetos
+    documentos = []
+    diagramas = []
+    galeria = []
+    if projetos_ids:
+        documentos = Document.query.filter(Document.fk_project.in_(projetos_ids)).all()
+        diagramas = Diagram.query.filter(Diagram.fk_project.in_(projetos_ids)).all()
+        galeria = Gallery.query.filter(Gallery.fk_project.in_(projetos_ids)).all()
+    
+    return render_template(
+        'admin/funcionario-perfil.html', 
+        funcionario=funcionario,
+        projetos=projetos,
+        documentos=documentos,
+        diagramas=diagramas,
+        galeria=galeria
+    )
 
 # ---------------------------------------------------------------------------
 # Criar novo funcionário (cria Usuario + Funcionario + habilidades)
