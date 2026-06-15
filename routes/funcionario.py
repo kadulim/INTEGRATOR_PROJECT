@@ -402,6 +402,26 @@ def update_requisito(req_id):
     return redirect(url_for('funcionario.projeto_detalhe', projeto_id=projeto_id, equipe=equipe_id))
 
 # =============================================================================
+# MINHA EQUIPE
+# =============================================================================
+@funcionario_bp.route('/equipe')
+@login_required
+def equipe():
+    if current_user.type_user != 'employee':
+        return redirect(url_for('page_login'))
+    funcionario = Employee.query.filter_by(fk_user=current_user.pk_id_user).first()
+    if not funcionario:
+        return "Perfil de funcionário não encontrado", 404
+    equipes = funcionario.teams
+    equipes_info = {}
+    for eq in equipes:
+        equipes_info[eq.pk_id_team] = {
+            'name_team': eq.name_team,
+            'membros': eq.employees,
+        }
+    return render_template('funcionario/equipe.html', equipes_info=equipes_info)
+
+# =============================================================================
 # CODEFLOW
 # =============================================================================
 @funcionario_bp.route('/codeflow')

@@ -40,9 +40,9 @@ def logar():
         if user.type_user == 'admin':
             return redirect('/admin/')
         elif user.type_user == 'employee':
-            return redirect('/funcionario')
+            return redirect(url_for('funcionario.dashboard'))
         else:
-            return redirect('/cliente-dashboard')
+            return redirect(url_for('cliente_dashboard'))
 
     return render_template('auth/login.html',
                          total_projetos=total_projetos,
