@@ -671,14 +671,6 @@
                   </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 24px;">
-                  <!-- Progress Bar -->
-                  <div class="progress-container">
-                    <div class="progress-bar-bg">
-                      {% set pct = [30, 45, 60, 75]|random %}
-                      <div class="progress-bar-fill" style="width: {{ pct }}%; background: {% if loop.index == 1 %}#a855f7{% elif loop.index == 2 %}#3b82f6{% else %}#ec4899{% endif %};"></div>
-                    </div>
-                    <span class="progress-text">{{ pct }}%</span>
-                  </div>
                   <span style="font-size: 11px; color: var(--tx2);">Entrega: {{ proj.end_date_project }}</span>
                 </div>
               </div>
