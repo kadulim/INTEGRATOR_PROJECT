@@ -336,6 +336,7 @@ def projeto_detalhe(projeto_id):
         requisitos=requisitos,
         equipe_atual=equipe_id,
         equipes_disponiveis=func_projeto_teams,
+        equipes=func_projeto_teams,
         documentos=documentos,
         diagramas=diagramas,
         galeria=galeria,

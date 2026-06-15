@@ -265,9 +265,74 @@
   justify-content: space-between;
   padding-top: 10px;
   border-top: 1px solid var(--border);
+  gap: 12px;
 }
 .doc-meta { font-size: 11.5px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
 .doc-meta svg { width: 12px; height: 12px; }
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.section-header .section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.section-header .section-desc {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  max-width: 620px;
+}
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.section-actions select {
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+.section-actions label {
+  margin-bottom: 0;
+}
+.section-actions .btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 11px 16px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 56px 40px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 18px;
+  border: 1px dashed var(--border);
+}
+.empty-state h4 {
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+.empty-state p {
+  color: var(--text-muted);
+  font-size: 13px;
+  max-width: 340px;
+  margin: 0 auto;
+}
 
 /* ═══════════════════════════════════════════════════════════
    REQUISITOS
@@ -335,7 +400,7 @@
 
 .diagrams-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -350,7 +415,7 @@
 .diagram-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-3px); }
 
 .diagram-preview {
-  height: 180px;
+  height: 220px;
   background: var(--surface-2);
   display: flex;
   align-items: center;
@@ -359,20 +424,27 @@
   overflow: hidden;
 }
 
-.diagram-canvas {
+.diagram-preview img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 .diagram-info {
-  padding: 16px;
+  padding: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid var(--border);
+  gap: 14px;
+  flex-wrap: wrap;
 }
 .diagram-name { font-size: 14px; font-weight: 700; }
 .diagram-type { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.diagram-card .btn {
+  white-space: nowrap;
+}
 
 /* Inline diagram placeholder shapes */
 .dg-node {
@@ -452,54 +524,53 @@
   gap: 24px;
 }
 
-.comment-thread { display: flex; flex-direction: column; gap: 16px; }
+.comment-thread { display: flex; flex-direction: column; gap: 18px; }
 
 .comment-card {
   background: var(--surface);
   border-radius: var(--radius);
   border: 1.5px solid var(--border);
   padding: 20px;
-  transition: box-shadow 0.18s;
+  transition: box-shadow 0.18s, transform 0.18s;
 }
-.comment-card:hover { box-shadow: var(--shadow-md); }
+.comment-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 
 .comment-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
-.comment-meta { display: flex; align-items: center; gap: 10px; }
-.comment-author { font-size: 14px; font-weight: 700; }
+.comment-meta { display: flex; align-items: center; gap: 12px; }
+.comment-author { font-size: 15px; font-weight: 700; }
 .comment-time   { font-size: 12px; color: var(--text-muted); }
-.comment-body   { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+.comment-body   { font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
 
 .comment-reply-area {
-  margin-top: 14px;
-  padding-top: 14px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid var(--border);
 }
 .comment-reply-box {
   background: var(--surface-2);
-  border-radius: var(--surface-2);
   border-left: 3px solid var(--accent);
-  padding: 12px 16px;
+  padding: 14px 16px;
   font-size: 13px;
   color: var(--text-secondary);
   border-radius: var(--radius-sm);
   font-style: italic;
-  line-height: 1.6;
+  line-height: 1.75;
 }
 
 .comment-input-area {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 .comment-textarea {
   width: 100%;
-  padding: 13px 16px;
+  padding: 16px;
   border: 1.5px solid var(--border-md);
   border-radius: var(--radius-sm);
   font-size: 14px;
@@ -508,26 +579,26 @@
   background: var(--surface);
   outline: none;
   resize: vertical;
-  min-height: 100px;
-  transition: border-color 0.18s;
+  min-height: 120px;
+  transition: border-color 0.18s, box-shadow 0.18s;
 }
-.comment-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(233,69,96,0.08); }
+.comment-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(233,69,96,0.1); }
 
 /* Filter sidebar */
-.comment-sidebar { display: flex; flex-direction: column; gap: 16px; }
+.comment-sidebar { display: flex; flex-direction: column; gap: 18px; }
 .comment-filter-card {
   background: var(--surface);
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  padding: 18px;
+  padding: 20px;
 }
-.csf-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
-.csf-list  { display: flex; flex-direction: column; gap: 4px; }
+.csf-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+.csf-list  { display: flex; flex-direction: column; gap: 6px; }
 .csf-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: var(--radius-sm);
   font-size: 13px;
   cursor: pointer;
@@ -538,16 +609,16 @@
 .csf-count {
   font-size: 11.5px;
   font-weight: 700;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 20px;
-  background: rgba(0,0,0,0.06);
+  background: rgba(0,0,0,0.08);
 }
 
 .comment-stats-card {
   background: var(--surface);
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  padding: 18px;
+  padding: 20px;
 }
 
 /* ── Light Mode Overrides ── */

@@ -395,7 +395,7 @@
             <div class="diagram-info">
               <div>
                 <div class="diagram-name">{{ diag.name_diagram }}</div>
-                <div class="diagram-type">Upload em {{ diag.date_diagram.strftime('%d/%m/%Y') }}</div>
+                <div class="diagram-type">{{ diag.type_diagram or 'Diagrama' }}</div>
               </div>
               <a href="/static/{{ diag.path_diagram }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                 <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar

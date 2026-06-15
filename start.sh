@@ -1,9 +1,10 @@
 #!/bin/bash
 set -e
 
-# Adiciona a API CodeFlow ao PYTHONPATH
+# Adiciona a raiz do projeto e a API CodeFlow ao PYTHONPATH
 API_DIR="$(dirname "$0")/api_codeflow/api"
-export PYTHONPATH="$API_DIR:$PYTHONPATH"
+PROJECT_ROOT="$(pwd)"
+export PYTHONPATH="$PROJECT_ROOT:$API_DIR:$PYTHONPATH"
 
 exec gunicorn app:app \
   --bind "0.0.0.0:$PORT" \
