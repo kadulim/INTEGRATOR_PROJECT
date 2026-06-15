@@ -876,8 +876,8 @@
             item.style.textAlign = 'left';
             
             item.innerHTML = `
-              <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.nome}">${p.nome}</span>
-              <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.prazo}</span>
+              <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.name_project}">${p.name_project}</span>
+              <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.end_date_project}</span>
             `;
             listEl.appendChild(item);
           });

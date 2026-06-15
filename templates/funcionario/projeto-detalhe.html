@@ -41,7 +41,7 @@
                 {% endif %}
             </h2>
             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                {% set badge_status = {'Em andamento': 'badge-em-andamento', 'Concluído': 'badge-concluido', 'Pausado': 'badge-pausado', 'Cancelado': 'badge-cancelado'} %}
+                {% set badge_status = {'Em andamento': 'badge-em-andamento', 'Concluído': 'badge-concluido', 'Pausado': 'badge-pausado'} %}
                 <span class="badge {{ badge_status.get(projeto.status_project, 'badge-gray') }}">{{ projeto.status_project }}</span>
                 <span style="font-size: 13px; color: var(--text-muted);">Prazo: <strong>{{ projeto.end_date_project }}</strong></span>
                 {% if equipes_disponiveis and equipes_disponiveis|length > 1 %}

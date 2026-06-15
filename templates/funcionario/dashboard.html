@@ -486,7 +486,7 @@
   /* ─── MONTHLY ─── */
   .monthly {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     flex-shrink: 0;
   }
@@ -683,6 +683,63 @@
     overflow-y: auto;
     flex: 1;
   }
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    .main-content { height: auto !important; overflow: visible !important; }
+    .page-content {
+      height: auto !important;
+      overflow: visible !important;
+      padding-top: 72px !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+    body { height: auto !important; overflow: auto !important; }
+    .db-wrapper { height: auto !important; overflow: visible !important; min-height: 100vh; }
+    .content-scrollable { overflow-y: visible !important; padding: 16px; }
+
+    .hero {
+      grid-template-columns: 1fr !important;
+      padding: 20px 16px !important;
+      gap: 20px !important;
+      min-height: auto !important;
+    }
+    .hero-right-lbl { display: none; }
+    .big-stat { display: none; }
+
+    /* Stats row: 2 cols on mobile */
+    .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+
+    /* Monthly cards: single column stacked */
+    .monthly { grid-template-columns: 1fr !important; }
+    .mcard-num { font-size: 28px !important; }
+
+    /* Bottom grid: stack */
+    .bottom-grid { grid-template-columns: 1fr !important; }
+    .bottom-grid > * { min-height: 260px; }
+
+    .topbar-custom { padding: 12px 16px !important; padding-top: 68px !important; }
+    .tb-right .date-pill { display: none; }
+
+    .donut-wrap svg { width: 180px !important; height: 180px !important; }
+    .d-num { font-size: 36px !important; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-row { grid-template-columns: 1fr !important; }
+    .monthly { grid-template-columns: 1fr !important; }
+    .scard { padding: 16px !important; }
+    .hero-title { font-size: 22px !important; }
+  }
+
+  /* Tablet */
+  @media (min-width: 769px) and (max-width: 1100px) {
+    .hero { grid-template-columns: 1fr 220px 1fr !important; gap: 24px !important; }
+    .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
+    /* 3 cards fit in one row even on tablet */
+    .monthly { grid-template-columns: repeat(3, 1fr) !important; }
+    .bottom-grid { grid-template-columns: 1fr !important; }
+  }
+
 </style>
 {% endblock %}
 
@@ -791,16 +848,6 @@
           <div class="bs-num" style="color:var(--rd);" id="breakdownPausado">0</div>
         </div>
 
-        <div class="big-stat" style="cursor:pointer;" onclick="openProjectsModal('cancelado')">
-          <div class="bs-left">
-            <div class="bs-bar" style="background:var(--cn);box-shadow:0 0 10px rgba(107,114,128,0.3);"></div>
-            <div>
-              <div style="font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px;">Cancelado</div>
-              <div class="bs-name">Cancelados</div>
-            </div>
-          </div>
-          <div class="bs-num" style="color:var(--cn);" id="breakdownCancelado">0</div>
-        </div>
       </div>
 
     </div>
@@ -976,7 +1023,7 @@
     <!-- ═══ ATIVIDADE DO MÊS ═══ -->
     <div class="section-lbl">Atividade de {{ current_month_name }}</div>
 
-    <div class="monthly" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="monthly">
 
       <div class="mcard mcard-gr" onclick="openProjectsModal('concluido')">
         <div class="mcard-inner">
@@ -1033,24 +1080,6 @@
         <div class="mcard-bar"></div>
       </div>
 
-      <div class="mcard mcard-cn" onclick="openProjectsModal('cancelado')">
-        <div class="mcard-inner">
-          <div class="mcard-icon">
-            <svg viewBox="0 0 24 24" stroke="currentColor">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="15" y1="9" x2="9" y2="15" />
-              <line x1="9" y1="9" x2="15" y2="15" />
-            </svg>
-          </div>
-          <div class="mcard-info">
-            <div class="mcard-lbl">Cancelados</div>
-            <div class="mcard-sub">Encerrados</div>
-          </div>
-          <div class="mcard-num" style="color:var(--cn);">{{ current_month_projects.cancelado|length }}</div>
-        </div>
-        <div class="mcard-bar"></div>
-      </div>
-
     </div>
 
   </div><!-- /content -->
@@ -1097,16 +1126,134 @@
     </div>
   </div>
 </div>
-<div id="team-modal" class="modal-ov" style="display:none;">
-  <div class="modal-box" style="width: 400px;">
-    <div class="modal-head">
-      <h3 id="team-modal-title" style="font-size: 16px; font-weight: 700;"></h3>
-      <button class="modal-close" onclick="document.getElementById('team-modal').style.display='none';">X</button>
+<!-- ══ TEAM SELECTION MODAL — Premium ══ -->
+<style>
+  .team-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(4, 6, 15, 0.82);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+  .team-modal-overlay.open { opacity: 1; pointer-events: all; }
+  .light-mode .team-modal-overlay { background: rgba(15, 23, 42, 0.45); }
+
+  .team-modal-box {
+    width: 100%; max-width: 440px;
+    background: #0c1322;
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 20px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset;
+    display: flex; flex-direction: column; overflow: hidden;
+    transform: scale(0.93) translateY(16px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-height: 90vh;
+  }
+  .team-modal-overlay.open .team-modal-box { transform: scale(1) translateY(0); }
+  .light-mode .team-modal-box { background: #ffffff; border-color: rgba(0,0,0,0.1); box-shadow: 0 24px 60px rgba(0,0,0,0.15); }
+
+  .team-modal-strip {
+    height: 4px;
+    background: linear-gradient(90deg, #3B82F6, #A855F7, #06b6d4);
+    background-size: 200% 100%;
+    animation: tmGradFlow 3s ease infinite;
+  }
+  @keyframes tmGradFlow { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+  .team-modal-head {
+    padding: 22px 24px 16px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .team-modal-project-icon {
+    width: 46px; height: 46px; border-radius: 12px;
+    background: linear-gradient(135deg,rgba(59,130,246,0.15),rgba(168,85,247,0.15));
+    border: 1px solid rgba(59,130,246,0.2);
+    display: flex; align-items: center; justify-content: center;
+    color: #60a5fa; flex-shrink: 0;
+  }
+  .team-modal-head-text { flex: 1; min-width: 0; }
+  .team-modal-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #3B82F6; margin-bottom: 4px; }
+  .team-modal-proj-title { font-size: 17px; font-weight: 800; color: var(--tx); letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .light-mode .team-modal-proj-title { color: #0f172a; }
+  .team-modal-subtitle { font-size: 12px; color: var(--tx2); margin-top: 3px; }
+  .tm-close-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.2s;
+    flex-shrink: 0; font-size: 16px; line-height: 1;
+  }
+  .tm-close-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); }
+  .light-mode .tm-close-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.4); }
+  .light-mode .tm-close-btn:hover { background: rgba(0,0,0,0.08); color: rgba(0,0,0,0.8); }
+  .tm-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 0 24px; }
+  .light-mode .tm-divider { background: rgba(0,0,0,0.08); }
+  .team-modal-body {
+    padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 10px;
+    overflow-y: auto; max-height: calc(90vh - 160px);
+  }
+  .team-modal-hint { font-size: 11px; color: var(--tx2); padding: 0 4px 4px; display: flex; align-items: center; gap: 6px; }
+  .tm-team-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.025);
+    cursor: pointer; transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    text-decoration: none; position: relative; overflow: hidden;
+  }
+  .tm-team-item::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    border-radius: 0 2px 2px 0; background: var(--tm-color, #3B82F6);
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .tm-team-item:hover { border-color: rgba(255,255,255,0.13); background: rgba(255,255,255,0.06); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+  .tm-team-item:hover::before { opacity: 1; }
+  .light-mode .tm-team-item { border-color: rgba(0,0,0,0.08); background: #f8fafc; }
+  .light-mode .tm-team-item:hover { border-color: #3B82F6; background: rgba(59,130,246,0.04); box-shadow: 0 4px 12px rgba(59,130,246,0.1); }
+  .tm-avatar {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 800; flex-shrink: 0;
+    background: var(--tm-color-bg, rgba(59,130,246,0.15));
+    color: var(--tm-color, #3B82F6);
+    border: 1px solid var(--tm-color-border, rgba(59,130,246,0.2));
+    transition: transform 0.2s;
+  }
+  .tm-team-item:hover .tm-avatar { transform: scale(1.08) rotate(-3deg); }
+  .tm-info { flex: 1; min-width: 0; }
+  .tm-name { font-size: 14px; font-weight: 700; color: var(--tx); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .light-mode .tm-name { color: #0f172a; }
+  .tm-sub { font-size: 11px; color: var(--tx2); }
+  .tm-arrow {
+    width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.25); transition: all 0.2s; flex-shrink: 0;
+  }
+  .tm-team-item:hover .tm-arrow { background: rgba(59,130,246,0.15); color: #60a5fa; transform: translateX(3px); }
+  .light-mode .tm-arrow { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.2); }
+  .light-mode .tm-team-item:hover .tm-arrow { background: rgba(59,130,246,0.1); color: #3B82F6; }
+</style>
+
+<div id="team-modal" class="team-modal-overlay" onclick="if(event.target===this)closeTeamModal()">
+  <div class="team-modal-box">
+    <div class="team-modal-strip"></div>
+    <div class="team-modal-head">
+      <div class="team-modal-project-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="team-modal-head-text">
+        <div class="team-modal-eyebrow">Selecionar Equipe</div>
+        <div class="team-modal-proj-title" id="team-modal-title">Projeto</div>
+        <div class="team-modal-subtitle">Escolha com qual equipe deseja acessar</div>
+      </div>
+      <button class="tm-close-btn" onclick="closeTeamModal()" title="Fechar">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
-    <div class="modal-scroll custom-scroll" style="padding: 20px;">
-      <p style="font-size: 12px; color: var(--tx2); margin-bottom: 16px;">Selecione a equipe:</p>
-      <div id="team-modal-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
-    </div>
+    <div class="tm-divider"></div>
+    <div class="team-modal-body" id="team-modal-body"></div>
   </div>
 </div>
 {% endblock %}
@@ -1120,12 +1267,10 @@
     const emAndamentoVal = parseInt(statusData.find(d => d.label === 'Em andamento')?.val || 0);
     const concluidoVal   = parseInt(statusData.find(d => d.label === 'Concluído')?.val || 0);
     const pausadoVal     = parseInt(statusData.find(d => d.label === 'Pausado')?.val || 0);
-    const canceladoVal   = parseInt(statusData.find(d => d.label === 'Cancelado')?.val || 0);
 
     document.getElementById('breakdownAndamento').textContent = emAndamentoVal;
     document.getElementById('breakdownConcluido').textContent = concluidoVal;
     document.getElementById('breakdownPausado').textContent   = pausadoVal;
-    document.getElementById('breakdownCancelado').textContent = canceladoVal;
 
     const SEGS = statusData.filter(s => s.val > 0).map(s => ({
       label: s.label, val: s.val, color: s.color
@@ -1227,8 +1372,7 @@
     const labels = {
       'concluido':   { title: 'Projetos Concluídos', color: 'var(--gr)' },
       'em_andamento':{ title: 'Projetos em Andamento', color: 'var(--am-anda)' },
-      'pausado':     { title: 'Projetos Pausados', color: 'var(--rd)' },
-      'cancelado':   { title: 'Projetos Cancelados', color: 'var(--cn)' },
+      'pausado':     { title: 'Projetos Pausados', color: 'var(--rd)' }
     };
     const info = labels[statusKey] || { title: 'Projetos', color: 'var(--ac)' };
     

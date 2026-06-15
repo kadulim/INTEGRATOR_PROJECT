@@ -4,156 +4,633 @@
 {% block title %}Meus Projetos — CoByte{% endblock %}
 {% block topbar_title %}Meus Projetos{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ─── Page header ─── */
+  .proj-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .proj-page-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+  .proj-page-count {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  /* ─── Table view (desktop) ─── */
+  .projects-list-table { display: flex; flex-direction: column; }
+
+  .p-row {
+    display: grid;
+    grid-template-columns: 1fr 180px 180px 60px;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.18s ease;
+    cursor: pointer;
+    gap: 16px;
+  }
+  .p-row:last-child { border-bottom: none; }
+  .p-row:hover { background: rgba(255, 255, 255, 0.03); }
+  .light-mode .p-row:hover { background: rgba(0, 0, 0, 0.02); }
+
+  .p-row-icon {
+    width: 42px; height: 42px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--blue);
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .p-row:hover .p-row-icon { background: rgba(59, 130, 246, 0.18); }
+
+  .p-row-name {
+    font-weight: 600;
+    font-size: 14.5px;
+    margin-bottom: 2px;
+    color: var(--text-primary);
+  }
+  .p-row-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    max-width: 400px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 6px;
+  }
+  .p-row-teams { display: flex; gap: 6px; flex-wrap: wrap; }
+  .team-badge {
+    font-size: 10px; padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(168, 85, 247, 0.15);
+    color: #a855f7;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .p-row-field-label {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .p-row-chevron {
+    display: flex; align-items: center; justify-content: flex-end;
+  }
+
+  /* ─── Mobile card view (≤ 640px) ─── */
+  .p-card-view { display: none; flex-direction: column; gap: 12px; padding: 16px; }
+  .p-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .p-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  }
+  .p-card-top {
+    display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;
+  }
+  .p-card-info { flex: 1; min-width: 0; }
+  .p-card-name {
+    font-size: 15px; font-weight: 700; color: var(--text-primary);
+    margin-bottom: 3px; line-height: 1.3;
+  }
+  .p-card-desc {
+    font-size: 11.5px; color: var(--text-muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .p-card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* ─── Responsive breakpoints ─── */
+  @media (max-width: 900px) {
+    .p-row {
+      grid-template-columns: 1fr 140px 120px 48px;
+      padding: 16px 20px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .projects-list-table { display: none !important; }
+    .p-card-view { display: flex !important; }
+    .proj-page-header { padding: 0 4px; }
+  }
+
+  /* ─── Empty state ─── */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state i { width: 64px; height: 64px; margin-bottom: 20px; opacity: 0.2; }
+
+  /* ══════════════════════════════════
+     TEAM SELECTION MODAL — Premium
+  ══════════════════════════════════ */
+  .team-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 6, 15, 0.82);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+  .team-modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .light-mode .team-modal-overlay {
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  .team-modal-box {
+    width: 100%;
+    max-width: 440px;
+    background: #0c1322;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 20px;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255,255,255,0.04) inset;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.93) translateY(16px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-height: 90vh;
+  }
+  .team-modal-overlay.open .team-modal-box {
+    transform: scale(1) translateY(0);
+  }
+  .light-mode .team-modal-box {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Header gradient strip */
+  .team-modal-strip {
+    height: 4px;
+    background: linear-gradient(90deg, #3B82F6, #A855F7, #06b6d4);
+    background-size: 200% 100%;
+    animation: gradientFlow 3s ease infinite;
+  }
+  @keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .team-modal-head {
+    padding: 22px 24px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .team-modal-project-icon {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(168,85,247,0.15));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    display: flex; align-items: center; justify-content: center;
+    color: #60a5fa;
+    flex-shrink: 0;
+  }
+  .team-modal-head-text { flex: 1; min-width: 0; }
+  .team-modal-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #3B82F6;
+    margin-bottom: 4px;
+  }
+  .team-modal-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .light-mode .team-modal-title { color: #0f172a; }
+
+  .team-modal-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .team-modal-close {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    font-size: 16px;
+    line-height: 1;
+  }
+  .team-modal-close:hover {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.9);
+    border-color: rgba(255,255,255,0.15);
+  }
+  .light-mode .team-modal-close {
+    background: rgba(0,0,0,0.05);
+    border-color: rgba(0,0,0,0.1);
+    color: rgba(0,0,0,0.4);
+  }
+  .light-mode .team-modal-close:hover {
+    background: rgba(0,0,0,0.08);
+    color: rgba(0,0,0,0.8);
+  }
+
+  .team-modal-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin: 0 24px;
+  }
+  .light-mode .team-modal-divider { background: rgba(0,0,0,0.08); }
+
+  .team-modal-body {
+    padding: 16px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    max-height: calc(90vh - 160px);
+  }
+  .team-modal-body::-webkit-scrollbar { width: 4px; }
+  .team-modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+  }
+
+  .team-modal-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 0 4px 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Individual team item */
+  .team-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.025);
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .team-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+    background: var(--item-color, #3B82F6);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .team-item:hover {
+    border-color: rgba(255,255,255,0.13);
+    background: rgba(255,255,255,0.06);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  }
+  .team-item:hover::before { opacity: 1; }
+
+  .light-mode .team-item {
+    border-color: rgba(0,0,0,0.08);
+    background: #f8fafc;
+  }
+  .light-mode .team-item:hover {
+    border-color: #3B82F6;
+    background: rgba(59, 130, 246, 0.04);
+    box-shadow: 0 4px 12px rgba(59,130,246,0.1);
+  }
+
+  .team-item-avatar {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 800;
+    flex-shrink: 0;
+    letter-spacing: -0.5px;
+    background: var(--item-color-bg, rgba(59,130,246,0.15));
+    color: var(--item-color, #3B82F6);
+    border: 1px solid var(--item-color-border, rgba(59,130,246,0.2));
+    transition: transform 0.2s;
+  }
+  .team-item:hover .team-item-avatar {
+    transform: scale(1.08) rotate(-3deg);
+  }
+
+  .team-item-info { flex: 1; min-width: 0; }
+  .team-item-name {
+    font-size: 14px; font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .light-mode .team-item-name { color: #0f172a; }
+  .team-item-sub {
+    font-size: 11px; color: var(--text-muted);
+  }
+
+  .team-item-arrow {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.25);
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .team-item:hover .team-item-arrow {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    transform: translateX(3px);
+  }
+  .light-mode .team-item-arrow { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.2); }
+  .light-mode .team-item:hover .team-item-arrow { background: rgba(59,130,246,0.1); color: #3B82F6; }
+
+  /* Color palette for teams */
+  .team-color-0 { --item-color: #3B82F6; --item-color-bg: rgba(59,130,246,0.12); --item-color-border: rgba(59,130,246,0.2); }
+  .team-color-1 { --item-color: #A855F7; --item-color-bg: rgba(168,85,247,0.12); --item-color-border: rgba(168,85,247,0.2); }
+  .team-color-2 { --item-color: #10b981; --item-color-bg: rgba(16,185,129,0.12); --item-color-border: rgba(16,185,129,0.2); }
+  .team-color-3 { --item-color: #f59e0b; --item-color-bg: rgba(245,158,11,0.12); --item-color-border: rgba(245,158,11,0.2); }
+  .team-color-4 { --item-color: #06b6d4; --item-color-bg: rgba(6,182,212,0.12); --item-color-border: rgba(6,182,212,0.2); }
+  .team-color-5 { --item-color: #f43f5e; --item-color-bg: rgba(244,63,94,0.12); --item-color-border: rgba(244,63,94,0.2); }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card">
-    <div class="card-header" style="padding: 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 18px; font-weight: 700;">Lista de Projetos Atribuídos</h3>
-        <div style="font-size: 13px; color: var(--text-muted);">{{ projetos|length }} Projetos encontrados</div>
-    </div>
-    <div class="card-body" style="padding: 0;">
-        {% if projetos %}
-            <div class="projects-list-table">
-                {% for p in projetos %}
-                {% set equipes_projeto = projeto_equipes_map.get(p.pk_id_project, []) %}
-                <div class="p-row" data-projeto-id="{{ p.pk_id_project }}" data-projeto-nome="{{ p.name_project }}" data-equipes='{{ equipes_projeto | map(attribute="pk_id_team") | list | tojson }}' data-equipes-nomes='{{ equipes_projeto | map(attribute="name_team") | list | tojson }}' style="display: grid; grid-template-columns: 1fr 180px 180px 120px; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); transition: 0.2s; cursor: pointer;" onclick="openProjeto(this)">
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <div style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--blue);">
-                            <i data-lucide="folder"></i>
-                        </div>
-                        <div>
-                            <div style="font-weight: 600; font-size: 15px; margin-bottom: 2px;">{{ p.name_project }}</div>
-                            <div style="font-size: 12px; color: var(--text-muted); max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ p.description_project or 'Sem descrição' }}</div>
-                            <div style="display: flex; gap: 6px; margin-top: 6px;">
-                                {% for eq in equipes_projeto %}
-                                <span style="font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(168, 85, 247, 0.15); color: #a855f7; font-weight: 600;">{{ eq.name_team }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px;">Status</div>
-                        <span class="badge {% if p.status_project == 'Em andamento' %}badge-em-andamento{% elif p.status_project == 'Concluído' %}badge-concluido{% elif p.status_project == 'Pausado' %}badge-pausado{% else %}badge-cancelado{% endif %}" style="font-size: 11px;">{{ p.status_project }}</span>
-                    </div>
-                    <div>
-                        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px;">Prazo Final</div>
-                        <div style="font-size: 14px; font-weight: 500;">{{ p.end_date_project }}</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <button class="btn btn-ghost btn-sm" title="Acessar Projeto">
-                            <i data-lucide="chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div style="text-align: center; padding: 100px 20px; color: var(--text-muted);">
-                <i data-lucide="folder-x" style="width: 64px; height: 64px; margin-bottom: 20px; opacity: 0.2;"></i>
-                <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Nenhum projeto</h4>
-                <p>Você ainda não faz parte de nenhuma equipe com projetos ativos.</p>
-            </div>
-        {% endif %}
-    </div>
+
+<!-- Page Header -->
+<div class="proj-page-header">
+  <div>
+    <div class="proj-page-title">Meus Projetos</div>
+  </div>
+  <span class="proj-page-count">{{ projetos|length }} projeto{{ 's' if projetos|length != 1 else '' }}</span>
 </div>
 
-<style>
-    .p-row:hover {
-        background: rgba(255, 255, 255, 0.02);
-    }
-    .modal-ov {
-        position: fixed; inset: 0;
-        background: rgba(4, 6, 12, 0.8);
-        backdrop-filter: blur(8px);
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .light-mode .modal-ov {
-        background: rgba(15, 23, 42, 0.35) !important;
-    }
-    .modal-box {
-        width: 520px; max-width: 90vw;
-        background: var(--s1);
-        border: 1px solid var(--b2);
-        border-radius: 16px;
-        max-height: 80vh;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-        animation: modalFadeIn 0.2s ease-out;
-    }
-    .light-mode .modal-box {
-        box-shadow: 0 24px 64px rgba(15, 23, 42, 0.12) !important;
-    }
-    @keyframes modalFadeIn {
-        from { opacity: 0; transform: scale(0.95) translateY(10px); }
-        to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .modal-head {
-        padding: 18px 24px;
-        border-bottom: 1px solid var(--b1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-shrink: 0;
-    }
-    .modal-head h3 { font-size: 15px; color: var(--tx); }
-    .modal-close {
-        background: none; border: none;
-        color: var(--tx2); cursor: pointer;
-        padding: 4px; border-radius: 6px;
-        font-size: 18px; line-height: 1;
-        transition: all 0.2s;
-    }
-    .modal-close:hover {
-        color: var(--tx);
-        background: var(--b1);
-    }
-    .modal-scroll {
-        overflow-y: auto;
-        flex: 1;
-    }
-</style>
+<div class="card" style="overflow: hidden;">
 
-<div id="team-modal" class="modal-ov" style="display:none;">
-  <div class="modal-box" style="width: 400px;">
-    <div class="modal-head">
-      <h3 id="team-modal-title" style="font-size: 16px; font-weight: 700;"></h3>
-      <button class="modal-close" onclick="document.getElementById('team-modal').style.display='none';">X</button>
+  {% if projetos %}
+
+    <!-- ── Desktop / Tablet table view ── -->
+    <div class="projects-list-table">
+      {% for p in projetos %}
+      {% set equipes_projeto = projeto_equipes_map.get(p.pk_id_project, []) %}
+      <div class="p-row"
+           data-projeto-id="{{ p.pk_id_project }}"
+           data-projeto-nome="{{ p.name_project }}"
+           data-equipes='{{ equipes_projeto | map(attribute="pk_id_team") | list | tojson }}'
+           data-equipes-nomes='{{ equipes_projeto | map(attribute="name_team") | list | tojson }}'
+           onclick="openProjeto(this)">
+
+        <!-- Name + description + teams -->
+        <div style="display: flex; align-items: center; gap: 16px; min-width: 0;">
+          <div class="p-row-icon">
+            <i data-lucide="folder" style="width:18px;height:18px;"></i>
+          </div>
+          <div style="min-width: 0;">
+            <div class="p-row-name">{{ p.name_project }}</div>
+            <div class="p-row-desc">{{ p.description_project or 'Sem descrição' }}</div>
+            <div class="p-row-teams">
+              {% for eq in equipes_projeto %}
+              <span class="team-badge">{{ eq.name_team }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <div class="p-row-field-label">Status</div>
+          <span class="badge {% if p.status_project == 'Em andamento' %}badge-em-andamento{% elif p.status_project == 'Concluído' %}badge-concluido{% elif p.status_project == 'Pausado' %}badge-pausado{% endif %}">
+            {{ p.status_project }}
+          </span>
+        </div>
+
+        <!-- Deadline -->
+        <div>
+          <div class="p-row-field-label">Prazo Final</div>
+          <div style="font-size: 14px; font-weight: 600;">{{ p.end_date_project }}</div>
+        </div>
+
+        <!-- Chevron -->
+        <div class="p-row-chevron">
+          <button class="btn btn-ghost btn-sm" title="Acessar Projeto">
+            <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
     </div>
-    <div class="modal-scroll custom-scroll" style="padding: 20px;">
-      <p style="font-size: 12px; color: var(--tx2); margin-bottom: 16px;">Selecione a equipe:</p>
-      <div id="team-modal-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+
+    <!-- ── Mobile card view ── -->
+    <div class="p-card-view">
+      {% for p in projetos %}
+      {% set equipes_projeto = projeto_equipes_map.get(p.pk_id_project, []) %}
+      <div class="p-card"
+           data-projeto-id="{{ p.pk_id_project }}"
+           data-projeto-nome="{{ p.name_project }}"
+           data-equipes='{{ equipes_projeto | map(attribute="pk_id_team") | list | tojson }}'
+           data-equipes-nomes='{{ equipes_projeto | map(attribute="name_team") | list | tojson }}'
+           onclick="openProjeto(this)">
+        <div class="p-card-top">
+          <div class="p-row-icon">
+            <i data-lucide="folder" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="p-card-info">
+            <div class="p-card-name">{{ p.name_project }}</div>
+            <div class="p-card-desc">{{ p.description_project or 'Sem descrição' }}</div>
+          </div>
+          <i data-lucide="chevron-right" style="width:16px;height:16px;color:var(--text-muted);flex-shrink:0;margin-top:3px;"></i>
+        </div>
+        <div class="p-row-teams" style="margin-bottom: 10px;">
+          {% for eq in equipes_projeto %}
+          <span class="team-badge">{{ eq.name_team }}</span>
+          {% endfor %}
+        </div>
+        <div class="p-card-footer">
+          <div>
+            <div class="p-row-field-label">Prazo</div>
+            <div style="font-size: 13px; font-weight: 600;">{{ p.end_date_project }}</div>
+          </div>
+          <span class="badge {% if p.status_project == 'Em andamento' %}badge-em-andamento{% elif p.status_project == 'Concluído' %}badge-concluido{% elif p.status_project == 'Pausado' %}badge-pausado{% endif %}">
+            {{ p.status_project }}
+          </span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="empty-state">
+      <i data-lucide="folder-x"></i>
+      <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Nenhum projeto</h4>
+      <p>Você ainda não faz parte de nenhuma equipe com projetos ativos.</p>
+    </div>
+  {% endif %}
+
+</div>
+
+
+<!-- ══ TEAM SELECTION MODAL ══ -->
+<div id="team-modal" class="team-modal-overlay" onclick="if(event.target===this)closeTeamModal()">
+  <div class="team-modal-box">
+    <!-- Gradient strip -->
+    <div class="team-modal-strip"></div>
+
+    <!-- Header -->
+    <div class="team-modal-head">
+      <div class="team-modal-project-icon">
+        <i data-lucide="folder-kanban" style="width:22px;height:22px;"></i>
+      </div>
+      <div class="team-modal-head-text">
+        <div class="team-modal-eyebrow">Selecionar Equipe</div>
+        <div class="team-modal-title" id="team-modal-title">Projeto</div>
+        <div class="team-modal-subtitle">Escolha com qual equipe deseja acessar</div>
+      </div>
+      <button class="team-modal-close" onclick="closeTeamModal()" title="Fechar">
+        <i data-lucide="x" style="width:14px;height:14px;"></i>
+      </button>
+    </div>
+
+    <div class="team-modal-divider"></div>
+
+    <!-- Body -->
+    <div class="team-modal-body" id="team-modal-body">
+      <!-- Filled by JS -->
     </div>
   </div>
 </div>
 
+
+{% endblock %}
+
+{% block extra_js %}
 <script>
+  lucide.createIcons();
+
+  const TEAM_COLORS = [
+    'team-color-0','team-color-1','team-color-2',
+    'team-color-3','team-color-4','team-color-5'
+  ];
+
   function openProjeto(el) {
-    const projId = el.dataset.projetoId;
+    const projId   = el.dataset.projetoId;
     const projNome = el.dataset.projetoNome;
-    const equipes = JSON.parse(el.dataset.equipes);
+    const equipes  = JSON.parse(el.dataset.equipes);
     const equipesNomes = JSON.parse(el.dataset.equipesNomes);
-    const baseUrl = '{{ url_for("funcionario.projeto_detalhe", projeto_id=0) }}'.replace('0', projId);
+    const baseUrl  = '{{ url_for("funcionario.projeto_detalhe", projeto_id=0) }}'.replace('0', projId);
+
+    // Single team → navigate directly
     if (equipes.length <= 1) {
-      location.href = baseUrl;
+      location.href = baseUrl + (equipes.length === 1 ? '?equipe=' + equipes[0] : '');
       return;
     }
+
+    // Multiple teams → show premium modal
     document.getElementById('team-modal-title').textContent = projNome;
-    const list = document.getElementById('team-modal-list');
-    list.innerHTML = equipes.map((id, i) => {
+
+    const body = document.getElementById('team-modal-body');
+    body.innerHTML = `
+      <div class="team-modal-hint">
+        <i data-lucide="users" style="width:13px;height:13px;flex-shrink:0;"></i>
+        <span>${equipes.length} equipes vinculadas a este projeto</span>
+      </div>
+    `;
+
+    equipes.forEach((id, i) => {
       const url = baseUrl + '?equipe=' + id;
-      return '<div onclick="location.href=\'' + url + '\'" style="padding: 12px 16px; border-radius: 8px; border: 1px solid var(--b1); background: var(--s2); cursor: pointer; font-weight: 500; font-size: 14px; transition: all 0.2s; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.background=\'var(--s3)\'; this.style.borderColor=\'var(--b2)\'; this.style.transform=\'translateY(-1px)\'; this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.1)\'" onmouseout="this.style.background=\'var(--s2)\'; this.style.borderColor=\'var(--b1)\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 2px 4px rgba(0,0,0,0.05)\'">' +
-        '<span style="width: 32px; height: 32px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); color: var(--ac); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border: 1px solid rgba(59, 130, 246, 0.2);">' + equipesNomes[i][0].toUpperCase() + '</span>' +
-        '<span style="color: var(--tx);">' + equipesNomes[i] + '</span>' +
-        '</div>';
-    }).join('');
-    document.getElementById('team-modal').style.display = 'flex';
+      const colorClass = TEAM_COLORS[i % TEAM_COLORS.length];
+      const initial = (equipesNomes[i] || 'E')[0].toUpperCase();
+
+      const item = document.createElement('a');
+      item.href = url;
+      item.className = `team-item ${colorClass}`;
+      item.innerHTML = `
+        <div class="team-item-avatar">${initial}</div>
+        <div class="team-item-info">
+          <div class="team-item-name">${equipesNomes[i]}</div>
+          <div class="team-item-sub">Clique para entrar como membro</div>
+        </div>
+        <div class="team-item-arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </div>
+      `;
+      body.appendChild(item);
+    });
+
+    lucide.createIcons();
+
+    const overlay = document.getElementById('team-modal');
+    overlay.style.display = 'flex';
+    // Trigger animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => overlay.classList.add('open'));
+    });
   }
 
-  document.getElementById('team-modal')?.addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
+  function closeTeamModal() {
+    const overlay = document.getElementById('team-modal');
+    overlay.classList.remove('open');
+    setTimeout(() => { overlay.style.display = 'none'; }, 220);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeTeamModal();
   });
 </script>
 {% endblock %}

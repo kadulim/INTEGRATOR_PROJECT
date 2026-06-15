@@ -10,11 +10,8 @@
   <script>
     (function() {
       const savedTheme = localStorage.getItem('cobyte-theme');
-      // Se não houver tema salvo, garante que seja dark
-      if (!savedTheme) {
-        localStorage.setItem('cobyte-theme', 'dark');
-      }
-      // Aplica light-mode apenas se explicitamente salvo como light
+      if (!savedTheme) { localStorage.setItem('cobyte-theme', 'dark'); }
+      if (localStorage.getItem('cobyte-sidebar-collapsed') === 'true') { document.documentElement.classList.add('sidebar-preload-collapsed'); }
       if (savedTheme === 'light') {
         document.documentElement.classList.add('light-mode');
         document.body.classList.add('light-mode');
@@ -27,47 +24,68 @@
 </head>
 <body>
 
+{% set user_name = current_user.name_user if current_user.is_authenticated and current_user.name_user else 'Usuário' %}
+{% set user_initials = user_name[:2].upper() %}
+
 <div class="app-shell">
+
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo" style="display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
       <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Icon" style="height: 44px; width: auto; object-fit: contain; transition: all 0.35s ease;">
       <span class="sidebar-logo-text" style="font-size: 24px; font-weight: 800; letter-spacing: -1.2px; font-family: 'Outfit', sans-serif; line-height: 1; transform: translateY(-1px); margin-left: -8px; display: inline-block; white-space: nowrap; transition: all 0.35s ease;">
-        <span style="color: var(--text-primary);">Co</span><span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
+        <span style="color: var(--text-primary);">Co</span>
+        <span style="background: linear-gradient(90deg, #3B82F6, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Byte</span>
       </span>
     </div>
+
     <nav class="sidebar-nav">
       <div class="nav-label">Menu</div>
-      
-      <a href="{{ url_for('funcionario.dashboard') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+
+      <a href="{{ url_for('funcionario.dashboard') }}"
+         class="nav-item {% if active_page == 'dashboard' %}active{% endif %}"
+         data-tooltip="Meu Painel">
         <i data-lucide="layout-dashboard"></i>
         <span>Meu Painel</span>
       </a>
-      
-      <a href="{{ url_for('funcionario.projetos') }}" class="nav-item {% if active_page == 'projetos' %}active{% endif %}">
+
+      <a href="{{ url_for('funcionario.projetos') }}"
+         class="nav-item {% if active_page == 'projetos' %}active{% endif %}"
+         data-tooltip="Meus Projetos">
         <i data-lucide="folder-kanban"></i>
         <span>Meus Projetos</span>
       </a>
 
-      <a href="{{ url_for('funcionario.configuracoes') }}" class="nav-item {% if active_page == 'configuracoes' %}active{% endif %}">
+      <a href="{{ url_for('funcionario.configuracoes') }}"
+         class="nav-item {% if active_page == 'configuracoes' %}active{% endif %}"
+         data-tooltip="Configurações">
         <i data-lucide="settings"></i>
         <span>Configurações</span>
       </a>
 
       <div class="nav-label" style="margin-top: 8px;">Ferramentas</div>
 
-      <a href="{{ url_for('funcionario.codeflow_dashboard') }}" class="nav-item {% if active_page == 'codeflow' %}active{% endif %}">
+      <a href="{{ url_for('funcionario.codeflow_dashboard') }}"
+         class="nav-item {% if active_page == 'codeflow' %}active{% endif %}"
+         data-tooltip="CodeFlow">
         <i data-lucide="git-branch"></i>
         <span>CodeFlow</span>
       </a>
     </nav>
-  </nav>
 
+    <!-- Sidebar toggle button (desktop only) -->
+    <button class="sidebar-toggle" id="sidebarToggle" title="Recolher sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+
+    <!-- USER -->
     <div class="sidebar-footer">
       <div class="user-chip">
-        <div class="avatar sm avatar-green">{{ current_user.name_user[:2].upper() }}</div>
+        <div class="avatar sm avatar-green">{{ user_initials }}</div>
         <div class="user-info">
-          <div class="user-name">{{ current_user.name_user }}</div>
+          <div class="user-name">{{ user_name }}</div>
           <div class="user-role">Funcionário</div>
         </div>
         <a href="{{ url_for('logout') }}" title="Sair" style="color:rgba(255,255,255,0.35);margin-left:auto;text-decoration:none;">
@@ -75,14 +93,16 @@
         </a>
       </div>
     </div>
+
   </aside>
 
   <div class="main-content">
     {% include 'components/mobile_nav.html' %}
-    <main class="page-content fade-up">
+    <main class="page-content fade-up" style="padding-bottom: 100px;">
       {% block content %}{% endblock %}
     </main>
   </div>
+
 </div>
 
 <!-- Bottom Dock Menu (iOS Style Pull-up) -->
@@ -128,14 +148,11 @@
     align-items: center;
     padding: 10px 32px;
     box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
-    
-    /* Initial state: only handle visible */
     height: 24px;
     overflow: hidden;
     transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
   }
-
   .ios-handle {
     width: 50px;
     height: 4px;
@@ -145,18 +162,15 @@
     transition: 0.3s;
     flex-shrink: 0;
   }
-
   .ios-dock:hover {
-    height: 90px; /* Expands to show content */
+    height: 90px;
     background: rgba(15, 23, 42, 0.95);
   }
-
   .ios-dock:hover .ios-handle {
-    background: var(--accent); /* Glow color */
+    background: var(--accent);
     box-shadow: 0 0 10px var(--accent);
     width: 70px;
   }
-
   .dock-content {
     display: flex;
     gap: 40px;
@@ -164,12 +178,10 @@
     transform: translateY(20px);
     transition: 0.4s 0.1s cubic-bezier(0.16, 1, 0.3, 1);
   }
-
   .ios-dock:hover .dock-content {
     opacity: 1;
     transform: translateY(0);
   }
-
   .dock-btn {
     display: flex;
     flex-direction: column;
@@ -184,7 +196,6 @@
     font-size: 11px;
     font-weight: 600;
   }
-
   .btn-icon {
     width: 36px;
     height: 36px;
@@ -197,44 +208,26 @@
     transition: 0.3s;
     color: rgba(255, 255, 255, 0.6);
   }
-
-  .dock-btn:hover {
-    color: #fff;
-  }
-
+  .dock-btn:hover { color: #fff; }
   .dock-btn:hover .btn-icon {
     background: rgba(59, 130, 246, 0.1);
     border-color: rgba(59, 130, 246, 0.3);
     color: var(--accent);
     transform: translateY(-2px);
   }
-
-  .dock-btn i {
-    width: 16px;
-    height: 16px;
-  }
-
-  /* iOS Dock Light Mode overrides */
+  .dock-btn i { width: 16px; height: 16px; }
   .light-mode .ios-dock {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.06);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
   }
-  .light-mode .ios-dock:hover {
-    background: rgba(255, 255, 255, 0.98);
-  }
-  .light-mode .ios-handle {
-    background: rgba(0, 0, 0, 0.15);
-  }
-  .light-mode .dock-btn {
-    color: rgba(0, 0, 0, 0.6);
-  }
-  .light-mode .dock-btn:hover {
-    color: #000;
-  }
+  .light-mode .ios-dock:hover { background: rgba(255, 255, 255, 0.98); }
+  .light-mode .ios-handle { background: rgba(0, 0, 0, 0.18); }
+  .light-mode .dock-btn { color: rgba(0, 0, 0, 0.6); }
+  .light-mode .dock-btn:hover { color: #0f172a; }
   .light-mode .btn-icon {
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.12);
     color: rgba(0, 0, 0, 0.6);
   }
 </style>
@@ -244,8 +237,6 @@
     const isLight = document.documentElement.classList.toggle('light-mode');
     document.body.classList.toggle('light-mode');
     localStorage.setItem('cobyte-theme', isLight ? 'light' : 'dark');
-    
-    // Update icons
     const sunIcon = document.querySelector('.theme-icon-sun');
     const moonIcon = document.querySelector('.theme-icon-moon');
     if (isLight) {
@@ -257,14 +248,30 @@
     }
   }
 
-  // Initialize icons on load
   document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('cobyte-theme');
     const sunIcon = document.querySelector('.theme-icon-sun');
     const moonIcon = document.querySelector('.theme-icon-moon');
+    if (localStorage.getItem('cobyte-sidebar-collapsed') === 'true') {
+      document.documentElement.classList.add('sidebar-preload-collapsed');
+    }
     if (savedTheme === 'light') {
       if (sunIcon) sunIcon.style.display = 'none';
       if (moonIcon) moonIcon.style.display = 'block';
+    }
+
+    // Sidebar toggle (desktop)
+    const toggle = document.getElementById('sidebarToggle');
+    const appShell = document.querySelector('.app-shell');
+    const sidebar = document.querySelector('.sidebar');
+    if (toggle && sidebar && appShell) {
+      const isCollapsed = localStorage.getItem('cobyte-sidebar-collapsed') === 'true';
+      if (isCollapsed) { appShell.classList.add('sidebar-collapsed'); sidebar.classList.add('sidebar-collapsed'); }
+      toggle.addEventListener('click', () => {
+        const collapsed = sidebar.classList.toggle('sidebar-collapsed');
+        appShell.classList.toggle('sidebar-collapsed', collapsed);
+        localStorage.setItem('cobyte-sidebar-collapsed', collapsed);
+      });
     }
   });
 </script>
@@ -272,14 +279,14 @@
 <script src="{{ url_for('static', filename='js/shared.js') }}"></script>
 <script>
   lucide.createIcons();
-  
+
   // Exibir Flash Messages do Flask como Toasts
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       document.addEventListener('DOMContentLoaded', () => {
         {% for category, msg in messages %}
           {% set toast_type = 'error' if category in ['error', 'danger', 'message'] else 'success' %}
-          setTimeout(() => { toast("{{ msg | replace('\"', '\\\"') | replace('\n', ' ') }}", "{{ toast_type }}"); }, {{ loop.index * 150 }});
+          setTimeout(() => { toast("{{ msg | replace('"', '\\"') | replace('\n', ' ') }}", "{{ toast_type }}"); }, {{ loop.index * 150 }});
         {% endfor %}
       });
     {% endif %}

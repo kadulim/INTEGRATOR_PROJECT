@@ -7,8 +7,7 @@ function statusBadge(status) {
   const map = {
     'Em andamento': 'badge-em-andamento',
     'Concluído':    'badge-concluido',
-    'Pausado':      'badge-pausado',
-    'Cancelado':    'badge-cancelado',
+    'Pausado':      'badge-pausado'
   };
   return `<span class="badge ${map[status] || 'badge-gray'}">${status}</span>`;
 }
