@@ -818,7 +818,7 @@
         <div class="scard-top">
           <div class="scard-lbl">Budget Total</div>
         </div>
-        <div class="scard-val" style="font-size:22px;letter-spacing:-0.5px;position: relative; z-index: 2;">R${{ "%.0f"|format(budget_total) if budget_total % 1 == 0 else "%.2f"|format(budget_total) }}</div>
+        <div class="scard-val" style="font-size:22px;letter-spacing:-0.5px;position: relative; z-index: 2;">R${{ budget_total|format_budget }}</div>
         <div class="scard-sub" style="position: relative; z-index: 2;">
           <span class="tag tag-am">Consolidado</span>
         </div>

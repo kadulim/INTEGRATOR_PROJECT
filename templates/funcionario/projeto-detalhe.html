@@ -63,7 +63,7 @@
         <div class="overview-stats" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
             <div class="card" style="padding: 20px; background: rgba(255,255,255,0.02);">
                 <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">Budget Atribuído</div>
-                <div style="font-size: 20px; font-weight: 700;">R$ {{ "%.2f"|format(projeto.orcamento) }}</div>
+                <div style="font-size: 20px; font-weight: 700;">R$ {{ projeto.orcamento|format_budget }}</div>
             </div>
             <div class="card" style="padding: 20px; background: rgba(255,255,255,0.02);">
                 <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">Cliente</div>

@@ -706,7 +706,7 @@
               <div class="pcard-budget" style="margin-bottom: 20px;">
                 <div class="pcard-budget-row" style="margin-bottom: 0;">
                   <span class="pcard-budget-lbl">Orçamento</span>
-                  <span class="pcard-budget-val">R$ {{ "%.2f" | format(p.orcamento) }}</span>
+                  <span class="pcard-budget-val">R$ {{ p.orcamento|format_budget }}</span>
                 </div>
               </div>
 
@@ -781,7 +781,7 @@
                   </span>
                 </td>
                 <td style="font-family: 'JetBrains Mono', monospace;">{{ p.end_date_project }}</td>
-                <td style="font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--tx);">R$ {{ "%.2f" | format(p.orcamento) }}</td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--tx);">R$ {{ p.orcamento|format_budget }}</td>
                 <td style="text-align: right;">
                   <div style="display:inline-flex; gap:8px; justify-content: flex-end; align-items: center;">
                     <a href="{{ url_for('admin.projeto_detalhe', id=p.pk_id_project) }}" class="icon-btn-custom" title="Ver Detalhes" style="width: 28px; height: 28px; border-radius: 6px;">

@@ -55,7 +55,7 @@ def dashboard():
             cliente_ids.add(p.fk_client)
     total_clientes = len(cliente_ids)
     
-    orcamento_total = 0
+    orcamento_total = sum(p.orcamento or 0 for p in projetos)
     
     requisitos_pendentes = 0
     for proj in projetos:

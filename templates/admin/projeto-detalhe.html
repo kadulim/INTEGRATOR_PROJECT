@@ -88,7 +88,7 @@
             </div>
             <div>
               <div class="kpi-label">Budget</div>
-              <div class="kpi-value">R$ {{ "%.0f" | format(projeto.orcamento) }}</div>
+              <div class="kpi-value">R$ {{ projeto.orcamento|format_budget }}</div>
             </div>
           </div>
         </div>

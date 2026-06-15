@@ -261,6 +261,22 @@ def add_header(response):
     return response
 
 # =============================================================================
+# filtro global para formatar orçamento (50K, 50M, 50BI)
+# =============================================================================
+@app.template_filter('format_budget')
+def format_budget(valor):
+    if not valor:
+        return '0'
+    if valor >= 1000000000:
+        return "{:.1f}BI".format(valor / 1000000000)
+    elif valor >= 1000000:
+        return "{:.1f}M".format(valor / 1000000)
+    elif valor >= 1000:
+        return "{:.0f}K".format(valor / 1000)
+    else:
+        return "{:.0f}".format(valor)
+
+# =============================================================================
 # Registro dos Blueprints
 # =============================================================================
 
