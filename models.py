@@ -41,7 +41,7 @@ class User(UserMixin, db.Model):
     type_user       = db.Column(db.String(30), nullable=False, default="employee")
     status_user     = db.Column(db.String(20), nullable=False, default="active")
     github_key_user = db.Column(db.String(255), nullable=True)
-    created_at_user = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at_user = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     admin    = db.relationship("Admin",     back_populates="user", uselist=False, cascade="all, delete-orphan")
     client   = db.relationship("Client",   back_populates="user", uselist=False, cascade="all, delete-orphan")
@@ -232,7 +232,7 @@ class Log(db.Model):
     fk_project      = db.Column(db.Integer, db.ForeignKey("project.pk_id_project", ondelete="CASCADE"), nullable=True)
     fk_team         = db.Column(db.Integer, db.ForeignKey("team.pk_id_team", ondelete="SET NULL"), nullable=True)
     description_log = db.Column(db.Text, nullable=False)
-    date_log        = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    date_log        = db.Column(db.DateTime, default=datetime.now, nullable=False)
     type_log        = db.Column(db.String(50), nullable=True)
 
     user    = db.relationship("User",    back_populates="logs")
@@ -263,7 +263,7 @@ class Document(db.Model):
     name_document        = db.Column(db.String(200), nullable=False)
     path_document        = db.Column(db.String(500), nullable=False)
     type_document        = db.Column(db.String(50),  nullable=True)
-    upload_date_document = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    upload_date_document = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     project = db.relationship("Project", back_populates="documents")
     team    = db.relationship("Team", backref="documents")
@@ -314,7 +314,7 @@ class Gallery(db.Model):
     fk_project    = db.Column(db.Integer, db.ForeignKey("project.pk_id_project", ondelete="CASCADE"), nullable=False)
     fk_team       = db.Column(db.Integer, db.ForeignKey("team.pk_id_team", ondelete="SET NULL"), nullable=True)
     path_gallery  = db.Column(db.String(500), nullable=False)
-    date_gallery  = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    date_gallery  = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     project = db.relationship("Project", back_populates="gallery")
     team    = db.relationship("Team", backref="galleries")
@@ -340,7 +340,7 @@ class Comment(db.Model):
     fk_project      = db.Column(db.Integer, db.ForeignKey("project.pk_id_project", ondelete="CASCADE"), nullable=False)
     fk_team         = db.Column(db.Integer, db.ForeignKey("team.pk_id_team", ondelete="SET NULL"), nullable=True)
     content_comment = db.Column(db.Text, nullable=False)
-    date_comment    = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    date_comment    = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     user    = db.relationship("User",    back_populates="comments")
     project = db.relationship("Project", back_populates="comments")
