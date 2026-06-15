@@ -1891,8 +1891,8 @@
             item.style.textAlign = 'left';
 
             item.innerHTML = `
-              <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.name_project}">${p.name_project}</span>
-              <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.end_date_project}</span>
+              <span style="font-size:11px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${p.nome}">${p.nome}</span>
+              <span style="font-size:8.5px;color:var(--tx2);display:block;">Prazo: ${p.prazo}</span>
             `;
             listEl.appendChild(item);
           });
@@ -2001,12 +2001,12 @@
         return `
           <div onclick="location.href='${p.url}'" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--s2); border: 1px solid var(--b1); border-radius: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--s3)'; this.style.borderColor='${themeColor}'" onmouseout="this.style.background='var(--s2)'; this.style.borderColor='var(--b1)'">
             <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0; padding-right: 12px;">
-              <span style="font-size: 13px; font-weight: 700; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name_project}</span>
+              <span style="font-size: 13px; font-weight: 700; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.nome}</span>
               <span style="font-size: 10.5px; color: var(--tx2);">Clique para gerenciar</span>
             </div>
             <div style="text-align: right; flex-shrink: 0;">
               <span style="font-size: 8.5px; color: var(--tx2); text-transform: uppercase; display: block; letter-spacing: 0.3px;">Prazo</span>
-              <span style="font-size: 11.5px; font-weight: 700; color: ${themeColor};">${p.end_date_project}</span>
+              <span style="font-size: 11.5px; font-weight: 700; color: ${themeColor};">${p.prazo}</span>
             </div>
           </div>
         `;
