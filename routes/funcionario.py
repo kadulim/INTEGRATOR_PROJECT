@@ -114,9 +114,9 @@ def dashboard():
             equipe_nome = log.team.name_team if log.team else (', '.join([eq.name_team for eq in proj_obj.teams]) if proj_obj and proj_obj.teams else '—')
             user_name = usuario.name_user if usuario else 'Sistema'
             logs_data.append({
-                'type_log': log.type_log,
-                'description_log': log.description_log,
-                'date_log': log.date_log,
+                'acao': log.type_log,
+                'descricao': log.description_log,
+                'data': log.date_log,
                 'project_name': project_name,
                 'equipe_nome': equipe_nome,
                 'user_name': user_name
@@ -135,9 +135,9 @@ def dashboard():
             equipe_nome = log.team.name_team if log.team else (', '.join([eq.name_team for eq in proj_obj.teams]) if proj_obj and proj_obj.teams else '—')
             user_name = usuario.name_user if usuario else 'Sistema'
             todos_logs_data.append({
-                'type_log': log.type_log,
-                'description_log': log.description_log,
-                'date_log': log.date_log,
+                'acao': log.type_log,
+                'descricao': log.description_log,
+                'data': log.date_log,
                 'project_name': project_name,
                 'equipe_nome': equipe_nome,
                 'user_name': user_name
