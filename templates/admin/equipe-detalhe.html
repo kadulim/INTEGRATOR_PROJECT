@@ -567,7 +567,7 @@
             <i data-lucide="check-circle"></i>
           </div>
           <div class="kpi-data">
-            <h3>{{ projetos|selectattr('situacao', 'equalto', 'Concluído')|list|length }}</h3>
+            <h3>{{ projetos|selectattr('status_project', 'equalto', 'Concluído')|list|length }}</h3>
             <p>Projetos Concluídos</p>
           </div>
         </div>
@@ -593,7 +593,7 @@
             <i data-lucide="code"></i>
           </div>
           <div class="kpi-data">
-            <h3>{{ projetos|selectattr('situacao', 'equalto', 'Em andamento')|list|length }}</h3>
+            <h3>{{ projetos|selectattr('status_project', 'equalto', 'Em andamento')|list|length }}</h3>
             <p>Projetos em Andamento</p>
           </div>
         </div>

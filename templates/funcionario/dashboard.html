@@ -964,7 +964,7 @@
           <a href="{{ url_for('funcionario.projetos') }}" class="card-act">Todos os projetos →</a>
         </div>
 
-        {% for proj in projetos_recentes %}
+        {% for proj in projetos_recentes[:3] %}
         {% set eqs = projeto_equipes_map.get(proj.pk_id_project, []) %}
         <div class="proj-row" onclick="openProjeto(this)" data-projeto-id="{{ proj.pk_id_project }}" data-projeto-nome="{{ proj.name_project }}" data-equipes='{{ eqs | map(attribute="pk_id_team") | list | tojson }}' data-equipes-nomes='{{ eqs | map(attribute="name_team") | list | tojson }}'>
           <div class="proj-ico">

@@ -567,7 +567,7 @@
         <div class="scard-top">
           <div>
             <div class="scard-lbl">Em Andamento</div>
-            <div class="scard-val" style="color:var(--am);">{{ projetos|selectattr("situacao", "equalto", "Em andamento")|list|length }}</div>
+            <div class="scard-val" style="color:var(--am);">{{ projetos|selectattr("status_project", "equalto", "Em andamento")|list|length }}</div>
             <div class="scard-sub">
               <span class="tag tag-am">Em Andamento</span>
             </div>
@@ -585,7 +585,7 @@
         <div class="scard-top">
           <div>
             <div class="scard-lbl">Projetos Concluídos</div>
-            <div class="scard-val" style="color:var(--gr);">{{ projetos|selectattr("situacao", "equalto", "Concluído")|list|length }}</div>
+            <div class="scard-val" style="color:var(--gr);">{{ projetos|selectattr("status_project", "equalto", "Concluído")|list|length }}</div>
             <div class="scard-sub">
               <span class="tag tag-gr">Concluídos e entregues</span>
             </div>
