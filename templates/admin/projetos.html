@@ -309,6 +309,7 @@
   .pcard-strip-am { background: var(--am); }
   .pcard-strip-gr { background: var(--gr); }
   .pcard-strip-rd { background: var(--rd); }
+  .pcard-strip-cn { background: #6b7280; }
 
   .pcard-body { padding: 22px 22px 0; }
   .pcard-top {
@@ -355,6 +356,7 @@
   .ptag-am { background: var(--am-d); color: var(--am); }
   .ptag-gr { background: var(--gr-d); color: var(--gr); }
   .ptag-rd { background: var(--rd-d); color: var(--rd); }
+  .ptag-cn { background: rgba(107, 114, 128, 0.12); color: #6b7280; }
   .ptag-pu { background: var(--pu-d); color: var(--pu); }
   .ptag-user { background: var(--s3); color: var(--tx2); border: 1px solid var(--b2); }
 
@@ -653,9 +655,9 @@
     <!-- ═══ PROJECT GRID VIEW ═══ -->
     <div id="view-cards" class="view-section active">
       <div class="proj-grid">
-        {% set status_strip = {'Concluído': 'pcard-strip-gr', 'Em andamento': 'pcard-strip-am', 'Pendente': 'pcard-strip-ac', 'Pausado': 'pcard-strip-rd'} %}
-        {% set status_color = {'Concluído': 'var(--gr)', 'Em andamento': 'var(--am)', 'Pendente': 'var(--ac)', 'Pausado': 'var(--rd)'} %}
-        {% set status_tag_class = {'Concluído': 'ptag-gr', 'Em andamento': 'ptag-am', 'Pendente': 'ptag-ac', 'Pausado': 'ptag-rd'} %}
+        {% set status_strip = {'Concluído': 'pcard-strip-gr', 'Em andamento': 'pcard-strip-am', 'Pendente': 'pcard-strip-ac', 'Pausado': 'pcard-strip-rd', 'Cancelado': 'pcard-strip-cn'} %}
+        {% set status_color = {'Concluído': 'var(--gr)', 'Em andamento': 'var(--am)', 'Pendente': 'var(--ac)', 'Pausado': 'var(--rd)', 'Cancelado': '#6b7280'} %}
+        {% set status_tag_class = {'Concluído': 'ptag-gr', 'Em andamento': 'ptag-am', 'Pendente': 'ptag-ac', 'Pausado': 'ptag-rd', 'Cancelado': 'ptag-cn'} %}
         
         {% if projetos %}
           {% for p in projetos %}

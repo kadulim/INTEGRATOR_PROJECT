@@ -221,7 +221,7 @@ def dashboard():
         total_projetos=total_projetos,
         total_equipe=total_equipe,
         total_clientes=total_clientes,
-        projetos_recentes=projetos,
+        projetos_recentes=sorted(projetos, key=lambda p: p.pk_id_project, reverse=True),
         projeto_equipes_map=projeto_equipes_map,
         budget_total=orcamento_total,
         funcionarios_painel=funcionarios_painel,
