@@ -5,6 +5,11 @@
 # login, blueprints e rotas principais (cliente, uploads, comentários).
 # =============================================================================
 
+import os
+import time
+os.environ['TZ'] = 'America/Sao_Paulo'
+time.tzset()
+
 # ---------------------------------------------------------------------------
 # Imports padrão e de terceiros
 # ---------------------------------------------------------------------------
