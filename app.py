@@ -31,7 +31,7 @@ _api_codeflow_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'a
 # Imports internos do projeto
 # ---------------------------------------------------------------------------
 from database import database
-from models import User, Client, Project, Log, Document, Diagram, Gallery, Comment, Employee, Requirement
+from models import User, Client, Project, Team, Log, Document, Diagram, Gallery, Comment, Employee, Requirement
 
 import function.login as logar
 import function.adicionar_na_tabela as adicionar_na_tabela
@@ -480,49 +480,48 @@ def delete_documento(doc_id):
 @login_required
 def upload_diagrama(projeto_id):
     projeto = Project.query.get_or_404(projeto_id)
-    
-    # Receber equipe_id do formulário
-    equipe_id = request.form.get('equipe_id', type=int)
-    if not equipe_id:
-        return "Equipe não especificada", 400
-    
-    # Validar permissão
-    if not _validar_equipe_upload(projeto_id, equipe_id):
+
+    equipe_ids = request.form.getlist('equipe_ids')
+    equipe_ids = [int(e) for e in equipe_ids if e]
+    if not equipe_ids:
+        return "Nenhuma equipe selecionada", 400
+
+    if not _validar_equipes_upload(projeto_id, equipe_ids):
         return "Permissão negada ou equipe inválida", 403
-    
+
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
     file = request.files['file']
     if file.filename == '':
         return "Nenhum arquivo selecionado", 400
-        
+
     ext = file.filename.split('.')[-1].lower()
     if ext not in ['png', 'jpg', 'jpeg', 'gif', 'svg']:
         return "Tipo de arquivo inválido. Apenas imagens são aceitas.", 400
-        
+
     filename = secure_filename(file.filename)
     unique_filename = f"{int(time.time())}_{filename}"
-    
-    # Pasta organizada por projeto e equipe
-    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f'projeto_{projeto_id}', f'equipe_{equipe_id}', 'diagramas')
+
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f'projeto_{projeto_id}', 'diagramas')
     os.makedirs(upload_path, exist_ok=True)
     file_path = os.path.join(upload_path, unique_filename)
     file.save(file_path)
-    
+
     diag = Diagram(
         fk_project=projeto_id,
         name_diagram=filename,
-        path_diagram=f"uploads/projeto_{projeto_id}/equipe_{equipe_id}/diagramas/{unique_filename}",
-        fk_team=equipe_id
+        path_diagram=f"uploads/projeto_{projeto_id}/diagramas/{unique_filename}",
     )
+    diag.teams = Team.query.filter(Team.pk_id_team.in_(equipe_ids)).all()
     database.session.add(diag)
-    
+
+    equipe_nomes = ', '.join(t.name_team for t in diag.teams)
     log_entry = Log(
         type_log='diagrama',
-        description_log=f"Diagrama '{filename}' enviado por {current_user.name_user}.",
+        description_log=f"Diagrama '{filename}' enviado por {current_user.name_user} para: {equipe_nomes}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
-        fk_team=equipe_id
+        fk_team=equipe_ids[0] if equipe_ids else None
     )
     database.session.add(log_entry)
     database.session.commit()
@@ -549,7 +548,7 @@ def delete_diagrama(diag_id):
         description_log=f"Diagrama '{diag.name_diagram}' excluído por {current_user.name_user}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
-        fk_team=diag.fk_team
+        fk_team=diag.teams[0].pk_id_team if diag.teams else None
     )
     database.session.add(log_entry)
     database.session.delete(diag)
@@ -569,48 +568,47 @@ def delete_diagrama(diag_id):
 @login_required
 def upload_galeria(projeto_id):
     projeto = Project.query.get_or_404(projeto_id)
-    
-    # Receber equipe_id do formulário
-    equipe_id = request.form.get('equipe_id', type=int)
-    if not equipe_id:
-        return "Equipe não especificada", 400
-    
-    # Validar permissão
-    if not _validar_equipe_upload(projeto_id, equipe_id):
+
+    equipe_ids = request.form.getlist('equipe_ids')
+    equipe_ids = [int(e) for e in equipe_ids if e]
+    if not equipe_ids:
+        return "Nenhuma equipe selecionada", 400
+
+    if not _validar_equipes_upload(projeto_id, equipe_ids):
         return "Permissão negada ou equipe inválida", 403
-    
+
     if 'file' not in request.files:
         return "Nenhum arquivo enviado", 400
     file = request.files['file']
     if file.filename == '':
         return "Nenhum arquivo selecionado", 400
-        
+
     ext = file.filename.split('.')[-1].lower()
     if ext not in ['png', 'jpg', 'jpeg', 'gif', 'svg']:
         return "Tipo de arquivo inválido. Apenas imagens são aceitas.", 400
-        
+
     filename = secure_filename(file.filename)
     unique_filename = f"{int(time.time())}_{filename}"
-    
-    # Pasta organizada por projeto e equipe
-    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f'projeto_{projeto_id}', f'equipe_{equipe_id}', 'galeria')
+
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f'projeto_{projeto_id}', 'galeria')
     os.makedirs(upload_path, exist_ok=True)
     file_path = os.path.join(upload_path, unique_filename)
     file.save(file_path)
-    
+
     gal = Gallery(
         fk_project=projeto_id,
-        path_gallery=f"uploads/projeto_{projeto_id}/equipe_{equipe_id}/galeria/{unique_filename}",
-        fk_team=equipe_id
+        path_gallery=f"uploads/projeto_{projeto_id}/galeria/{unique_filename}",
     )
+    gal.teams = Team.query.filter(Team.pk_id_team.in_(equipe_ids)).all()
     database.session.add(gal)
-    
+
+    equipe_nomes = ', '.join(t.name_team for t in gal.teams)
     log_entry = Log(
         type_log='galeria',
-        description_log=f"Imagem '{filename}' enviada para a galeria por {current_user.name_user}.",
+        description_log=f"Imagem '{filename}' enviada para a galeria por {current_user.name_user} para: {equipe_nomes}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
-        fk_team=equipe_id
+        fk_team=equipe_ids[0] if equipe_ids else None
     )
     database.session.add(log_entry)
     database.session.commit()
@@ -637,7 +635,7 @@ def delete_galeria(item_id):
         description_log=f"Imagem removida da galeria por {current_user.name_user}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
-        fk_team=gal.fk_team
+        fk_team=gal.teams[0].pk_id_team if gal.teams else None
     )
     database.session.add(log_entry)
     database.session.delete(gal)

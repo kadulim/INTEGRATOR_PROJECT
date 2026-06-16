@@ -34,6 +34,20 @@ document_teams = db.Table(
     db.PrimaryKeyConstraint("fk_document", "fk_team", name="pk_document_teams"),
 )
 
+diagram_teams = db.Table(
+    "diagram_teams",
+    db.Column("fk_diagram", db.Integer, db.ForeignKey("diagram.pk_id_diagram", ondelete="CASCADE"), nullable=False),
+    db.Column("fk_team",    db.Integer, db.ForeignKey("team.pk_id_team", ondelete="CASCADE"), nullable=False),
+    db.PrimaryKeyConstraint("fk_diagram", "fk_team", name="pk_diagram_teams"),
+)
+
+gallery_teams = db.Table(
+    "gallery_teams",
+    db.Column("fk_gallery", db.Integer, db.ForeignKey("gallery.pk_id_gallery", ondelete="CASCADE"), nullable=False),
+    db.Column("fk_team",    db.Integer, db.ForeignKey("team.pk_id_team", ondelete="CASCADE"), nullable=False),
+    db.PrimaryKeyConstraint("fk_gallery", "fk_team", name="pk_gallery_teams"),
+)
+
 # ---------------------------------------------------------------------------
 # User  (ex-Usuario)
 # ---------------------------------------------------------------------------
@@ -290,17 +304,15 @@ class Diagram(db.Model):
 
     pk_id_diagram = db.Column(db.Integer, primary_key=True, autoincrement=True)
     fk_project    = db.Column(db.Integer, db.ForeignKey("project.pk_id_project", ondelete="CASCADE"), nullable=False)
-    fk_team       = db.Column(db.Integer, db.ForeignKey("team.pk_id_team", ondelete="SET NULL"), nullable=True)
     name_diagram  = db.Column(db.String(200), nullable=False)
     type_diagram  = db.Column(db.String(50),  nullable=True)
     path_diagram  = db.Column(db.String(500), nullable=False)
 
     project = db.relationship("Project", back_populates="diagrams")
-    team    = db.relationship("Team", backref="diagrams")
+    teams   = db.relationship("Team", secondary=diagram_teams, backref="diagrams")
 
     __table_args__ = (
         db.Index("ix_diagram_fk_project", "fk_project"),
-        db.Index("ix_diagram_fk_team",    "fk_team"),
     )
 
     def __repr__(self):
@@ -316,16 +328,14 @@ class Gallery(db.Model):
 
     pk_id_gallery = db.Column(db.Integer, primary_key=True, autoincrement=True)
     fk_project    = db.Column(db.Integer, db.ForeignKey("project.pk_id_project", ondelete="CASCADE"), nullable=False)
-    fk_team       = db.Column(db.Integer, db.ForeignKey("team.pk_id_team", ondelete="SET NULL"), nullable=True)
     path_gallery  = db.Column(db.String(500), nullable=False)
     date_gallery  = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     project = db.relationship("Project", back_populates="gallery")
-    team    = db.relationship("Team", backref="galleries")
+    teams   = db.relationship("Team", secondary=gallery_teams, backref="galleries")
 
     __table_args__ = (
         db.Index("ix_gallery_fk_project", "fk_project"),
-        db.Index("ix_gallery_fk_team",    "fk_team"),
     )
 
     def __repr__(self):

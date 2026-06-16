@@ -378,7 +378,9 @@
                 <div class="diagram-name">{{ diag.name_diagram }}</div>
                 <div class="diagram-type">{{ diag.type_diagram or 'Diagrama' }}</div>
                 <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
-                  <span style="font-size:10px; padding:2px 8px; border-radius:20px; background:rgba(139,92,246,0.12); color:#a78bfa; font-weight:600;">{{ diag.team.name_team if diag.team else 'Sem equipe' }}</span>
+                  {% for team in diag.teams %}
+                  <span style="font-size:10px; padding:2px 8px; border-radius:20px; background:rgba(139,92,246,0.12); color:#a78bfa; font-weight:600;">{{ team.name_team }}</span>
+                  {% endfor %}
                 </div>
               </div>
               <a href="/static/{{ diag.path_diagram }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
@@ -436,7 +438,9 @@
                 <div class="diagram-name">{{ item.nome }}</div>
                 <div class="diagram-type">Upload em {{ item.date_gallery.strftime('%d/%m/%Y') }}</div>
                 <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
-                  <span style="font-size:10px; padding:2px 8px; border-radius:20px; background:rgba(139,92,246,0.12); color:#a78bfa; font-weight:600;">{{ item.team.name_team if item.team else 'Sem equipe' }}</span>
+                  {% for team in item.teams %}
+                  <span style="font-size:10px; padding:2px 8px; border-radius:20px; background:rgba(139,92,246,0.12); color:#a78bfa; font-weight:600;">{{ team.name_team }}</span>
+                  {% endfor %}
                 </div>
               </div>
               <a href="/static/{{ item.path_gallery }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
@@ -715,7 +719,8 @@
 
       <div class="form-group" style="margin-bottom:24px;">
         <label class="form-label" style="display:flex; align-items:center; justify-content:space-between;">
-          <span>Equipe <span style="color:var(--accent);">*</span></span>
+          <span>Equipes Destinatárias <span style="color:var(--accent);">*</span></span>
+          <span id="diag-team-count" style="font-size:11px; color:var(--text-muted);">0 selecionadas</span>
         </label>
         <div style="position:relative; margin-bottom:8px;">
           <input type="text" id="diag-team-search" placeholder="Pesquisar equipes..." style="width:100%; padding:8px 12px 8px 36px; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px;">
@@ -724,7 +729,7 @@
         <div id="diag-team-list" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:4px 0;">
           {% for equipe in equipes %}
           <label class="diag-team-option" data-name="{{ equipe.name_team|lower }}" style="display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; cursor:pointer; transition:background 0.1s;">
-            <input type="radio" name="equipe_id" value="{{ equipe.pk_id_team }}" style="width:16px;height:16px; accent-color:var(--accent);">
+            <input type="checkbox" name="equipe_ids" value="{{ equipe.pk_id_team }}" style="width:16px;height:16px; accent-color:var(--accent);">
             <span style="font-size:13px; color:var(--text);">{{ equipe.name_team }}</span>
           </label>
           {% endfor %}
@@ -732,6 +737,11 @@
       </div>
 
       <div id="modal-diag-status" style="display:none; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:600; margin-bottom:16px;"></div>
+
+      <div id="modal-diag-success" style="display:none; padding:16px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); border-radius:10px; margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; color:#10b981; margin-bottom:8px;">Diagrama enviado com sucesso para:</div>
+        <div id="modal-diag-success-teams" style="font-size:12px; color:var(--text-muted);"></div>
+      </div>
 
       <div class="modal-footer" style="margin-top:0; padding-top:0;">
         <button type="button" class="btn btn-ghost" onclick="closeModal('modal-enviar-diagrama')" style="font-weight:600; color:var(--text-muted);">Cancelar</button>
@@ -766,7 +776,8 @@
 
       <div class="form-group" style="margin-bottom:24px;">
         <label class="form-label" style="display:flex; align-items:center; justify-content:space-between;">
-          <span>Equipe <span style="color:var(--accent);">*</span></span>
+          <span>Equipes Destinatárias <span style="color:var(--accent);">*</span></span>
+          <span id="gal-team-count" style="font-size:11px; color:var(--text-muted);">0 selecionadas</span>
         </label>
         <div style="position:relative; margin-bottom:8px;">
           <input type="text" id="gal-team-search" placeholder="Pesquisar equipes..." style="width:100%; padding:8px 12px 8px 36px; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px;">
@@ -775,7 +786,7 @@
         <div id="gal-team-list" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:4px 0;">
           {% for equipe in equipes %}
           <label class="gal-team-option" data-name="{{ equipe.name_team|lower }}" style="display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; cursor:pointer; transition:background 0.1s;">
-            <input type="radio" name="equipe_id" value="{{ equipe.pk_id_team }}" style="width:16px;height:16px; accent-color:var(--accent);">
+            <input type="checkbox" name="equipe_ids" value="{{ equipe.pk_id_team }}" style="width:16px;height:16px; accent-color:var(--accent);">
             <span style="font-size:13px; color:var(--text);">{{ equipe.name_team }}</span>
           </label>
           {% endfor %}
@@ -783,6 +794,11 @@
       </div>
 
       <div id="modal-gal-status" style="display:none; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:600; margin-bottom:16px;"></div>
+
+      <div id="modal-gal-success" style="display:none; padding:16px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); border-radius:10px; margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; color:#10b981; margin-bottom:8px;">Imagem enviada com sucesso para:</div>
+        <div id="modal-gal-success-teams" style="font-size:12px; color:var(--text-muted);"></div>
+      </div>
 
       <div class="modal-footer" style="margin-top:0; padding-top:0;">
         <button type="button" class="btn btn-ghost" onclick="closeModal('modal-enviar-galeria')" style="font-weight:600; color:var(--text-muted);">Cancelar</button>
@@ -1083,6 +1099,16 @@
     const diagFile = document.getElementById('modal-diag-file');
     const diagSubmit = document.getElementById('btn-enviar-diag');
     const diagStatus = document.getElementById('modal-diag-status');
+    const diagSuccess = document.getElementById('modal-diag-success');
+    const diagSuccessTeams = document.getElementById('modal-diag-success-teams');
+    const diagCheckboxes = document.querySelectorAll('#diag-team-list input[type="checkbox"]');
+    const diagTeamCount = document.getElementById('diag-team-count');
+
+    function updateDiagTeamCount() {
+      const checked = document.querySelectorAll('#diag-team-list input[type="checkbox"]:checked');
+      if (diagTeamCount) diagTeamCount.textContent = checked.length + ' selecionada' + (checked.length !== 1 ? 's' : '');
+    }
+    diagCheckboxes.forEach(function(cb) { cb.addEventListener('change', updateDiagTeamCount); });
 
     if (diagForm) {
       diagForm.addEventListener('submit', function(e) {
@@ -1090,14 +1116,18 @@
         if (!diagFile.files[0]) { showModalStatus(diagStatus, 'Selecione uma imagem.', 'error'); return; }
         const ext = diagFile.files[0].name.split('.').pop().toLowerCase();
         if (!['png','jpg','jpeg','gif','svg'].includes(ext)) { showModalStatus(diagStatus, 'Tipo de arquivo inválido. Apenas imagens são aceitas.', 'error'); return; }
-        const selected = document.querySelector('input[name="equipe_id"]:checked');
-        if (!selected) { showModalStatus(diagStatus, 'Selecione uma equipe.', 'error'); return; }
+        const selected = document.querySelectorAll('#diag-team-list input[type="checkbox"]:checked');
+        if (selected.length === 0) { showModalStatus(diagStatus, 'Selecione ao menos uma equipe.', 'error'); return; }
         if (diagStatus) diagStatus.style.display = 'none';
+        if (diagSuccess) diagSuccess.style.display = 'none';
         diagSubmit.disabled = true;
         diagSubmit.innerHTML = '<i data-lucide="loader" style="width:16px;animation:spin 1s linear infinite;"></i> Enviando...';
         if (window.lucide) lucide.createIcons();
 
         const fd = new FormData(diagForm);
+        fd.delete('equipe_ids');
+        selected.forEach(function(cb) { fd.append('equipe_ids', cb.value); });
+
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/projeto/{{ projeto.pk_id_project }}/upload-diagrama', true);
         xhr.setRequestHeader('X-CSRFToken', document.querySelector('input[name="csrf_token"]').value);
@@ -1105,8 +1135,14 @@
           diagSubmit.disabled = false;
           diagSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
           if (window.lucide) lucide.createIcons();
-          if (xhr.status === 200) { closeModal('modal-enviar-diagrama'); window.location.reload(); }
-          else { showModalStatus(diagStatus, 'Erro: ' + xhr.responseText, 'error'); }
+          if (xhr.status === 200) {
+            var names = [];
+            selected.forEach(function(cb) { var l = cb.closest('.diag-team-option'); if (l) names.push('✓ ' + l.querySelector('span').textContent); });
+            if (diagSuccessTeams) diagSuccessTeams.innerHTML = names.join('<br>');
+            if (diagSuccess) diagSuccess.style.display = 'block';
+            if (diagStatus) diagStatus.style.display = 'none';
+            setTimeout(function() { closeModal('modal-enviar-diagrama'); window.location.reload(); }, 2000);
+          } else { showModalStatus(diagStatus, 'Erro: ' + xhr.responseText, 'error'); }
         };
         xhr.onerror = function() {
           diagSubmit.disabled = false;
@@ -1123,6 +1159,16 @@
     const galFile = document.getElementById('modal-gal-file');
     const galSubmit = document.getElementById('btn-enviar-gal');
     const galStatus = document.getElementById('modal-gal-status');
+    const galSuccess = document.getElementById('modal-gal-success');
+    const galSuccessTeams = document.getElementById('modal-gal-success-teams');
+    const galCheckboxes = document.querySelectorAll('#gal-team-list input[type="checkbox"]');
+    const galTeamCount = document.getElementById('gal-team-count');
+
+    function updateGalTeamCount() {
+      const checked = document.querySelectorAll('#gal-team-list input[type="checkbox"]:checked');
+      if (galTeamCount) galTeamCount.textContent = checked.length + ' selecionada' + (checked.length !== 1 ? 's' : '');
+    }
+    galCheckboxes.forEach(function(cb) { cb.addEventListener('change', updateGalTeamCount); });
 
     if (galForm) {
       galForm.addEventListener('submit', function(e) {
@@ -1130,14 +1176,18 @@
         if (!galFile.files[0]) { showModalStatus(galStatus, 'Selecione uma imagem.', 'error'); return; }
         const ext = galFile.files[0].name.split('.').pop().toLowerCase();
         if (!['png','jpg','jpeg','gif','svg'].includes(ext)) { showModalStatus(galStatus, 'Tipo de arquivo inválido. Apenas imagens são aceitas.', 'error'); return; }
-        const selected = document.querySelector('input[name="equipe_id"]:checked');
-        if (!selected) { showModalStatus(galStatus, 'Selecione uma equipe.', 'error'); return; }
+        const selected = document.querySelectorAll('#gal-team-list input[type="checkbox"]:checked');
+        if (selected.length === 0) { showModalStatus(galStatus, 'Selecione ao menos uma equipe.', 'error'); return; }
         if (galStatus) galStatus.style.display = 'none';
+        if (galSuccess) galSuccess.style.display = 'none';
         galSubmit.disabled = true;
         galSubmit.innerHTML = '<i data-lucide="loader" style="width:16px;animation:spin 1s linear infinite;"></i> Enviando...';
         if (window.lucide) lucide.createIcons();
 
         const fd = new FormData(galForm);
+        fd.delete('equipe_ids');
+        selected.forEach(function(cb) { fd.append('equipe_ids', cb.value); });
+
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/projeto/{{ projeto.pk_id_project }}/upload-galeria', true);
         xhr.setRequestHeader('X-CSRFToken', document.querySelector('input[name="csrf_token"]').value);
@@ -1145,8 +1195,14 @@
           galSubmit.disabled = false;
           galSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
           if (window.lucide) lucide.createIcons();
-          if (xhr.status === 200) { closeModal('modal-enviar-galeria'); window.location.reload(); }
-          else { showModalStatus(galStatus, 'Erro: ' + xhr.responseText, 'error'); }
+          if (xhr.status === 200) {
+            var names = [];
+            selected.forEach(function(cb) { var l = cb.closest('.gal-team-option'); if (l) names.push('✓ ' + l.querySelector('span').textContent); });
+            if (galSuccessTeams) galSuccessTeams.innerHTML = names.join('<br>');
+            if (galSuccess) galSuccess.style.display = 'block';
+            if (galStatus) galStatus.style.display = 'none';
+            setTimeout(function() { closeModal('modal-enviar-galeria'); window.location.reload(); }, 2000);
+          } else { showModalStatus(galStatus, 'Erro: ' + xhr.responseText, 'error'); }
         };
         xhr.onerror = function() {
           galSubmit.disabled = false;
@@ -1171,11 +1227,21 @@
         if (el.style.display === 'flex') {
           if (m.form) m.form.reset();
           if (m.id === 'modal-enviar-documento') updateDocTeamCount();
+          if (m.id === 'modal-enviar-diagrama') updateDiagTeamCount();
+          if (m.id === 'modal-enviar-galeria') updateGalTeamCount();
           resetFileZone(m.zoneId);
-          // Reset status/success for doc
+          // Reset status/success
           if (m.id === 'modal-enviar-documento') {
             if (docStatus) docStatus.style.display = 'none';
             if (docSuccess) docSuccess.style.display = 'none';
+          }
+          if (m.id === 'modal-enviar-diagrama') {
+            if (diagStatus) diagStatus.style.display = 'none';
+            if (diagSuccess) diagSuccess.style.display = 'none';
+          }
+          if (m.id === 'modal-enviar-galeria') {
+            if (galStatus) galStatus.style.display = 'none';
+            if (galSuccess) galSuccess.style.display = 'none';
           }
           if (window.lucide) lucide.createIcons();
         }
@@ -1202,11 +1268,13 @@
         if (window.lucide) lucide.createIcons();
       } else if (id === 'modal-enviar-diagrama') {
         if (diagStatus) diagStatus.style.display = 'none';
+        if (diagSuccess) diagSuccess.style.display = 'none';
         diagSubmit.disabled = false;
         diagSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
         if (window.lucide) lucide.createIcons();
       } else if (id === 'modal-enviar-galeria') {
         if (galStatus) galStatus.style.display = 'none';
+        if (galSuccess) galSuccess.style.display = 'none';
         galSubmit.disabled = false;
         galSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
         if (window.lucide) lucide.createIcons();

@@ -308,8 +308,14 @@ def projeto_detalhe(projeto_id):
             Document.fk_project == projeto_id,
             Document.teams.any(Team.pk_id_team == equipe_id)
         ).all()
-        diagramas = Diagram.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
-        galeria = Gallery.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
+        diagramas = Diagram.query.filter(
+            Diagram.fk_project == projeto_id,
+            Diagram.teams.any(Team.pk_id_team == equipe_id)
+        ).all()
+        galeria = Gallery.query.filter(
+            Gallery.fk_project == projeto_id,
+            Gallery.teams.any(Team.pk_id_team == equipe_id)
+        ).all()
     else:
         documentos = Document.query.filter(
             Document.fk_project == projeto_id,
@@ -317,11 +323,11 @@ def projeto_detalhe(projeto_id):
         ).all()
         diagramas = Diagram.query.filter(
             Diagram.fk_project == projeto_id,
-            Diagram.fk_team.in_(func_projeto_team_ids)
+            Diagram.teams.any(Team.pk_id_team.in_(func_projeto_team_ids))
         ).all()
         galeria = Gallery.query.filter(
             Gallery.fk_project == projeto_id,
-            Gallery.fk_team.in_(func_projeto_team_ids)
+            Gallery.teams.any(Team.pk_id_team.in_(func_projeto_team_ids))
         ).all()
     logs_projeto = (
         Log.query
