@@ -427,9 +427,10 @@ def upload_documento(projeto_id):
     doc.teams = Team.query.filter(Team.pk_id_team.in_(equipe_ids)).all()
     database.session.add(doc)
     
+    equipe_nomes = ', '.join(t.name_team for t in doc.teams)
     log_entry = Log(
         type_log='documento',
-        description_log=f"Documento '{filename}' enviado por {current_user.name_user}.",
+        description_log=f"Documento '{filename}' enviado por {current_user.name_user} — equipes: {equipe_nomes}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
         fk_team=equipe_ids[0] if equipe_ids else None
@@ -514,9 +515,10 @@ def upload_diagrama(projeto_id):
     diag.teams = Team.query.filter(Team.pk_id_team.in_(equipe_ids)).all()
     database.session.add(diag)
 
+    equipe_nomes = ', '.join(t.name_team for t in diag.teams)
     log_entry = Log(
         type_log='diagrama',
-        description_log=f"Diagrama '{filename}' enviado por {current_user.name_user}.",
+        description_log=f"Diagrama '{filename}' enviado por {current_user.name_user} — equipes: {equipe_nomes}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
         fk_team=equipe_ids[0] if equipe_ids else None
@@ -600,9 +602,10 @@ def upload_galeria(projeto_id):
     gal.teams = Team.query.filter(Team.pk_id_team.in_(equipe_ids)).all()
     database.session.add(gal)
 
+    equipe_nomes = ', '.join(t.name_team for t in gal.teams)
     log_entry = Log(
         type_log='galeria',
-        description_log=f"Imagem '{filename}' enviada para a galeria por {current_user.name_user}.",
+        description_log=f"Imagem '{filename}' enviada para a galeria por {current_user.name_user} — equipes: {equipe_nomes}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
         fk_team=equipe_ids[0] if equipe_ids else None
