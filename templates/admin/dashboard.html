@@ -1363,7 +1363,6 @@
 
             <div
               style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--b1); padding-top: 6px; margin-top: 4px; font-size: 11px; color: var(--tx3);">
-              <span>Equipe: <strong style="color: var(--tx2);">{{ last_log.equipe_nome }}</strong></span>
               <span>Autor: <strong style="color: var(--gr);">{{ current_user.name_user if current_user.is_authenticated
                   else 'Administrador' }}</strong></span>
             </div>
@@ -1634,7 +1633,7 @@
           </div>
           <div>
             <div class="act-user">
-              <div class="act-user">Projeto: {{ log.project_name }} | Equipe: {{ log.equipe_nome }} | Tipo {{
+              <div class="act-user">Projeto: {{ log.project_name }} | Tipo {{
                 log.type_log }}</div>
             </div>
             <div class="act-desc">{{ log.acao }} · {{ log.descricao }}</div>
@@ -1750,9 +1749,6 @@
         <div class="log-details" style="flex: 1;">
           <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);">
             Projeto: <strong>{{log.project_name }}</strong>
-            </div>
-            <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);">
-              Equipe: <strong>{{ log.equipe_nome }}</strong>
             </div>
           <div class="log-header-text" style="font-size: 13px; font-weight: 700; color: var(--tx);">Tipo: <strong>{{
               log.type_log }}</strong>
