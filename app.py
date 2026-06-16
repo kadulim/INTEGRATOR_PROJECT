@@ -427,10 +427,10 @@ def upload_documento(projeto_id):
     doc.teams = Team.query.filter(Team.pk_id_team.in_(equipe_ids)).all()
     database.session.add(doc)
     
-    equipe_nomes = ', '.join(t.name_team for t in doc.teams)
+    equipe_nome = Team.query.get(equipe_ids[0]).name_team if equipe_ids else ''
     log_entry = Log(
         type_log='documento',
-        description_log=f"Documento '{filename}' enviado por {current_user.name_user} para: {equipe_nomes}.",
+        description_log=f"Documento '{filename}' enviado por {current_user.name_user} — equipe {equipe_nome}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
         fk_team=equipe_ids[0] if equipe_ids else None
@@ -515,10 +515,10 @@ def upload_diagrama(projeto_id):
     diag.teams = Team.query.filter(Team.pk_id_team.in_(equipe_ids)).all()
     database.session.add(diag)
 
-    equipe_nomes = ', '.join(t.name_team for t in diag.teams)
+    equipe_nome = Team.query.get(equipe_ids[0]).name_team if equipe_ids else ''
     log_entry = Log(
         type_log='diagrama',
-        description_log=f"Diagrama '{filename}' enviado por {current_user.name_user} para: {equipe_nomes}.",
+        description_log=f"Diagrama '{filename}' enviado por {current_user.name_user} — equipe {equipe_nome}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
         fk_team=equipe_ids[0] if equipe_ids else None
@@ -602,10 +602,10 @@ def upload_galeria(projeto_id):
     gal.teams = Team.query.filter(Team.pk_id_team.in_(equipe_ids)).all()
     database.session.add(gal)
 
-    equipe_nomes = ', '.join(t.name_team for t in gal.teams)
+    equipe_nome = Team.query.get(equipe_ids[0]).name_team if equipe_ids else ''
     log_entry = Log(
         type_log='galeria',
-        description_log=f"Imagem '{filename}' enviada para a galeria por {current_user.name_user} para: {equipe_nomes}.",
+        description_log=f"Imagem '{filename}' enviada para a galeria por {current_user.name_user} — equipe {equipe_nome}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
         fk_team=equipe_ids[0] if equipe_ids else None
@@ -738,7 +738,8 @@ def _update_file(record, attr_name, file, upload_subdir, allowed_exts):
         return "Tipo de arquivo inválido.", 400
     filename = secure_filename(file.filename)
     unique_filename = f"{int(time.time())}_{filename}"
-    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], upload_subdir)
+    projeto_id = record.fk_project
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f'projeto_{projeto_id}', upload_subdir)
     os.makedirs(upload_path, exist_ok=True)
     file.save(os.path.join(upload_path, unique_filename))
     try:
@@ -747,7 +748,7 @@ def _update_file(record, attr_name, file, upload_subdir, allowed_exts):
             os.remove(old_path)
     except Exception as e:
         print(f"Erro ao remover arquivo físico: {e}")
-    setattr(record, attr_name, f"uploads/{upload_subdir}/{unique_filename}")
+    setattr(record, attr_name, f"uploads/projeto_{projeto_id}/{upload_subdir}/{unique_filename}")
 
 # ---------------------------------------------------------------------------
 # Atualizar documento
