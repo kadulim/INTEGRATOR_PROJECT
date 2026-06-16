@@ -365,38 +365,39 @@ os.makedirs(upload_folder, exist_ok=True)
 # Validação de equipe para upload
 # ---------------------------------------------------------------------------
 def _validar_equipe_upload(projeto_id, equipe_id):
-    """Valida se o usuário pode fazer upload para a equipe especificada."""
+    return _validar_equipes_upload(projeto_id, [equipe_id])
+
+def _validar_equipes_upload(projeto_id, equipe_ids):
+    """Valida se o usuário pode fazer upload para as equipes especificadas."""
     projeto = Project.query.get_or_404(projeto_id)
-    
-    # Verificar se a equipe pertence ao projeto
     proj_team_ids = [t.pk_id_team for t in projeto.teams]
-    if equipe_id not in proj_team_ids:
-        return False
     
-    # Validar permissão do usuário
+    for equipe_id in equipe_ids:
+        if equipe_id not in proj_team_ids:
+            return False
+    
     if current_user.type_user == 'employee':
         func = Employee.query.filter_by(fk_user=current_user.pk_id_user).first()
         if not func:
             return False
         func_team_ids = [t.pk_id_team for t in func.teams]
-        return equipe_id in func_team_ids
-    elif current_user.type_user == 'admin':
-        return True
+        for equipe_id in equipe_ids:
+            if equipe_id not in func_team_ids:
+                return False
     
-    return False
+    return True
 
 @app.route('/projeto/<int:projeto_id>/upload-documento', methods=['POST'])
 @login_required
 def upload_documento(projeto_id):
     projeto = Project.query.get_or_404(projeto_id)
     
-    # Receber equipe_id do formulário
-    equipe_id = request.form.get('equipe_id', type=int)
-    if not equipe_id:
-        return "Equipe não especificada", 400
+    equipe_ids = request.form.getlist('equipe_ids')
+    equipe_ids = [int(e) for e in equipe_ids if e]
+    if not equipe_ids:
+        return "Nenhuma equipe selecionada", 400
     
-    # Validar permissão
-    if not _validar_equipe_upload(projeto_id, equipe_id):
+    if not _validar_equipes_upload(projeto_id, equipe_ids):
         return "Permissão negada ou equipe inválida", 403
     
     if 'file' not in request.files:
@@ -412,8 +413,7 @@ def upload_documento(projeto_id):
     filename = secure_filename(file.filename)
     unique_filename = f"{int(time.time())}_{filename}"
     
-    # Pasta organizada por projeto e equipe
-    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f'projeto_{projeto_id}', f'equipe_{equipe_id}', 'documentos')
+    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f'projeto_{projeto_id}', 'documentos')
     os.makedirs(upload_path, exist_ok=True)
     file_path = os.path.join(upload_path, unique_filename)
     file.save(file_path)
@@ -421,18 +421,19 @@ def upload_documento(projeto_id):
     doc = Document(
         fk_project=projeto_id,
         name_document=filename,
-        path_document=f"uploads/projeto_{projeto_id}/equipe_{equipe_id}/documentos/{unique_filename}",
+        path_document=f"uploads/projeto_{projeto_id}/documentos/{unique_filename}",
         type_document=ext,
-        fk_team=equipe_id
     )
+    doc.teams = Team.query.filter(Team.pk_id_team.in_(equipe_ids)).all()
     database.session.add(doc)
     
+    equipe_nomes = ', '.join(t.name_team for t in doc.teams)
     log_entry = Log(
         type_log='documento',
-        description_log=f"Documento '{filename}' enviado por {current_user.name_user}.",
+        description_log=f"Documento '{filename}' enviado por {current_user.name_user} para: {equipe_nomes}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
-        fk_team=equipe_id
+        fk_team=equipe_ids[0] if equipe_ids else None
     )
     database.session.add(log_entry)
     database.session.commit()
@@ -459,7 +460,7 @@ def delete_documento(doc_id):
         description_log=f"Documento '{doc.name_document}' excluído por {current_user.name_user}.",
         fk_project=projeto_id,
         fk_user=current_user.pk_id_user,
-        fk_team=doc.fk_team
+        fk_team=doc.teams[0].pk_id_team if doc.teams else None
     )
     database.session.add(log_entry)
     database.session.delete(doc)

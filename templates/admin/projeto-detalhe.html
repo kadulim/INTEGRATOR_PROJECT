@@ -284,24 +284,12 @@
             <h3 style="margin-bottom:4px;">Documentação do Projeto</h3>
             <p style="color:var(--text-muted); font-size:13px;">Upload e gerenciamento de especificações, manuais e outros arquivos em formato PDF ou DOCX.</p>
           </div>
-          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <select id="doc-team-select" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; min-width:160px;">
-              <option value="">Selecione a equipe</option>
-              {% for equipe in equipes %}
-              <option value="{{ equipe.pk_id_team }}">{{ equipe.name_team }}</option>
-              {% endfor %}
-            </select>
-            <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+          <div>
+            <button class="btn btn-primary" onclick="openModal('modal-enviar-documento')" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
               <i data-lucide="upload" style="width:16px;"></i>
               Enviar Documento
-              <input type="file" id="input-documento" style="display:none;" accept=".pdf,.docx" onchange="uploadFile(this, 'document', '/projeto/{{ projeto.pk_id_project }}/upload-documento', 'doc-team-select')">
-            </label>
+            </button>
           </div>
-        </div>
-
-        <div id="document-status" class="status-indicator" style="display:none;"></div>
-        <div id="document-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
-          <div id="document-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
         </div>
 
         {% if documentos %}
@@ -325,6 +313,11 @@
             </div>
             <div class="doc-title" style="word-break: break-all;">{{ doc.name_document }}</div>
             <div class="doc-cat">{{ doc.type_document.upper() }}</div>
+            <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;">
+              {% for team in doc.teams %}
+              <span style="font-size:10px; padding:2px 8px; border-radius:20px; background:rgba(139,92,246,0.12); color:#a78bfa; font-weight:600;">{{ team.name_team }}</span>
+              {% endfor %}
+            </div>
             <div class="doc-footer">
               <div class="doc-meta">
                 <i data-lucide="calendar" style="width:12px;"></i>
@@ -359,24 +352,12 @@
             <h3 style="margin-bottom:4px;">Diagramas do Projeto</h3>
             <p style="color:var(--text-muted); font-size:13px;">Upload de diagramas de arquitetura, UML, fluxogramas de processos, etc.</p>
           </div>
-          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <select id="diag-team-select" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; min-width:160px;">
-              <option value="">Selecione a equipe</option>
-              {% for equipe in equipes %}
-              <option value="{{ equipe.pk_id_team }}">{{ equipe.name_team }}</option>
-              {% endfor %}
-            </select>
-            <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+          <div>
+            <button class="btn btn-primary" onclick="openModal('modal-enviar-diagrama')" style="display:inline-flex; align-items:center; gap:8px;">
               <i data-lucide="upload" style="width:16px;"></i>
               Enviar Diagrama
-              <input type="file" id="input-diagrama" style="display:none;" accept="image/*" onchange="uploadFile(this, 'diagram', '/projeto/{{ projeto.pk_id_project }}/upload-diagrama', 'diag-team-select')">
-            </label>
+            </button>
           </div>
-        </div>
-
-        <div id="diagram-status" class="status-indicator" style="display:none;"></div>
-        <div id="diagram-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
-          <div id="diagram-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
         </div>
 
         {% if diagramas %}
@@ -396,6 +377,9 @@
               <div>
                 <div class="diagram-name">{{ diag.name_diagram }}</div>
                 <div class="diagram-type">{{ diag.type_diagram or 'Diagrama' }}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+                  <span style="font-size:10px; padding:2px 8px; border-radius:20px; background:rgba(139,92,246,0.12); color:#a78bfa; font-weight:600;">{{ diag.team.name_team if diag.team else 'Sem equipe' }}</span>
+                </div>
               </div>
               <a href="/static/{{ diag.path_diagram }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                 <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
@@ -426,24 +410,12 @@
             <h3 style="margin-bottom:4px;">Galeria do Projeto</h3>
             <p style="color:var(--text-muted); font-size:13px;">Imagens do projeto, capturas de tela das interfaces, mockups e inspirações visuais.</p>
           </div>
-          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <select id="gal-team-select" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; min-width:160px;">
-              <option value="">Selecione a equipe</option>
-              {% for equipe in equipes %}
-              <option value="{{ equipe.pk_id_team }}">{{ equipe.name_team }}</option>
-              {% endfor %}
-            </select>
-            <label class="btn btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+          <div>
+            <button class="btn btn-primary" onclick="openModal('modal-enviar-galeria')" style="display:inline-flex; align-items:center; gap:8px;">
               <i data-lucide="upload" style="width:16px;"></i>
               Enviar Imagem
-              <input type="file" id="input-galeria" style="display:none;" accept="image/*" onchange="uploadFile(this, 'gallery', '/projeto/{{ projeto.pk_id_project }}/upload-galeria', 'gal-team-select')">
-            </label>
+            </button>
           </div>
-        </div>
-
-        <div id="gallery-status" class="status-indicator" style="display:none;"></div>
-        <div id="gallery-progress-container" class="progress-bar-container" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.05); border-radius:10px; height:20px; overflow:hidden;">
-          <div id="gallery-progress-bar" class="progress-bar-fill" style="width:0%; height:100%; background:var(--blue); text-align:center; color:#fff; font-size:11px; line-height:20px; font-weight:700; transition:width 0.1s;">0%</div>
         </div>
 
         {% if galeria %}
@@ -463,6 +435,9 @@
               <div>
                 <div class="diagram-name">{{ item.nome }}</div>
                 <div class="diagram-type">Upload em {{ item.date_gallery.strftime('%d/%m/%Y') }}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+                  <span style="font-size:10px; padding:2px 8px; border-radius:20px; background:rgba(139,92,246,0.12); color:#a78bfa; font-weight:600;">{{ item.team.name_team if item.team else 'Sem equipe' }}</span>
+                </div>
               </div>
               <a href="/static/{{ item.path_gallery }}" download onclick="event.stopPropagation();" class="btn btn-outline btn-sm">
                 <i data-lucide="download" style="width:12px; margin-right:4px;"></i> Baixar
@@ -661,6 +636,165 @@
   </div>
 </div>
 
+<!-- Modal Enviar Documento -->
+<div id="modal-enviar-documento" class="modal-overlay">
+  <div class="modal-content" style="max-width: 640px;">
+    <div class="modal-header">
+      <h3 class="modal-title" style="font-size:18px;">Enviar Documento</h3>
+      <button class="close-btn" onclick="closeModal('modal-enviar-documento')"><i data-lucide="x"></i></button>
+    </div>
+    <form id="form-enviar-documento" style="padding:24px 32px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label">Arquivo <span style="color:var(--accent);">*</span></label>
+        <div class="upload-zone" id="modal-doc-zone" style="border:2px dashed var(--border); border-radius:12px; padding:28px 20px; text-align:center; cursor:pointer; transition:border-color 0.2s, background 0.2s;">
+          <i data-lucide="upload" style="width:28px; height:28px; color:var(--text-muted); margin-bottom:8px;"></i>
+          <div style="font-size:14px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Clique para selecionar</div>
+          <div style="font-size:11px; color:var(--text-muted);">PDF ou DOCX</div>
+          <input type="file" id="modal-doc-file" name="file" accept=".pdf,.docx" required style="display:none;">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px;">
+        <label class="form-label" style="display:flex; align-items:center; justify-content:space-between;">
+          <span>Equipes Destinatárias <span style="color:var(--accent);">*</span></span>
+          <span id="doc-team-count" style="font-size:11px; color:var(--text-muted);">0 selecionadas</span>
+        </label>
+        <div style="position:relative; margin-bottom:8px;">
+          <input type="text" id="doc-team-search" placeholder="Pesquisar equipes..." style="width:100%; padding:8px 12px 8px 36px; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px;">
+          <i data-lucide="search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; color:var(--text-muted);"></i>
+        </div>
+        <div id="doc-team-list" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:4px 0;">
+          {% for equipe in equipes %}
+          <label class="doc-team-option" data-name="{{ equipe.name_team|lower }}" style="display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; cursor:pointer; transition:background 0.1s;">
+            <input type="checkbox" name="equipe_ids" value="{{ equipe.pk_id_team }}" style="width:16px;height:16px; accent-color:var(--accent);">
+            <span style="font-size:13px; color:var(--text);">{{ equipe.name_team }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div id="modal-doc-status" style="display:none; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:600; margin-bottom:16px;"></div>
+
+      <div id="modal-doc-success" style="display:none; padding:16px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); border-radius:10px; margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; color:#10b981; margin-bottom:8px;">Documento enviado com sucesso para:</div>
+        <div id="modal-doc-success-teams" style="font-size:12px; color:var(--text-muted);"></div>
+      </div>
+
+      <div class="modal-footer" style="margin-top:0; padding-top:0;">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-enviar-documento')" style="font-weight:600; color:var(--text-muted);">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-enviar-doc" style="display:inline-flex; align-items:center; gap:8px;">
+          <i data-lucide="upload" style="width:16px;"></i>
+          Enviar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Enviar Diagrama -->
+<div id="modal-enviar-diagrama" class="modal-overlay">
+  <div class="modal-content" style="max-width: 640px;">
+    <div class="modal-header">
+      <h3 class="modal-title" style="font-size:18px;">Enviar Diagrama</h3>
+      <button class="close-btn" onclick="closeModal('modal-enviar-diagrama')"><i data-lucide="x"></i></button>
+    </div>
+    <form id="form-enviar-diagrama" style="padding:24px 32px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label">Arquivo <span style="color:var(--accent);">*</span></label>
+        <div class="upload-zone" id="modal-diag-zone" style="border:2px dashed var(--border); border-radius:12px; padding:28px 20px; text-align:center; cursor:pointer; transition:border-color 0.2s, background 0.2s;">
+          <i data-lucide="image" style="width:28px; height:28px; color:var(--text-muted); margin-bottom:8px;"></i>
+          <div style="font-size:14px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Clique para selecionar</div>
+          <div style="font-size:11px; color:var(--text-muted);">PNG, JPG, JPEG, GIF ou SVG</div>
+          <input type="file" id="modal-diag-file" name="file" accept="image/*" required style="display:none;">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px;">
+        <label class="form-label" style="display:flex; align-items:center; justify-content:space-between;">
+          <span>Equipe <span style="color:var(--accent);">*</span></span>
+        </label>
+        <div style="position:relative; margin-bottom:8px;">
+          <input type="text" id="diag-team-search" placeholder="Pesquisar equipes..." style="width:100%; padding:8px 12px 8px 36px; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px;">
+          <i data-lucide="search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; color:var(--text-muted);"></i>
+        </div>
+        <div id="diag-team-list" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:4px 0;">
+          {% for equipe in equipes %}
+          <label class="diag-team-option" data-name="{{ equipe.name_team|lower }}" style="display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; cursor:pointer; transition:background 0.1s;">
+            <input type="radio" name="equipe_id" value="{{ equipe.pk_id_team }}" style="width:16px;height:16px; accent-color:var(--accent);">
+            <span style="font-size:13px; color:var(--text);">{{ equipe.name_team }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div id="modal-diag-status" style="display:none; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:600; margin-bottom:16px;"></div>
+
+      <div class="modal-footer" style="margin-top:0; padding-top:0;">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-enviar-diagrama')" style="font-weight:600; color:var(--text-muted);">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-enviar-diag" style="display:inline-flex; align-items:center; gap:8px;">
+          <i data-lucide="upload" style="width:16px;"></i>
+          Enviar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Enviar Galeria -->
+<div id="modal-enviar-galeria" class="modal-overlay">
+  <div class="modal-content" style="max-width: 640px;">
+    <div class="modal-header">
+      <h3 class="modal-title" style="font-size:18px;">Enviar Imagem</h3>
+      <button class="close-btn" onclick="closeModal('modal-enviar-galeria')"><i data-lucide="x"></i></button>
+    </div>
+    <form id="form-enviar-galeria" style="padding:24px 32px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label">Arquivo <span style="color:var(--accent);">*</span></label>
+        <div class="upload-zone" id="modal-gal-zone" style="border:2px dashed var(--border); border-radius:12px; padding:28px 20px; text-align:center; cursor:pointer; transition:border-color 0.2s, background 0.2s;">
+          <i data-lucide="image" style="width:28px; height:28px; color:var(--text-muted); margin-bottom:8px;"></i>
+          <div style="font-size:14px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Clique para selecionar</div>
+          <div style="font-size:11px; color:var(--text-muted);">PNG, JPG, JPEG, GIF ou SVG</div>
+          <input type="file" id="modal-gal-file" name="file" accept="image/*" required style="display:none;">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px;">
+        <label class="form-label" style="display:flex; align-items:center; justify-content:space-between;">
+          <span>Equipe <span style="color:var(--accent);">*</span></span>
+        </label>
+        <div style="position:relative; margin-bottom:8px;">
+          <input type="text" id="gal-team-search" placeholder="Pesquisar equipes..." style="width:100%; padding:8px 12px 8px 36px; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px;">
+          <i data-lucide="search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; color:var(--text-muted);"></i>
+        </div>
+        <div id="gal-team-list" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:4px 0;">
+          {% for equipe in equipes %}
+          <label class="gal-team-option" data-name="{{ equipe.name_team|lower }}" style="display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; cursor:pointer; transition:background 0.1s;">
+            <input type="radio" name="equipe_id" value="{{ equipe.pk_id_team }}" style="width:16px;height:16px; accent-color:var(--accent);">
+            <span style="font-size:13px; color:var(--text);">{{ equipe.name_team }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div id="modal-gal-status" style="display:none; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:600; margin-bottom:16px;"></div>
+
+      <div class="modal-footer" style="margin-top:0; padding-top:0;">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-enviar-galeria')" style="font-weight:600; color:var(--text-muted);">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-enviar-gal" style="display:inline-flex; align-items:center; gap:8px;">
+          <i data-lucide="upload" style="width:16px;"></i>
+          Enviar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Modal Confirmar Edição de Projeto -->
 <div id="modal-confirmar-edit-projeto" class="modal-overlay">
   <div class="modal-content" style="max-width: 400px; background: var(--surface-solid); border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
@@ -773,87 +907,6 @@
     }
   }
 
-  function uploadFile(inputElement, fileType, uploadUrl, teamSelectId) {
-    const file = inputElement.files[0];
-    if (!file) return;
-
-    // Validar seleção de equipe
-    const teamSelect = document.getElementById(teamSelectId);
-    const equipeId = teamSelect ? teamSelect.value : null;
-    if (!equipeId) {
-      showStatus(fileType + '-status', 'Por favor, selecione uma equipe antes de fazer upload.', 'error');
-      return;
-    }
-
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (fileType === 'document' && !['pdf', 'docx'].includes(ext)) {
-      showStatus('document-status', 'Tipo de arquivo inválido. Apenas PDF e DOCX são aceitos.', 'error');
-      return;
-    }
-    if ((fileType === 'diagram' || fileType === 'gallery') && !['png', 'jpg', 'jpeg', 'gif', 'svg'].includes(ext)) {
-      showStatus(fileType + '-status', 'Tipo de arquivo inválido. Apenas imagens (PNG, JPG, JPEG, GIF, SVG) são aceitas.', 'error');
-      return;
-    }
-
-    const progressContainer = document.getElementById(fileType + '-progress-container');
-    const progressBar = document.getElementById(fileType + '-progress-bar');
-    if (progressContainer && progressBar) {
-      progressContainer.style.display = 'block';
-      progressBar.style.width = '0%';
-      progressBar.textContent = '0%';
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('equipe_id', equipeId);
-    
-    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', uploadUrl, true);
-    xhr.setRequestHeader('X-CSRFToken', csrfToken);
-
-    xhr.upload.onprogress = function(e) {
-      if (e.lengthComputable) {
-        const percentComplete = Math.round((e.loaded / e.total) * 100);
-        if (progressBar) {
-          progressBar.style.width = percentComplete + '%';
-          progressBar.textContent = percentComplete + '%';
-        }
-      }
-    };
-
-    xhr.onload = function() {
-      if (xhr.status === 200) {
-        showStatus(fileType + '-status', 'Upload concluído com sucesso!', 'success');
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } else {
-        showStatus(fileType + '-status', 'Erro ao realizar upload: ' + xhr.responseText, 'error');
-        if (progressContainer) progressContainer.style.display = 'none';
-      }
-    };
-
-    xhr.onerror = function() {
-      showStatus(fileType + '-status', 'Erro de rede ao realizar upload.', 'error');
-      if (progressContainer) progressContainer.style.display = 'none';
-    };
-
-    xhr.send(formData);
-  }
-
-  function showStatus(elementId, message, type) {
-    const statusEl = document.getElementById(elementId);
-    if (!statusEl) return;
-    statusEl.textContent = message;
-    statusEl.className = 'status-indicator ' + type;
-    statusEl.style.display = 'block';
-    setTimeout(() => {
-      statusEl.style.display = 'none';
-    }, 5000);
-  }
-
   // Restore active tab on load
   window.addEventListener('DOMContentLoaded', () => {
     const activeTab = localStorage.getItem('activeProjectTab');
@@ -892,6 +945,275 @@
       if (window.lucide) lucide.createIcons();
     }
   }
+
+  // ─── Upload Zone Helpers ───
+  function setupUploadZone(zoneId, inputId) {
+    const zone = document.getElementById(zoneId);
+    const input = document.getElementById(inputId);
+    if (!zone || !input) return;
+    zone.addEventListener('click', function() { input.click(); });
+    zone.addEventListener('mouseenter', function() {
+      if (!input.files || !input.files[0]) zone.style.borderColor = 'var(--text-muted)';
+    });
+    zone.addEventListener('mouseleave', function() {
+      if (!input.files || !input.files[0]) zone.style.borderColor = '';
+    });
+    input.addEventListener('change', function() {
+      if (input.files && input.files[0]) {
+        zone.style.borderColor = 'var(--accent)';
+        zone.style.background = 'rgba(233,69,96,0.04)';
+        const label = zone.querySelector('div:nth-child(3)');
+        if (label) label.textContent = input.files[0].name;
+      } else {
+        zone.style.borderColor = '';
+        zone.style.background = '';
+        const label = zone.querySelector('div:nth-child(3)');
+        if (label) label.textContent = 'Clique para selecionar';
+      }
+    });
+  }
+
+  // ─── Upload Modals ───
+  document.addEventListener('DOMContentLoaded', function() {
+    // Setup all upload zones
+    setupUploadZone('modal-doc-zone', 'modal-doc-file');
+    setupUploadZone('modal-diag-zone', 'modal-diag-file');
+    setupUploadZone('modal-gal-zone', 'modal-gal-file');
+
+    // ── Helper: team search ──
+    function setupTeamSearch(searchId, optionClass, listId) {
+      const search = document.getElementById(searchId);
+      if (!search) return;
+      const options = document.querySelectorAll('.' + optionClass);
+      search.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        options.forEach(function(opt) {
+          opt.style.display = opt.getAttribute('data-name').includes(q) ? 'flex' : 'none';
+        });
+      });
+      // Reset on open
+      const list = document.getElementById(listId);
+      const modal = list && list.closest('.modal-overlay');
+      if (modal) {
+        new MutationObserver(function() {
+          if (modal.style.display === 'flex') {
+            search.value = '';
+            options.forEach(function(opt) { opt.style.display = 'flex'; });
+          }
+        }).observe(modal, { attributes: true, attributeFilter: ['style'] });
+      }
+    }
+
+    setupTeamSearch('doc-team-search', 'doc-team-option', 'doc-team-list');
+    setupTeamSearch('diag-team-search', 'diag-team-option', null);
+    setupTeamSearch('gal-team-search', 'gal-team-option', null);
+
+    // ── Helper: reset file zone on modal open ──
+    function resetFileZone(zoneId) {
+      const zone = document.getElementById(zoneId);
+      if (!zone) return;
+      zone.style.borderColor = '';
+      zone.style.background = '';
+      const label = zone.querySelector('div:nth-child(3)');
+      if (label) label.textContent = 'Clique para selecionar';
+    }
+
+    // ── Document form ──
+    const docForm = document.getElementById('form-enviar-documento');
+    const docFile = document.getElementById('modal-doc-file');
+    const docSubmit = document.getElementById('btn-enviar-doc');
+    const docStatus = document.getElementById('modal-doc-status');
+    const docSuccess = document.getElementById('modal-doc-success');
+    const docSuccessTeams = document.getElementById('modal-doc-success-teams');
+    const docCheckboxes = document.querySelectorAll('#doc-team-list input[type="checkbox"]');
+    const docTeamCount = document.getElementById('doc-team-count');
+
+    function updateDocTeamCount() {
+      const checked = document.querySelectorAll('#doc-team-list input[type="checkbox"]:checked');
+      if (docTeamCount) docTeamCount.textContent = checked.length + ' selecionada' + (checked.length !== 1 ? 's' : '');
+    }
+    docCheckboxes.forEach(function(cb) { cb.addEventListener('change', updateDocTeamCount); });
+
+    if (docForm) {
+      docForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!docFile.files[0]) { showModalStatus(docStatus, 'Selecione um arquivo.', 'error'); return; }
+        const ext = docFile.files[0].name.split('.').pop().toLowerCase();
+        if (!['pdf', 'docx'].includes(ext)) { showModalStatus(docStatus, 'Tipo de arquivo inválido. Apenas PDF e DOCX são aceitos.', 'error'); return; }
+        const selected = document.querySelectorAll('#doc-team-list input[type="checkbox"]:checked');
+        if (selected.length === 0) { showModalStatus(docStatus, 'Selecione ao menos uma equipe.', 'error'); return; }
+        if (docStatus) docStatus.style.display = 'none';
+        if (docSuccess) docSuccess.style.display = 'none';
+        docSubmit.disabled = true;
+        docSubmit.innerHTML = '<i data-lucide="loader" style="width:16px;animation:spin 1s linear infinite;"></i> Enviando...';
+        if (window.lucide) lucide.createIcons();
+
+        const fd = new FormData(docForm);
+        fd.delete('equipe_ids');
+        selected.forEach(function(cb) { fd.append('equipe_ids', cb.value); });
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/projeto/{{ projeto.pk_id_project }}/upload-documento', true);
+        xhr.setRequestHeader('X-CSRFToken', document.querySelector('input[name="csrf_token"]').value);
+        xhr.onload = function() {
+          docSubmit.disabled = false;
+          docSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
+          if (window.lucide) lucide.createIcons();
+          if (xhr.status === 200) {
+            var names = [];
+            selected.forEach(function(cb) { var l = cb.closest('.doc-team-option'); if (l) names.push('✓ ' + l.querySelector('span').textContent); });
+            if (docSuccessTeams) docSuccessTeams.innerHTML = names.join('<br>');
+            if (docSuccess) docSuccess.style.display = 'block';
+            if (docStatus) docStatus.style.display = 'none';
+            setTimeout(function() { closeModal('modal-enviar-documento'); window.location.reload(); }, 2000);
+          } else { showModalStatus(docStatus, 'Erro: ' + xhr.responseText, 'error'); }
+        };
+        xhr.onerror = function() {
+          docSubmit.disabled = false;
+          docSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
+          if (window.lucide) lucide.createIcons();
+          showModalStatus(docStatus, 'Erro de rede.', 'error');
+        };
+        xhr.send(fd);
+      });
+    }
+
+    // ── Diagram form ──
+    const diagForm = document.getElementById('form-enviar-diagrama');
+    const diagFile = document.getElementById('modal-diag-file');
+    const diagSubmit = document.getElementById('btn-enviar-diag');
+    const diagStatus = document.getElementById('modal-diag-status');
+
+    if (diagForm) {
+      diagForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!diagFile.files[0]) { showModalStatus(diagStatus, 'Selecione uma imagem.', 'error'); return; }
+        const ext = diagFile.files[0].name.split('.').pop().toLowerCase();
+        if (!['png','jpg','jpeg','gif','svg'].includes(ext)) { showModalStatus(diagStatus, 'Tipo de arquivo inválido. Apenas imagens são aceitas.', 'error'); return; }
+        const selected = document.querySelector('input[name="equipe_id"]:checked');
+        if (!selected) { showModalStatus(diagStatus, 'Selecione uma equipe.', 'error'); return; }
+        if (diagStatus) diagStatus.style.display = 'none';
+        diagSubmit.disabled = true;
+        diagSubmit.innerHTML = '<i data-lucide="loader" style="width:16px;animation:spin 1s linear infinite;"></i> Enviando...';
+        if (window.lucide) lucide.createIcons();
+
+        const fd = new FormData(diagForm);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/projeto/{{ projeto.pk_id_project }}/upload-diagrama', true);
+        xhr.setRequestHeader('X-CSRFToken', document.querySelector('input[name="csrf_token"]').value);
+        xhr.onload = function() {
+          diagSubmit.disabled = false;
+          diagSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
+          if (window.lucide) lucide.createIcons();
+          if (xhr.status === 200) { closeModal('modal-enviar-diagrama'); window.location.reload(); }
+          else { showModalStatus(diagStatus, 'Erro: ' + xhr.responseText, 'error'); }
+        };
+        xhr.onerror = function() {
+          diagSubmit.disabled = false;
+          diagSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
+          if (window.lucide) lucide.createIcons();
+          showModalStatus(diagStatus, 'Erro de rede.', 'error');
+        };
+        xhr.send(fd);
+      });
+    }
+
+    // ── Gallery form ──
+    const galForm = document.getElementById('form-enviar-galeria');
+    const galFile = document.getElementById('modal-gal-file');
+    const galSubmit = document.getElementById('btn-enviar-gal');
+    const galStatus = document.getElementById('modal-gal-status');
+
+    if (galForm) {
+      galForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!galFile.files[0]) { showModalStatus(galStatus, 'Selecione uma imagem.', 'error'); return; }
+        const ext = galFile.files[0].name.split('.').pop().toLowerCase();
+        if (!['png','jpg','jpeg','gif','svg'].includes(ext)) { showModalStatus(galStatus, 'Tipo de arquivo inválido. Apenas imagens são aceitas.', 'error'); return; }
+        const selected = document.querySelector('input[name="equipe_id"]:checked');
+        if (!selected) { showModalStatus(galStatus, 'Selecione uma equipe.', 'error'); return; }
+        if (galStatus) galStatus.style.display = 'none';
+        galSubmit.disabled = true;
+        galSubmit.innerHTML = '<i data-lucide="loader" style="width:16px;animation:spin 1s linear infinite;"></i> Enviando...';
+        if (window.lucide) lucide.createIcons();
+
+        const fd = new FormData(galForm);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/projeto/{{ projeto.pk_id_project }}/upload-galeria', true);
+        xhr.setRequestHeader('X-CSRFToken', document.querySelector('input[name="csrf_token"]').value);
+        xhr.onload = function() {
+          galSubmit.disabled = false;
+          galSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
+          if (window.lucide) lucide.createIcons();
+          if (xhr.status === 200) { closeModal('modal-enviar-galeria'); window.location.reload(); }
+          else { showModalStatus(galStatus, 'Erro: ' + xhr.responseText, 'error'); }
+        };
+        xhr.onerror = function() {
+          galSubmit.disabled = false;
+          galSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
+          if (window.lucide) lucide.createIcons();
+          showModalStatus(galStatus, 'Erro de rede.', 'error');
+        };
+        xhr.send(fd);
+      });
+    }
+
+    // ── Modal observers: reset form / zone on open ──
+    const modalsToReset = [
+      { id: 'modal-enviar-documento', zoneId: 'modal-doc-zone', form: docForm },
+      { id: 'modal-enviar-diagrama',  zoneId: 'modal-diag-zone', form: diagForm },
+      { id: 'modal-enviar-galeria',   zoneId: 'modal-gal-zone', form: galForm }
+    ];
+    modalsToReset.forEach(function(m) {
+      const el = document.getElementById(m.id);
+      if (!el) return;
+      new MutationObserver(function() {
+        if (el.style.display === 'flex') {
+          if (m.form) m.form.reset();
+          if (m.id === 'modal-enviar-documento') updateDocTeamCount();
+          resetFileZone(m.zoneId);
+          // Reset status/success for doc
+          if (m.id === 'modal-enviar-documento') {
+            if (docStatus) docStatus.style.display = 'none';
+            if (docSuccess) docSuccess.style.display = 'none';
+          }
+          if (window.lucide) lucide.createIcons();
+        }
+      }).observe(el, { attributes: true, attributeFilter: ['style'] });
+    });
+
+    function showModalStatus(el, msg, type) {
+      if (!el) return;
+      el.textContent = msg;
+      el.style.background = type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(59,130,246,0.08)';
+      el.style.color = type === 'error' ? '#ef4444' : '#3b82f6';
+      el.style.border = type === 'error' ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(59,130,246,0.2)';
+      el.style.display = 'block';
+    }
+
+    // Reset on modal close
+    var origClose = closeModal;
+    window.closeModal = function(id) {
+      if (id === 'modal-enviar-documento') {
+        if (docStatus) docStatus.style.display = 'none';
+        if (docSuccess) docSuccess.style.display = 'none';
+        docSubmit.disabled = false;
+        docSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
+        if (window.lucide) lucide.createIcons();
+      } else if (id === 'modal-enviar-diagrama') {
+        if (diagStatus) diagStatus.style.display = 'none';
+        diagSubmit.disabled = false;
+        diagSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
+        if (window.lucide) lucide.createIcons();
+      } else if (id === 'modal-enviar-galeria') {
+        if (galStatus) galStatus.style.display = 'none';
+        galSubmit.disabled = false;
+        galSubmit.innerHTML = '<i data-lucide="upload" style="width:16px;"></i> Enviar';
+        if (window.lucide) lucide.createIcons();
+      }
+      origClose(id);
+    };
+  });
 </script>
 
 <!-- Modal Confirmar Exclusão de Requisito -->

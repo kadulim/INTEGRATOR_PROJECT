@@ -304,13 +304,16 @@ def projeto_detalhe(projeto_id):
     func_projeto_team_ids = [t.pk_id_team for t in func_projeto_teams]
 
     if equipe_id:
-        documentos = Document.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
+        documentos = Document.query.filter(
+            Document.fk_project == projeto_id,
+            Document.teams.any(Team.pk_id_team == equipe_id)
+        ).all()
         diagramas = Diagram.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
         galeria = Gallery.query.filter_by(fk_project=projeto_id, fk_team=equipe_id).all()
     else:
         documentos = Document.query.filter(
             Document.fk_project == projeto_id,
-            Document.fk_team.in_(func_projeto_team_ids)
+            Document.teams.any(Team.pk_id_team.in_(func_projeto_team_ids))
         ).all()
         diagramas = Diagram.query.filter(
             Diagram.fk_project == projeto_id,

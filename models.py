@@ -27,6 +27,13 @@ project_teams = db.Table(
     db.PrimaryKeyConstraint("fk_team", "fk_project", name="pk_project_teams"),
 )
 
+document_teams = db.Table(
+    "document_teams",
+    db.Column("fk_document", db.Integer, db.ForeignKey("document.pk_id_document", ondelete="CASCADE"), nullable=False),
+    db.Column("fk_team",     db.Integer, db.ForeignKey("team.pk_id_team", ondelete="CASCADE"), nullable=False),
+    db.PrimaryKeyConstraint("fk_document", "fk_team", name="pk_document_teams"),
+)
+
 # ---------------------------------------------------------------------------
 # User  (ex-Usuario)
 # ---------------------------------------------------------------------------
@@ -258,18 +265,16 @@ class Document(db.Model):
 
     pk_id_document       = db.Column(db.Integer, primary_key=True, autoincrement=True)
     fk_project           = db.Column(db.Integer, db.ForeignKey("project.pk_id_project", ondelete="CASCADE"), nullable=False)
-    fk_team              = db.Column(db.Integer, db.ForeignKey("team.pk_id_team", ondelete="SET NULL"), nullable=True)
     name_document        = db.Column(db.String(200), nullable=False)
     path_document        = db.Column(db.String(500), nullable=False)
     type_document        = db.Column(db.String(50),  nullable=True)
     upload_date_document = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     project = db.relationship("Project", back_populates="documents")
-    team    = db.relationship("Team", backref="documents")
+    teams   = db.relationship("Team", secondary=document_teams, backref="documents")
 
     __table_args__ = (
         db.Index("ix_document_fk_project", "fk_project"),
-        db.Index("ix_document_fk_team",    "fk_team"),
     )
 
     def __repr__(self):

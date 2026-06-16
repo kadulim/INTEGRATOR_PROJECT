@@ -5,52 +5,49 @@
 
 {% block extra_css %}
 <style>
-  /* Force hide original topbar and clean up content wrapper */
+  html { overflow: visible !important; }
   .topbar { display: none !important; }
-  .main-content { padding-top: 0 !important; height: 100vh !important; overflow: hidden !important; }
-  .page-content { padding: 0 !important; height: 100vh !important; overflow: hidden !important; }
-  body { height: 100vh !important; overflow: hidden !important; }
+  .main-content { padding-top: 0 !important; }
+  .page-content { padding: 0 !important; padding-bottom: 0 !important; }
 
   :root {
     --bg: #060910;
     --s1: #0B1220;
     --s2: #101A2D;
     --s3: #162033;
-    --b1: rgba(255, 255, 255, 0.055);
-    --b2: rgba(255, 255, 255, 0.10);
-    --b3: rgba(255, 255, 255, 0.16);
+    --b1: rgba(255,255,255,0.055);
+    --b2: rgba(255,255,255,0.10);
     --ac: #00CFFF;
-    --ac-d: rgba(0, 207, 255, 0.10);
     --gr: #00E5A0;
     --pu: #A78BFA;
+    --yl: #FFB020;
     --tx: #DCE5F0;
     --tx2: #7A8FA8;
     --tx3: #3A4D62;
-    --rl: 16px;
   }
-  
+
   .db-wrapper {
     background: var(--bg) !important;
     color: var(--tx);
-    height: 100vh;
+    height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     font-family: 'Outfit', sans-serif;
   }
+
   .content-scrollable {
     flex: 1;
-    overflow-y: auto;
-    padding: 32px 32px 40px;
+    min-height: 0;
+    padding: 20px 28px 32px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 14px;
   }
 
-  /* Custom Topbar */
   .topbar-custom {
-    padding: 18px 32px;
+    padding: 12px 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -58,45 +55,198 @@
     position: sticky;
     top: 0;
     z-index: 50;
+    border-bottom: 1px solid var(--b1);
+    flex-shrink: 0;
   }
   .tb-left .page-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
-    letter-spacing: -0.4px;
+    letter-spacing: -0.3px;
     color: var(--tx);
   }
-  
+
   .btn-outline {
     background: transparent; border: 1px solid var(--b2); border-radius: 8px;
-    padding: 8px 16px; color: var(--tx2); font-family: 'Outfit', sans-serif;
-    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    padding: 7px 14px; color: var(--tx2); font-family: 'Outfit', sans-serif;
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
     display: flex; align-items: center; gap: 6px; text-decoration: none;
   }
-  .btn-outline:hover { border-color: var(--b3); color: var(--tx); }
+  .btn-outline:hover { border-color: var(--b2); color: var(--tx); background: rgba(255,255,255,0.03); }
 
-  /* Premium Card */
-  .pcard {
+  .card {
     background: var(--s1);
     border: 1px solid var(--b1);
-    border-radius: var(--rl);
+    border-radius: 12px;
     overflow: hidden;
-    display: flex; flex-direction: column;
+    display: flex;
+    flex-direction: column;
   }
-  .pcard-strip { height: 3px; width: 100%; }
-  .pcard-strip-ac { background: var(--ac); }
-  .pcard-strip-pu { background: var(--pu); }
-  .pcard-strip-gr { background: var(--gr); }
+  .card-strip { height: 3px; width: 100%; flex-shrink: 0; }
+  .card-body { padding: 16px 20px; flex: 1; }
 
-  .pcard-body { padding: 24px; }
-  
-  /* Avatar */
-  .avatar-color-0 { background: var(--ac-d); border: 1px solid rgba(0,207,255,0.25); color: var(--ac); }
-  .avatar-color-1 { background: rgba(167,139,250,0.10); border: 1px solid rgba(167,139,250,0.25); color: var(--pu); }
+  .avatar-lg {
+    width: 56px; height: 56px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700;
+    flex-shrink: 0;
+  }
 
-  .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .badge-green { background: rgba(0, 229, 160, 0.10); color: var(--gr); border: 1px solid rgba(0, 229, 160, 0.25); }
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge-green { background: rgba(0,229,160,0.10); color: var(--gr); border: 1px solid rgba(0,229,160,0.25); }
 
-  .ptag-user { background: var(--s3); color: var(--tx2); border: 1px solid var(--b2); padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .skill-tag {
+    background: var(--s3);
+    color: var(--tx2);
+    border: 1px solid var(--b1);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .skill-tag:hover { border-color: var(--ac); color: var(--ac); }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--tx);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-title .count {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--tx3);
+    background: var(--s3);
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--b1);
+  }
+
+  .proj-item {
+    padding: 10px 14px;
+    background: var(--s2);
+    border: 1px solid var(--b1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transition: border-color 0.15s;
+  }
+  .proj-item:hover { border-color: var(--b2); }
+
+  .doc-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--s2);
+    border: 1px solid var(--b1);
+    border-radius: 8px;
+    transition: border-color 0.15s;
+  }
+  .doc-item:hover { border-color: var(--b2); }
+  .doc-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .thumb-card {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--b1);
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: var(--s2);
+  }
+  .thumb-card:hover {
+    border-color: var(--b2);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .thumb-card img {
+    width: 100%;
+    aspect-ratio: 16 / 11;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+  }
+  .thumb-card:hover img { transform: scale(1.04); }
+  .thumb-label {
+    padding: 6px 10px;
+    background: var(--s2);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--tx);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .grid-half { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-proj { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-media { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 24px 16px;
+    color: var(--tx3);
+    font-size: 12px;
+  }
+
+  .modal-ov {
+    position: fixed; inset: 0;
+    background: rgba(4,6,12,0.88);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-box {
+    position: relative;
+    max-width: 92vw;
+    max-height: 92vh;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  }
+  .modal-box img {
+    max-width: 92vw;
+    max-height: 88vh;
+    display: block;
+  }
+  .modal-close-img {
+    position: absolute; top: 10px; right: 10px;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    border: none; color: #fff; font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .modal-close-img:hover { background: rgba(0,0,0,0.75); }
+
+  @media (max-width: 768px) {
+    .content-scrollable { padding: 14px 16px 24px; gap: 12px; }
+    .topbar-custom { padding: 10px 16px; }
+    .topbar-custom .page-title { font-size: 16px; }
+    .grid-half { grid-template-columns: 1fr; }
+    .grid-proj { grid-template-columns: 1fr; }
+    .card-body { padding: 14px 16px; }
+    .profile-body { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .avatar-lg { width: 46px; height: 46px; font-size: 18px; border-radius: 12px; }
+  }
+  @media (max-width: 480px) {
+    .content-scrollable { padding: 10px 12px 20px; gap: 10px; }
+    .topbar-custom { padding: 8px 12px; }
+    .card-body { padding: 12px 14px; }
+    .grid-media { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .avatar-lg { width: 40px; height: 40px; font-size: 16px; border-radius: 10px; }
+    .proj-item { flex-direction: column; align-items: flex-start; }
+  }
 </style>
 {% endblock %}
 
@@ -106,95 +256,103 @@
     <div class="tb-left">
       <div class="page-title">Perfil do Funcionário</div>
     </div>
-    <div class="tb-right" style="display:flex; align-items:center; gap:16px;">
+    <div class="tb-right" style="display:flex; align-items:center; gap:12px;">
       <a href="{{ url_for('admin.funcionarios') }}" class="btn-outline">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         Voltar
       </a>
-      <div style="color:var(--tx2); cursor:pointer;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-      </div>
     </div>
   </div>
 
-  <div class="content-scrollable">
+  <div class="content-scrollable" style="overflow-y: scroll;">
     {% set usuario = funcionario.user %}
     {% if not usuario %}
-    <div style="padding: 20px; color: var(--rd);">Usuário não encontrado para este funcionário.</div>
+    <div class="card"><div class="card-body" style="color:var(--tx3);font-size:13px;">Usuário não encontrado para este funcionário.</div></div>
     {% endif %}
 
-    <div class="pcard fade-up" style="margin-bottom: 24px;">
-      <div class="pcard-strip pcard-strip-ac"></div>
-      <div class="pcard-body" style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="display:flex; align-items:center; gap:24px;">
-          <div class="avatar-color-0" style="width:64px; height:64px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700;">
+    <div class="card">
+      <div class="card-strip" style="background:var(--ac);"></div>
+      <div class="card-body profile-body" style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div class="avatar-lg" style="background:rgba(0,207,255,0.08); border:1px solid rgba(0,207,255,0.2); color:var(--ac);">
             {{ usuario.name_user[:2].upper() if usuario else '??' }}
           </div>
           <div>
-            <h2 style="font-size:22px; font-weight:700; color:var(--tx); margin-bottom:4px;">{{ usuario.name_user if usuario else 'Desconhecido' }}</h2>
-            <div style="color:var(--tx2); font-size:13px; font-weight:500; margin-bottom:6px;">{{ funcionario.role_employee }}</div>
-            <div style="color:var(--tx3); font-size:12px; font-family:'JetBrains Mono', monospace;">{{ usuario.email_user if usuario else '---' }}</div>
+            <h2 style="font-size:20px; font-weight:700; color:var(--tx); margin:0 0 1px;">{{ usuario.name_user if usuario else 'Desconhecido' }}</h2>
+            <div style="color:var(--tx2); font-size:12px; font-weight:500;">{{ funcionario.role_employee }}</div>
+            <div style="color:var(--tx3); font-size:11px; font-family:'JetBrains Mono', monospace;">{{ usuario.email_user if usuario else '---' }}</div>
           </div>
         </div>
-        <div>
-          <span class="badge badge-green">Ativo</span>
-        </div>
+        <span class="badge badge-green">Ativo</span>
       </div>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
-      <div class="pcard fade-up">
-        <div class="pcard-strip pcard-strip-pu"></div>
-        <div class="pcard-body">
-          <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin-bottom:16px;">Skills</h3>
+    <div class="grid-half">
+      <div class="card">
+        <div class="card-strip" style="background:var(--pu);"></div>
+        <div class="card-body">
+          <div class="section-title">
+            Skills
+            <span class="count">{{ funcionario.skills|length if funcionario.skills else 0 }}</span>
+          </div>
           {% if funcionario.skills %}
-          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
             {% for skill in funcionario.skills %}
-            <span class="ptag-user">{{ skill.name_skill }}</span>
+            <span class="skill-tag">{{ skill.name_skill }}</span>
             {% endfor %}
           </div>
           {% else %}
-          <p style="color:var(--tx3); font-size:13px;">Nenhuma skill cadastrada.</p>
+          <div class="empty-state">Nenhuma skill cadastrada.</div>
           {% endif %}
         </div>
       </div>
 
-      <div class="pcard fade-up">
-        <div class="pcard-strip pcard-strip-gr"></div>
-        <div class="pcard-body">
-          <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin-bottom:16px;">Equipes</h3>
+      <div class="card">
+        <div class="card-strip" style="background:var(--gr);"></div>
+        <div class="card-body">
+          <div class="section-title">
+            Equipes
+            <span class="count">{{ funcionario.teams|length if funcionario.teams else 0 }}</span>
+          </div>
           {% if funcionario.teams %}
-          <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; flex-direction:column; gap:8px;">
             {% for eq in funcionario.teams %}
-            <div style="display:flex; align-items:center; gap:12px;">
-              <div class="avatar-color-1" style="width:32px;height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:30px;height:30px; border-radius:7px; background:rgba(167,139,250,0.08); border:1px solid rgba(167,139,250,0.2); color:var(--pu); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">
                 {{ eq.name_team[:2].upper() }}
               </div>
-              <span style="font-size:14px; font-weight:600; color:var(--tx);">{{ eq.name_team }}</span>
+              <span style="font-size:13px; font-weight:600; color:var(--tx);">{{ eq.name_team }}</span>
             </div>
             {% endfor %}
           </div>
           {% else %}
-          <p style="color:var(--tx3); font-size:13px;">Não pertence a nenhuma equipe.</p>
+          <div class="empty-state">Não pertence a nenhuma equipe.</div>
           {% endif %}
         </div>
       </div>
     </div>
 
-    <!-- Projetos associados -->
     {% if projetos %}
-    <div class="pcard fade-up">
-      <div class="pcard-strip" style="background: #00CFFF;"></div>
-      <div class="pcard-body">
-        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin-bottom:16px;">Projetos</h3>
-        <div style="display:flex; flex-direction:column; gap:12px;">
+    <div class="card">
+      <div class="card-strip" style="background:var(--ac);"></div>
+      <div class="card-body">
+        <div class="section-title">
+          Projetos
+          <span class="count">{{ projetos|length }}</span>
+        </div>
+        <div class="grid-proj">
           {% for proj in projetos %}
-          <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--s2); border-radius:8px; border:1px solid var(--b1);">
+          <div class="proj-item">
             <div>
-              <div style="font-size:14px; font-weight:600; color:var(--tx);">{{ proj.name_project }}</div>
-              <div style="font-size:12px; color:var(--tx2);">{{ proj.status_project }}</div>
+              <div style="font-size:13px; font-weight:600; color:var(--tx);">{{ proj.name_project }}</div>
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:3px;">
+                <span style="font-size:11px; color:var(--tx2);">{{ proj.status_project }}</span>
+                {% if proj.start_date_project %}
+                <span style="font-size:10px; color:var(--tx3);">{{ proj.start_date_project.strftime('%d/%m/%Y') }}</span>
+                {% endif %}
+              </div>
             </div>
-            <a href="{{ url_for('admin.projeto_detalhe', id=proj.pk_id_project) }}" style="color:var(--ac); text-decoration:none; font-size:13px; font-weight:600;">Ver</a>
+            <a href="{{ url_for('admin.projeto_detalhe', id=proj.pk_id_project) }}" style="color:var(--ac); text-decoration:none; font-size:12px; font-weight:600; white-space:nowrap;">Ver →</a>
           </div>
           {% endfor %}
         </div>
@@ -202,73 +360,103 @@
     </div>
     {% endif %}
 
-    <!-- Documentação -->
-    <div class="pcard fade-up">
-      <div class="pcard-strip" style="background: #A78BFA;"></div>
-      <div class="pcard-body">
-        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin-bottom:16px;">Documentação</h3>
+    <div class="card">
+      <div class="card-strip" style="background:var(--pu);"></div>
+      <div class="card-body">
+        <div class="section-title">
+          Documentação
+          <span class="count">{{ documentos|length }}</span>
+        </div>
         {% if documentos %}
-        <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; flex-direction:column; gap:6px;">
           {% for doc in documentos %}
-          <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--s2); border-radius:8px; border:1px solid var(--b1);">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="color:var(--ac);"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-              <div>
-                <div style="font-size:14px; font-weight:600; color:var(--tx);">{{ doc.name_document }}</div>
-                <div style="font-size:12px; color:var(--tx2);">{{ doc.type_document or 'Documento' }}</div>
+          <div class="doc-item">
+            <div class="doc-icon" style="background:rgba(167,139,250,0.08); color:var(--pu);">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+            </div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:12px; font-weight:600; color:var(--tx); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ doc.name_document }}</div>
+              <div style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--tx3); margin-top:1px;">
+                <span>{{ doc.type_document|upper or 'DOC' }}</span>
+                {% if doc.upload_date_document %}
+                <span>{{ doc.upload_date_document.strftime('%d/%m/%Y') }}</span>
+                {% endif %}
               </div>
             </div>
-            <a href="/static/{{ doc.path_document }}" target="_blank" style="color:var(--ac); text-decoration:none; font-size:13px; font-weight:600;">Abrir</a>
+            <a href="/static/{{ doc.path_document }}" target="_blank" style="color:var(--ac); text-decoration:none; font-size:12px; font-weight:600; white-space:nowrap;">Abrir</a>
           </div>
           {% endfor %}
         </div>
         {% else %}
-        <p style="color:var(--tx3); font-size:13px;">Nenhum documento disponível.</p>
+        <div class="empty-state">Nenhum documento.</div>
         {% endif %}
       </div>
     </div>
 
-    <!-- Diagramas -->
-    <div class="pcard fade-up">
-      <div class="pcard-strip" style="background: #FFB020;"></div>
-      <div class="pcard-body">
-        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin-bottom:16px;">Diagramas</h3>
+    <div class="card">
+      <div class="card-strip" style="background:var(--yl);"></div>
+      <div class="card-body">
+        <div class="section-title">
+          Diagramas
+          <span class="count">{{ diagramas|length }}</span>
+        </div>
         {% if diagramas %}
-        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px;">
+        <div class="grid-media">
           {% for diag in diagramas %}
-          <div style="position:relative; border-radius:8px; overflow:hidden; border:1px solid var(--b1); cursor:pointer;" onclick="window.open('/static/{{ diag.path_diagram }}', '_blank')">
-            <img src="/static/{{ diag.path_diagram }}" alt="{{ diag.name_diagram }}" style="width:100%; height:120px; object-fit:cover;">
-            <div style="padding:8px; background:var(--s2);">
-              <div style="font-size:12px; font-weight:600; color:var(--tx); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ diag.name_diagram }}</div>
-            </div>
+          <div class="thumb-card" onclick="openImage('/static/{{ diag.path_diagram }}')">
+            <img src="/static/{{ diag.path_diagram }}" alt="{{ diag.name_diagram }}" loading="lazy">
+            <div class="thumb-label">{{ diag.name_diagram }}</div>
           </div>
           {% endfor %}
         </div>
         {% else %}
-        <p style="color:var(--tx3); font-size:13px;">Nenhum diagrama disponível.</p>
+        <div class="empty-state">Nenhum diagrama.</div>
         {% endif %}
       </div>
     </div>
 
-    <!-- Galeria -->
-    <div class="pcard fade-up">
-      <div class="pcard-strip" style="background: #00E5A0;"></div>
-      <div class="pcard-body">
-        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin-bottom:16px;">Galeria</h3>
+    <div class="card">
+      <div class="card-strip" style="background:var(--gr);"></div>
+      <div class="card-body">
+        <div class="section-title">
+          Galeria
+          <span class="count">{{ galeria|length }}</span>
+        </div>
         {% if galeria %}
-        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px;">
+        <div class="grid-media">
           {% for img in galeria %}
-          <div style="position:relative; border-radius:8px; overflow:hidden; border:1px solid var(--b1); cursor:pointer;" onclick="window.open('/static/{{ img.path_gallery }}', '_blank')">
-            <img src="/static/{{ img.path_gallery }}" alt="Galeria" style="width:100%; height:120px; object-fit:cover;">
+          <div class="thumb-card" onclick="openImage('/static/{{ img.path_gallery }}')">
+            <img src="/static/{{ img.path_gallery }}" alt="Galeria" loading="lazy">
           </div>
           {% endfor %}
         </div>
         {% else %}
-        <p style="color:var(--tx3); font-size:13px;">Nenhuma imagem na galeria.</p>
+        <div class="empty-state">Nenhuma imagem.</div>
         {% endif %}
       </div>
     </div>
-
   </div>
 </div>
+
+<div id="img-modal" class="modal-ov" onclick="closeImage()">
+  <div class="modal-box">
+    <button class="modal-close-img" onclick="event.stopPropagation(); closeImage()">✕</button>
+    <img id="img-full" src="" alt="Ampliada">
+  </div>
+</div>
+
+<script>
+  function openImage(src) {
+    document.getElementById('img-full').src = src;
+    document.getElementById('img-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeImage() {
+    document.getElementById('img-modal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeImage();
+  });
+</script>
 {% endblock %}

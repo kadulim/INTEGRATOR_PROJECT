@@ -8,8 +8,8 @@
   /* Force hide original topbar and clean up content wrapper */
   .topbar { display: none !important; }
   .main-content { padding-top: 0 !important; height: 100vh !important; overflow: hidden !important; }
-  .page-content { padding: 0 !important; height: 100vh !important; overflow: hidden !important; }
-  body { height: 100vh !important; overflow: hidden !important; }
+  .page-content { padding: 0 !important; height: 100% !important; overflow: hidden !important; padding-bottom: 0 !important; }
+  body { overflow: hidden !important; }
 
   :root {
     --bg: #060910;
@@ -54,7 +54,7 @@
   .db-wrapper {
     background: var(--bg) !important;
     color: var(--tx);
-    height: 100vh;
+    height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -64,11 +64,12 @@
 
   .content-scrollable {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     padding: 32px 32px 40px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 32px;
   }
 
   /* Custom Scrollbar */
