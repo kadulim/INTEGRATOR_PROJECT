@@ -131,9 +131,7 @@ def dashboard():
     
     logs_data = []
     for log, projeto in logs_query:
-        equipe_nome = projeto.name_project if projeto else 'Geral'
-        if projeto and projeto.teams:
-            equipe_nome = ', '.join([eq.name_team for eq in projeto.teams])
+        equipe_nome = log.team.name_team if log.team else '—'
         logs_data.append({
             'acao': log.type_log,
             'descricao': log.description_log,
@@ -146,9 +144,7 @@ def dashboard():
     todos_logs_query = database.session.query(Log, Project).outerjoin(Project, Log.fk_project == Project.pk_id_project).order_by(Log.date_log.desc()).all()
     todos_logs_data = []
     for log, projeto in todos_logs_query:
-        equipe_nome = projeto.name_project if projeto else 'Geral'
-        if projeto and projeto.teams:
-            equipe_nome = ', '.join([eq.name_team for eq in projeto.teams])
+        equipe_nome = log.team.name_team if log.team else '—'
         todos_logs_data.append({
             'acao': log.type_log,
             'descricao': log.description_log,
